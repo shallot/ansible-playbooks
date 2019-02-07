@@ -15,11 +15,29 @@
 
 ---
 
-aa_centos_custom_packages__to_merge:
-  bind-utils: "present"
+# https://docs.ansible.com/ansible/latest/modules/package_module.html
+- name:
+    "packages : state=absent"
+  package:
+    name: "{{ custom_packages_absent }}"
+    state: "absent"
+  become:
+    true
 
-openssh_client_package_name:
-  "openssh-clients"
+# https://docs.ansible.com/ansible/latest/modules/package_module.html
+- name:
+    "packages : state=present"
+  package:
+    name: "{{ custom_packages_present }}"
+    state: "present"
+  become:
+    true
 
-openssh_service_name:
-  "sshd"
+# https://docs.ansible.com/ansible/latest/modules/package_module.html
+- name:
+    "packages : state=latest"
+  package:
+    name: "{{ custom_packages_latest }}"
+    state: "latest"
+  become:
+    true

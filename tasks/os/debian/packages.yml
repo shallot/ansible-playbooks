@@ -1,0 +1,49 @@
+# Copyright (c) 2018-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+# https://docs.ansible.com/ansible/latest/modules/apt_module.html
+- name:
+    "packages : state=absent"
+  apt:
+    name: "{{ custom_packages_absent }}"
+    state: "absent"
+  become:
+    true
+
+# https://docs.ansible.com/ansible/latest/modules/apt_module.html
+- name:
+    "packages : state=present"
+  apt:
+    cache_valid_time: "{{ apt_cache_valid_time | default(omit) }}"
+    default_release: "{{ apt_default_release | default(omit) }}"
+    name: "{{ custom_packages_present }}"
+    state: "present"
+    update_cache: "{{ apt_update_cache | default(true) }}"
+  become:
+    true
+
+# https://docs.ansible.com/ansible/latest/modules/apt_module.html
+- name:
+    "packages : state=latest"
+  apt:
+    cache_valid_time: "{{ apt_cache_valid_time | default(omit) }}"
+    default_release: "{{ apt_default_release | default(omit) }}"
+    name: "{{ custom_packages_latest }}"
+    state: "latest"
+    update_cache: "{{ apt_update_cache | default(true) }}"
+  become:
+    true

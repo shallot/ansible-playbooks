@@ -15,6 +15,9 @@
 
 ---
 
+aa_debian_custom_packages__to_merge:
+  dnsutils: "present"
+
 # https://docs.ansible.com/ansible/latest/modules/apt_module.html
 apt_cache_valid_time:
   600

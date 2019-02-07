@@ -15,6 +15,12 @@
 
 ---
 
+# tasks/packages.yml
+host_specific_custom_packages__to_merge:
+  bc: "latest"
+  gimp: "absent"
+  joe: "present"
+
 # provision-custom-systems.yml
 host_specific_sshd_config__to_merge:
   AllowAgentForwarding: "no"
