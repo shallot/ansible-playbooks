@@ -15,6 +15,15 @@
 
 ---
 
+# tasks/users.yml
+host_specific_custom_users__to_merge:
+  example:
+    comment: "Host-specific example user (via Ansible)"
+    groups:
+      - "users"
+      - "adm"
+    password: "$6$bCrd2ylJ$uQ.uN7Oy1QStmunslSMzYX0vM4wYXKdO9tgu.SE.hPdKBqcHk.CrHsUMxzN8rwiPcwRI3nzvzd9W4T0sJJmNz."
+
 # provision-custom-systems.yml
 host_specific_sshd_config__to_merge:
   AllowAgentForwarding: "no"

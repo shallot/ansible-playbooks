@@ -1,0 +1,84 @@
+# Copyright (c) 2018-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+# action_plugins/merge_variable.py
+- name:
+    "merge_variable : custom_users"
+  merge_variable:
+    default: {}
+    name: "custom_users"
+    suffix: "custom_users__to_merge"
+
+# https://docs.ansible.com/ansible/latest/modules/user_module.html
+- name:
+    "users"
+  user:
+    append: true
+    comment: "{{ item.value['comment'] | default(omit) }}"
+    create_home: true
+    expires: "{{ item.value['expires'] | default(omit) }}"
+    force: "{{ item.value['force'] | default(omit) }}"
+    group: "{{ item.value['group'] | default(omit) }}"
+    groups: "{{ item.value['groups'] | default([]) }}"
+    home: "{{ item.value['home'] | default(omit) }}"
+    move_home: true
+    name: "{{ item.key }}"
+    password: "{{ item.value['password'] | default(omit) }}"
+    remove: true
+    shell: "{{ item.value['shell'] | default('/bin/bash') }}"
+    state: "{{ item.value['state'] | default('present') }}"
+  with_dict:
+    "{{ custom_users }}"
+  loop_control:
+    label: "{{ item.key | to_json }}"
+  register:
+    "custom_user"
+  become:
+    true
+
+# https://docs.ansible.com/ansible/latest/modules/file_module.html
+- name:
+    "users : home directory permissions"
+  file:
+    mode: "0750"
+    path: "{{ item['home'] }}"
+    state: "directory"
+  with_items:
+    "{{ custom_user.results }}"
+  loop_control:
+    label: "{{ item['name'] | to_json }}"
+  when:
+    - "item['home'] is defined"
+  become:
+    true
+
+# https://docs.ansible.com/ansible/latest/modules/authorized_key_module.html
+- name:
+    "authorized_keys"
+  authorized_key:
+    exclusive: true
+    key: |
+      # Generated with Ansible
+      {{ item.value['authorized_keys'] | default('') }}
+    manage_dir: true
+    user: "{{ item.key }}"
+  with_dict:
+    "{{ custom_users }}"
+  loop_control:
+    label: "{{ item.key | to_json }}"
+  become:
+    true
