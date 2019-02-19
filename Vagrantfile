@@ -75,6 +75,17 @@ Vagrant.configure('2') do |vagrant|
       ansible_host_groups[name] << hostname
     end
 
+    # https://docs.ansible.com/ansible/latest/user_guide/playbooks_tags.html
+    # https://www.vagrantup.com/docs/provisioning/ansible_common.html#tags
+    ansible_tags = [
+      'all'
+    ]
+
+    # https://docs.ruby-lang.org/en/trunk/Hash.html#method-i-fetch
+    hostvars.fetch('vagrant_tags', []).each do |name|
+      ansible_tags.push(name)
+    end
+
     # https://www.vagrantup.com/docs/multi-machine/
     vagrant.vm.define(hostname) do |config|
 
@@ -111,6 +122,7 @@ Vagrant.configure('2') do |vagrant|
         config.vm.provision('ansible') do |ansible|
           ansible.compatibility_mode = '2.0'
           ansible.extra_vars = ansible_extra_vars
+          ansible.tags = ansible_tags
           ansible.groups = ansible_host_groups
           ansible.playbook = File.join(__dir__, playbook)
         end
