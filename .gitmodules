@@ -1,0 +1,6 @@
+[submodule "roles/apt"]
+	path = roles/apt
+	url = https://gitlab.com/eyeo/devops/ansible-role-apt
+[submodule "roles/openssh"]
+	path = roles/openssh
+	url = https://gitlab.com/eyeo/devops/ansible-role-openssh

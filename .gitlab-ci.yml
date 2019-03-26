@@ -1,0 +1,45 @@
+# Copyright (c) 2018-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+# https://docs.gitlab.com/ee/ci/yaml/#stages
+stages:
+  - "test"
+
+# Use `gitlab-runner exec docker rubocop` to execute in development
+rubocop:
+  image:
+    "registry.gitlab.com/eyeo/docker/rubocop:0.63.0"
+  script:
+    - "set -- Vagrantfile"
+    - "rubocop $@"
+  stage:
+    "test"
+
+# Use `gitlab-runner exec docker yamllint` to execute in development
+yamllint:
+  image:
+    "registry.gitlab.com/eyeo/docker/yamllint:1.14.0"
+  script:
+    - "set -- *.yml"
+    - "set -- $@ `find group_vars/ host_vars/ -type f`"
+    - "set -- $@ `find tasks/ -type f`"
+    - "set -- $@ .gitlab-ci.yml"
+    - "set -- $@ .rubocop.yml"
+    - "set -- $@ .yamllint.yml"
+    - "yamllint -c .yamllint.yml $@"
+  stage:
+    "test"

@@ -1,0 +1,57 @@
+# Copyright (c) 2018-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+# https://docs.ansible.com/ansible/latest/modules/include_tasks_module.html
+- include_tasks:
+    "{{ custom_ansible_tasks }}"
+  with_first_found:
+    - files:
+        - "os/{{ ansible_os_family | lower }}/ansible.yml"
+      skip: true
+  loop_control:
+    loop_var: "custom_ansible_tasks"
+
+# https://docs.ansible.com/ansible/latest/modules/pip_module.html
+- name:
+    "pip : ansible"
+  pip:
+    name: "ansible==2.7.*"
+    virtualenv: "{{ custom_ansible_pip_virtualenv | default(omit) }}"
+  become: &custom_ansible_become
+    "{{ custom_ansible_pip_virtualenv is not defined }}"
+
+# https://docs.ansible.com/ansible/latest/modules/ini_file_module.html
+- name:
+    "ini_file : ansible.cfg"
+  ini_file:
+    create: true
+    mode: "0644"
+    option: "{{ (item.key | splitext)[1][1:] }}"
+    path: "{{ custom_ansible_configuration_path }}"
+    section: "{{ (item.key | splitext)[0] }}"
+    state: "{{ (item.value is none) | ternary('absent', 'present') }}"
+    value: "{{ item.value }}"
+  with_dict:
+    "{{ custom_ansible_configuration_settings | default({}) }}"
+  loop_control:
+    label: "{{ [item.key, item.value] | to_json }}"
+  vars:
+    custom_ansible_configuration_path:
+      "{{ custom_ansible_pip_virtualenv is defined
+        | ternary('~/.ansible.cfg', '/etc/ansible/ansible.cfg') }}"
+  become:
+    *custom_ansible_become

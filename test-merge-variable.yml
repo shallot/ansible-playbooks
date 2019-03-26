@@ -1,0 +1,88 @@
+# Copyright (c) 2018-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+- name:
+    "test-merge-variable"
+
+  hosts:
+    "localhost"
+
+  gather_facts:
+    false
+
+  tasks:
+
+    - name:
+        "merge_vaiable: : list"
+      merge_variable:
+        default: []
+        name: "example_list"
+        suffix: "list__to_merge"
+
+    - name:
+        "assert : list"
+      assert:
+        that: "example_list | sort == expected_example_list | sort"
+
+    - name:
+        "merge_vaiable: : dict"
+      merge_variable:
+        default: {}
+        name: "example_dict"
+        suffix: "dict__to_merge"
+
+    - name:
+        "assert : dict"
+      assert:
+        that: "example_dict == expected_example_dict"
+
+  vars:
+
+    first_example_list__to_merge:
+      - "foobar"
+      - "baz"
+
+    second_example_list__to_merge:
+      - "spam"
+      - "ham"
+      - "eggs"
+
+    third_example_list__to_merge:
+      - "wibble"
+      - "wobble"
+      - "wubble"
+
+    expected_example_list:
+      "{{ first_example_list__to_merge
+        + second_example_list__to_merge
+        + third_example_list__to_merge
+        }}"
+
+    first_example_dict__to_merge:
+      foo: "wibble"
+      bar: "wobble"
+      baz: "wubble"
+
+    second_example_dict__to_merge:
+      spam: "wibble"
+      ham: "wobble"
+      eggs: "wubble"
+
+    expected_example_dict:
+      "{{ first_example_dict__to_merge
+        | combine(second_example_dict__to_merge)
+        }}"
