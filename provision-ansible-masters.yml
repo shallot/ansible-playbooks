@@ -1,0 +1,179 @@
+# Copyright (c) 2018-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+- name:
+    "provision-ansible-masters"
+
+  hosts:
+    "ansible-masters"
+
+  tasks:
+
+    # https://docs.ansible.com/ansible/latest/import_tasks_module.html
+    - import_tasks:
+        "tasks/common.yml"
+
+    # https://docs.ansible.com/ansible/latest/modules/group_module.html
+    - name:
+        "group : ansible"
+      group:
+        name: "ansible"
+      register:
+        "custom_ansible_group"
+      become:
+        true
+
+    # https://docs.ansible.com/ansible/latest/modules/user_module.html
+    - name:
+        "group : ansible : users"
+      user:
+        append: true
+        name: "{{ item }}"
+        groups: "{{ custom_ansible_group.name }}"
+      with_items:
+        "{{ custom_ansible_group_members | default([]) }}"
+      become:
+        true
+
+    # https://docs.ansible.com/ansible/latest/modules/user_module.html
+    - name:
+        "user : ansible"
+      user:
+        comment: "Ansible Master"
+        generate_ssh_key: true
+        group: "{{ custom_ansible_group.name }}"
+        home: "/srv/ansible"
+        name: "ansible"
+        shell: "/bin/bash"
+        ssh_key_bits: 4096
+        ssh_key_comment: "ansible@{{ ansible_fqdn }}"
+      register:
+        "custom_ansible_user"
+      become:
+        true
+
+    # https://docs.ansible.com/ansible/latest/modules/git_module.html
+    - name:
+        "git : ~ansible/playbooks"
+      git:
+        accept_hostkey: true
+        dest: "{{ custom_ansible_user.home }}/playbooks"
+        repo: "{{ custom_ansible_playbooks_repository | mandatory }}"
+      become:
+        true
+      become_user:
+        "{{ custom_ansible_user.name }}"
+
+    # https://docs.ansible.com/ansible/latest/modules/command_module.html
+    - name:
+        "git : ~ansible/inventory"
+      command:
+        "git init '{{ custom_ansible_user.home }}/inventory'"
+      args:
+        creates: "{{ custom_ansible_user.home }}/inventory/.git"
+      become:
+        true
+      become_user:
+        "{{ custom_ansible_user.name }}"
+
+    # https://docs.ansible.com/ansible/latest/modules/file_module.html
+    - name:
+        "directory : ~ansible/inventory/.git"
+      file:
+        group: "{{ custom_ansible_user.group }}"
+        mode: "0750"
+        owner: "{{ custom_ansible_user.name }}"
+        path: "{{ custom_ansible_user.home }}/inventory/.git"
+        state: "directory"
+      become:
+        true
+
+    # https://docs.ansible.com/ansible/latest/modules/ini_file_module.html
+    - name:
+        "ini_file : ~ansible/inventory/.git/config"
+      ini_file:
+        option: "{{ (item.key | splitext)[1][1:] }}"
+        path: "{{ custom_ansible_user.home }}/inventory/.git/config"
+        section: "{{ (item.key | splitext)[0] }}"
+        state: "{{ (item.value is none) | ternary('absent', 'present') }}"
+        value: "{{ item.value }}"
+      with_dict:
+        receive.denyCurrentBranch: "updateInstead"
+      loop_control:
+        label: "{{ [item.key, item.value] | to_json }}"
+      become:
+        true
+
+    # https://docs.ansible.com/ansible/latest/modules/file_module.html
+    - name:
+        "link : /etc/ansible : ~ansible/inventory"
+      file:
+        path: "/etc/ansible"
+        src: "{{ custom_ansible_user.home }}/inventory"
+        state: "link"
+      become:
+        true
+
+    # https://docs.ansible.com/ansible/latest/import_tasks_module.html
+    - import_tasks:
+        "tasks/ansible.yml"
+
+    # https://docs.ansible.com/ansible/latest/user_guide/playbooks_blocks.html
+    - block:
+
+        # https://docs.ansible.com/ansible/latest/modules/copy_module.html
+        - name:
+            "file : /etc/ansible/hosts"
+          copy:
+            content: "{{ lookup('template', 'vagrant-inventory.j2') }}"
+            dest: "/etc/ansible/hosts"
+            group: "{{ custom_ansible_user.group }}"
+            owner: "{{ custom_ansible_user.name }}"
+
+        # https://docs.ansible.com/ansible/latest/modules/user_module.html
+        - name:
+            "user : vagrant"
+          user:
+            name: "vagrant"
+            generate_ssh_key: true
+            ssh_key_comment: "vagrant@{{ ansible_fqdn }}"
+          register:
+            "custom_vagrant_user"
+
+      when:
+        - "custom_ansible_playbooks_repository == '/vagrant'"
+      become:
+        true
+
+    # https://docs.ansible.com/ansible/latest/modules/authorized_key_module.html
+    - name:
+        "file : ~ansible/.ssh/authorized_keys"
+      authorized_key:
+        exclusive: true
+        key: "{{ custom_ansible_authorized_keys | join('\n') }}"
+        key_options: "{{ custom_ansible_authorized_key_options | join(',') }}"
+        user: "{{ custom_ansible_user.name }}"
+      vars:
+        custom_ansible_authorized_key_options:
+          - "command=\"git-shell -c \\\"$SSH_ORIGINAL_COMMAND\\\"\""
+          - "from=\"127.0.0.1,::1\""
+          - "no-agent-forwarding"
+          - "no-port-forwarding"
+          - "no-pty"
+          - "no-X11-forwarding"
+      become:
+        true

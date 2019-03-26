@@ -1,0 +1,45 @@
+{# Copyright (c) 2018-present eyeo GmbH
+ #
+ # This module is free software: you can redistribute it and/or modify
+ # it under the terms of the GNU General Public License as published by
+ # the Free Software Foundation, either version 3 of the License, or
+ # (at your option) any later version.
+ #
+ # This program is distributed in the hope that it will be useful,
+ # but WITHOUT ANY WARRANTY; without even the implied warranty of
+ # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ # GNU General Public License for more details.
+ #
+ # You should have received a copy of the GNU General Public License
+ # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-#}
+
+# {{ ansible_managed }}
+{%  set custom_host_vars_glob = playbook_dir + '/host_vars/*.test' %}
+{%  set custom_host_vars_files = lookup('fileglob', custom_host_vars_glob, wantlist=True) %}
+{%  set custom_host_groups = {} %}
+{%  for custom_host_vars_file in custom_host_vars_files | sort %}
+{%    set custom_host_name = custom_host_vars_file | basename %}
+{%    set custom_host_vars = lookup('file', custom_host_vars_file) | from_yaml %}
+{%    for custom_host_group in custom_host_vars.vagrant_groups | default([]) %}
+{%      set _ = custom_host_groups.setdefault(custom_host_group, []) %}
+{%      set _ = custom_host_groups[custom_host_group].append(custom_host_name) %}
+{%    endfor %}
+{%    set custom_host_key =  '/vagrant/.vagrant/machines/' + custom_host_name + '/virtualbox/private_key' %}
+{%    set custom_host_options = ['ansible_ssh_private_key_file=' + custom_host_key] %}
+{%    if custom_host_vars.vagrant_networks %}
+{%      set custom_host_address = custom_host_vars.vagrant_networks[0].private_network.ip %}
+{%      set _ = custom_host_options.append('ansible_ssh_host=' + custom_host_address) %}
+{%    endif %}
+{{ custom_host_name }} {{ custom_host_options | join(' ') }}
+{%  endfor %}
+{%  for custom_group_name, custom_group_hosts in custom_host_groups | dictsort %}
+
+[{{ custom_group_name }}]
+{%    for custom_host_name in custom_group_hosts -%}
+{{ custom_host_name }}
+{%    endfor %}
+{%  endfor %}
+
+[all:vars]
+ansible_ssh_common_args='-o StrictHostKeyChecking=no'
