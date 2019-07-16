@@ -27,7 +27,6 @@
   vars:
     packages:
       - "git"
-      - "openssh-client"
       - "vagrant"
       - "virtualenv"
   become:
