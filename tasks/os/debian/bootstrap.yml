@@ -29,7 +29,6 @@
       - "git"
       - "openssh-client"
       - "vagrant"
-      - "virtualbox"
       - "virtualenv"
   become:
     true

@@ -18,10 +18,15 @@ that populate the `roles/` directory therein:
 Next the [Ansible][ansible] software and some auxiliaries need to be installed,
 a list of which can be found in the **Dependencies** section below.
 On supported systems, the `provision-localhost.yml` playbook can ensure the
-required dependencies to be available, including the [Vagrant][vagrant] software
-and [VirtualBox][virtualbox]:
+required dependencies to be available:
 
     ansible-playbook --ask-become-pass provision-localhost.yml
+
+By default, the tasks associated with [VirtualBox][virtualbox] are not run.
+One can either use the `--tags virtualbox` option to explicitly perform those,
+or run both the regular (`untagged`) and `virtualbox` tasks together:
+
+    ansible-playbook -K --tags untagged,virtualbox provision-localhost.yml
 
 When the operating system is not supported, one needs to manually ensure the
 dependencies being available before working with the repository.

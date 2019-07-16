@@ -4,3 +4,6 @@
 [submodule "roles/openssh"]
 	path = roles/openssh
 	url = https://gitlab.com/eyeo/devops/ansible-role-openssh
+[submodule "roles/virtualbox"]
+	path = roles/virtualbox
+	url = https://gitlab.com/eyeo/devops/ansible-role-virtualbox

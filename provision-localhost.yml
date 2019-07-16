@@ -54,6 +54,13 @@
     - import_tasks:
         "tasks/ansible.yml"
 
+    # https://docs.ansible.com/ansible/latest/modules/import_role_module.html
+    - import_role:
+        name: "virtualbox/host"
+      tags:
+        - "never"
+        - "virtualbox"
+
   vars:
 
     # The location of the Python virtual environment used to install Ansible
