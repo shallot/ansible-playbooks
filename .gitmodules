@@ -10,3 +10,6 @@
 [submodule "roles/postgresql"]
 	path = roles/postgresql
 	url = https://gitlab.com/eyeo/devops/ansible-role-postgresql
+[submodule "roles/mumble"]
+	path = roles/mumble
+	url = https://gitlab.com/eyeo/devops/ansible-role-mumble
