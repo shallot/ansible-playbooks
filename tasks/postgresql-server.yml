@@ -1,0 +1,58 @@
+# Copyright (c) 2018-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+# roles/postgresql/server/defaults/main.yml
+# action_plugins/merge_variable.py
+- name:
+    "merge_variable : postgresql_configuration"
+  merge_variable:
+    default: {}
+    name: "postgresql_server_configuration"
+    suffix: "postgresql_config__to_merge"
+
+# roles/postgresql/server/defaults/main.yml
+# action_plugins/merge_variable.py
+- name:
+    "merge_variable : postgresql_users"
+  merge_variable:
+    default: {}
+    name: "postgresql_users"
+    suffix: "postgresql_users__to_merge"
+
+# roles/postgresql/server/defaults/main.yml
+# action_plugins/merge_variable.py
+- name:
+    "merge_variable : postgresql_databases"
+  merge_variable:
+    default: {}
+    name: "postgresql_databases"
+    suffix: "postgresql_databases__to_merge"
+
+# roles/postgresql/server/defaults/main.yml
+# action_plugins/merge_variable.py
+- name:
+    "merge_variable : postgresql_hba_entries"
+  merge_variable:
+    default: {}
+    name: "postgresql_hba_entries"
+    suffix: "postgresql_hba_entries__to_merge"
+
+# https://docs.ansible.com/ansible/latest/import_role_module.html
+# https://gitlab.com/eyeo/devops/ansible-role-postgresql
+# roles/postgresql/server/tasks/main.yml
+- import_role:
+    name: "postgresql/server"

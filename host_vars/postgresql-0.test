@@ -1,0 +1,57 @@
+# Copyright (c) 2019-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+# https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
+vagrant_groups:
+  - "postgresql-servers"
+
+# https://www.vagrantup.com/intro/getting-started/networking.html
+vagrant_networks:
+  - private_network:
+      ip: "10.8.20.10"
+
+# https://www.vagrantup.com/docs/provisioning/ansible.html
+vagrant_playbooks:
+  - "provision-custom-systems.yml"
+  - "provision-postgresql-servers.yml"
+
+# roles/postgresql/server/defaults/main.yml
+# this overrides the defaults as a whole; use ansible_merge_vars elsewhere
+postgresql_server_configuration:
+  # reduce default to use even fewer resources
+  max_connections: "25"
+  # if using SSDs
+  random_page_cost: "1.5"
+  # adjust to half the system RAM size
+  effective_cache_size: "256MB"
+  # we want to diagnose slow queries even more actively
+  log_min_duration_statement: "100"
+
+# roles/postgresql/server/defaults/main.yml
+# have to restart instead of reload because of max_connections above
+postgresql_service_strategy:
+  "restart"
+
+# roles/postgresql/server/defaults/main.yml
+postgresql_databases:
+  example_1:
+    encoding: "UTF8"
+
+# roles/postgresql/server/defaults/main.yml
+postgresql_users:
+  example_1:
+    password: "changeme"
