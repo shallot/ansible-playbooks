@@ -79,7 +79,7 @@ Vagrant.configure('2') do |vagrant|
     vagrant.vm.define(hostname) do |config|
 
       # https://www.vagrantup.com/docs/vagrantfile/machine_settings.html
-      vagrant.vm.box = hostvars.fetch('vagrant_box', 'debian/contrib-stretch64')
+      config.vm.box = hostvars.fetch('vagrant_box', 'debian/contrib-stretch64')
 
       # https://www.vagrantup.com/docs/virtualbox/configuration.html
       config.vm.provider('virtualbox') do |virtualbox|
