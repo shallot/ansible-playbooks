@@ -13,3 +13,6 @@
 [submodule "roles/mumble"]
 	path = roles/mumble
 	url = https://gitlab.com/eyeo/devops/ansible-role-mumble
+[submodule "roles/apache2"]
+	path = roles/apache2
+	url = https://gitlab.com/eyeo/devops/ansible-role-apache2.git

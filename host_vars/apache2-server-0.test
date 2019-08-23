@@ -1,0 +1,65 @@
+# Copyright (c) 2018-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+# roles/apache2/tasks/main.yml
+# provision-apache2-servers.yml
+host_specific_apache2_modules__to_merge:
+  proxy_http: &apache2_standard_module
+    package: false
+  ssl:
+    *apache2_standard_module
+
+# roles/apache2/tasks/main.yml
+host_specific_apache2_sites__to_merge:
+  example:
+    configuration: |
+      <VirtualHost *:80>
+        ServerAdmin webmaster@localhost
+        DocumentRoot /var/www/html
+        ErrorLog ${APACHE_LOG_DIR}/error.log
+        CustomLog ${APACHE_LOG_DIR}/access.log combined
+      </VirtualHost>
+  example-reverse-proxy:
+    configuration: |
+      <VirtualHost *:80>
+        ServerName example-reverse-proxy
+
+        ErrorLog ${APACHE_LOG_DIR}/example-reverse-proxy-error.log
+        CustomLog ${APACHE_LOG_DIR}/example-reverse-proxy-access.log combined
+
+        ProxyPass "/" "http://localhost:8080/"
+        ProxyPassReverse "/"  "http://localhost:8080/"
+
+      </VirtualHost>
+
+# tasks/apache2.yml
+apache2_logrotate_count:
+  7
+
+# https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
+vagrant_groups:
+  - "apache2-servers"
+
+# https://www.vagrantup.com/intro/getting-started/networking.html
+vagrant_networks:
+  - private_network:
+      ip: "10.8.100.30"
+
+# https://www.vagrantup.com/docs/provisioning/ansible.html
+vagrant_playbooks:
+  - "provision-custom-systems.yml"
+  - "provision-apache2-servers.yml"
