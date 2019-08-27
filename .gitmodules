@@ -34,3 +34,6 @@
 [submodule "roles/mysql"]
 	path = roles/mysql
 	url = https://gitlab.com/eyeo/devops/ansible-role-mysql.git
+[submodule "roles/eyeo"]
+	path = roles/eyeo
+	url = https://gitlab.com/eyeo/devops/ansible-role-eyeo.git
