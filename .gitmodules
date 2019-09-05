@@ -25,3 +25,6 @@
 [submodule "roles/docker"]
 	path = roles/docker
 	url = https://gitlab.com/eyeo/devops/ansible-role-docker.git
+[submodule "roles/tmate"]
+	path = roles/tmate
+	url = https://gitlab.com/eyeo/devops/ansible-role-tmate.git
