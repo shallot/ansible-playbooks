@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # Copyright (c) 2019-present eyeo GmbH
 #
 # This module is free software: you can redistribute it and/or modify
@@ -13,18 +15,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
----
+# Symlink arbitrary resources to their destined location, relative to the
+# current working directory.
 
-# https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
-vagrant_groups:
-  - "gitlab-runners"
-
-# https://www.vagrantup.com/intro/getting-started/networking.html
-vagrant_networks:
-  - private_network:
-      ip: "10.8.30.10"
-
-# https://www.vagrantup.com/docs/provisioning/ansible.html
-vagrant_playbooks:
-  - "provision-custom-systems.yml"
-  - "provision-gitlab-runners.yml"
+{% for resource in copied_resources.results %}
+mkdir -p {{ resource.item | dirname }}
+ln -s {{ resource.dest | default('skip_this_in_check_mode') }} {{ resource.item }} -f
+{% endfor %}

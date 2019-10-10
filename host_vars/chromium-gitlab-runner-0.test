@@ -1,4 +1,4 @@
-# Copyright (c) 2019-present eyeo GmbH
+# Copyright (c) 2018-present eyeo GmbH
 #
 # This module is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,14 +17,14 @@
 
 # https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
 vagrant_groups:
-  - "gitlab-runners"
+  - "chromium-gitlab-runners"
 
 # https://www.vagrantup.com/intro/getting-started/networking.html
 vagrant_networks:
   - private_network:
-      ip: "10.8.30.10"
+      ip: "10.8.30.11"
 
 # https://www.vagrantup.com/docs/provisioning/ansible.html
 vagrant_playbooks:
   - "provision-custom-systems.yml"
-  - "provision-gitlab-runners.yml"
+  - "provision-chromium-gitlab-runners.yml"
