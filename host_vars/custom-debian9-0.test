@@ -71,7 +71,7 @@ host_specific_sshd_config__to_merge:
 
 # https://www.vagrantup.com/docs/vagrantfile/machine_settings.html
 vagrant_box:
-  "debian/contrib-stretch64"
+  "debian/stretch64"
 
 # https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
 vagrant_groups:

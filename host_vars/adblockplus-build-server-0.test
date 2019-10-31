@@ -17,7 +17,7 @@
 
 # https://www.vagrantup.com/intro/getting-started/boxes.html
 vagrant_box:
-  "debian/contrib-buster64"
+  "debian/buster64"
 
 # https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
 vagrant_groups:

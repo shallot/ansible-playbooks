@@ -37,6 +37,10 @@ custom_ansible_group_members:
 custom_ansible_playbooks_repository:
   "/vagrant"
 
+# https://www.vagrantup.com/docs/vagrantfile/machine_settings.html
+vagrant_box:
+  "debian/buster64"
+
 # https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
 vagrant_groups:
   - "ansible-masters"
