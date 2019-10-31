@@ -31,7 +31,7 @@ vagrant_playbooks:
 
 # roles/postgresql/server/defaults/main.yml
 # this overrides the defaults as a whole; use ansible_merge_vars elsewhere
-postgresql_server_configuration:
+host_specific_postgresql_server_configuration__to_merge:
   # reduce default to use even fewer resources
   max_connections: "25"
   # if using SSDs
@@ -47,11 +47,24 @@ postgresql_service_strategy:
   "restart"
 
 # roles/postgresql/server/defaults/main.yml
-postgresql_databases:
+host_specific_postgresql_databases__to_merge:
   example_1:
     encoding: "UTF8"
 
 # roles/postgresql/server/defaults/main.yml
-postgresql_users:
+host_specific_postgresql_users__to_merge:
   example_1:
     password: "changeme"
+
+# roles/postgresql/server/defaults/main.yml
+host_specific_postgresql_hba_entries__to_merge:
+  - type: "host"
+    database: "example_1"
+    user: "example_1"
+    address: "127.0.0.1/32"
+    auth_method: "md5"
+  - type: "host"
+    database: "example_1"
+    user: "example_1"
+    address: "::1/128"
+    auth_method: "md5"

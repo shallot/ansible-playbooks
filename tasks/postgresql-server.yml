@@ -47,7 +47,7 @@
 - name:
     "merge_variable : postgresql_hba_entries"
   merge_variable:
-    default: {}
+    default: []
     name: "postgresql_hba_entries"
     suffix: "postgresql_hba_entries__to_merge"
 
