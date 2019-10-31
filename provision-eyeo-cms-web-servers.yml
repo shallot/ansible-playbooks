@@ -42,14 +42,13 @@
     - import_role:
         name: "eyeo/sitescripts"
 
-    # action_plugins/merge_variable.py
-    # roles/apache2/defaults/main.yml
-    - name:
-        "merge_variable : apache2_sites"
-      merge_variable:
-        default: {}
-        name: "apache2_sites"
-        suffix: "apache2_sites__to_merge"
+    # https://docs.ansible.com/ansible/latest/import_role_module.html
+    - import_role:
+        name: "eyeo/mimeo"
+
+    # https://docs.ansible.com/ansible/latest/import_tasks_module.html
+    - import_tasks:
+        "tasks/apache2.yml"
 
     # https://docs.ansible.com/ansible/latest/modules/set_fact_module.html
     - name:
@@ -90,22 +89,6 @@
         cms_content_input_dir: "/home/{{ eyeo_cms_system_username }}"
         cms_content_input_dir_prefix: "web."
         cms_content_output_dir: "{{ eyeo_cms_content_output_dir }}"
-
-    # https://docs.ansible.com/ansible/latest/import_role_module.html
-    - import_role:
-        name: "eyeo/mimeo"
-
-    # action_plugins/merge_variable.py
-    - name:
-        "merge_variable : apache2_modules"
-      merge_variable:
-        default: {}
-        name: "apache2_modules"
-        suffix: "apache2_modules__to_merge"
-
-    # https://docs.ansible.com/ansible/latest/import_role_module.html
-    - import_role:
-        name: "apache2"
 
     # https://docs.ansible.com/ansible/latest/import_role_module.html
     - import_role:
