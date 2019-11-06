@@ -49,18 +49,19 @@
         "paths : file"
       file:
         follow: "{{ item.value.follow | default(omit) }}"
+        path: "{{ item.key }}"
+        recurse: "{{ item.value.recurse | default(omit) }}"
+        state: "{{ item.value.state | default(omit) }}"
+      args: &shared_parameters
         force: "{{ item.value.force | default(omit) }}"
         group: "{{ item.value.group | default(omit) }}"
         mode: "{{ item.value.mode | default(omit) }}"
         owner: "{{ item.value.owner | default(omit) }}"
-        path: "{{ item.key }}"
-        recurse: "{{ item.value.recurse | default(omit) }}"
         selevel: "{{ item.value.selevel | default(omit) }}"
         serole: "{{ item.value.serole | default(omit) }}"
         setype: "{{ item.value.setype | default(omit) }}"
         seuser: "{{ item.value.seuser | default(omit) }}"
         src: "{{ item.value.src | default(omit) }}"
-        state: "{{ item.value.state | default(omit) }}"
       loop:
         "{{ custom_paths_for_file | sort(attribute='key') }}"
       loop_control:
@@ -77,16 +78,9 @@
         dest: "{{ item.key }}"
         directory_mode: "{{ item.value.directory_mode | default(omit) }}"
         follow: "{{ item.value.follow | default(omit) }}"
-        force: "{{ item.value.force | default(omit) }}"
-        group: "{{ item.value.group | default(omit) }}"
-        mode: "{{ item.value.mode | default(omit) }}"
-        owner: "{{ item.value.owner | default(omit) }}"
-        selevel: "{{ item.value.selevel | default(omit) }}"
-        serole: "{{ item.value.serole | default(omit) }}"
-        setype: "{{ item.value.setype | default(omit) }}"
-        seuser: "{{ item.value.seuser | default(omit) }}"
-        src: "{{ item.value.src | default(omit) }}"
         validate: "{{ item.value.validate | default(omit) }}"
+      args:
+        *shared_parameters
       loop:
         "{{ custom_paths_for_copy | sort(attribute='key') }}"
       loop_control:
@@ -99,15 +93,8 @@
       template:
         backup: "{{ item.value.backup | default(omit) }}"
         dest: "{{ item.key }}"
-        force: "{{ item.value.force | default(omit) }}"
-        group: "{{ item.value.group | default(omit) }}"
-        mode: "{{ item.value.mode | default(omit) }}"
-        owner: "{{ item.value.owner | default(omit) }}"
-        selevel: "{{ item.value.selevel | default(omit) }}"
-        serole: "{{ item.value.serole | default(omit) }}"
-        setype: "{{ item.value.setype | default(omit) }}"
-        seuser: "{{ item.value.seuser | default(omit) }}"
-        src: "{{ item.value.src | default(omit) }}"
+      args:
+        *shared_parameters
       vars:
         custom: "{{ item.value.custom | default({}) }}"
       loop:
