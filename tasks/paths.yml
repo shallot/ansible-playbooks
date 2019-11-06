@@ -1,0 +1,151 @@
+# Copyright (c) 2019-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# These tasks process a dictionary of arbitrary `custom_paths` where the
+# keys represent the path on the target system and the values correspond to
+# attributes of the `file`, `copy` or `template` module, respectively.
+# Which module is chosen to process an item depends on the value of the `state`
+# parameter: "copy" and "template" map to the modules of the same name, any
+# other value or an undefined state will be handled by the `file` module.
+---
+
+# action_plugins/merge_variable.py
+- name:
+    "merge_variable : custom_paths"
+  merge_variable:
+    default: {}
+    name: "custom_paths"
+    suffix: "custom_paths__to_merge"
+  when:
+    - "custom_paths is not defined"
+
+# https://docs.ansible.com/ansible/latest/user_guide/playbooks_blocks.html
+- block:
+
+    # Covers paths with missing state.
+    # https://docs.ansible.com/ansible/latest/modules/fail_module.html
+    - name:
+        "paths : check"
+      fail:
+        msg: "custom path '{{ item.key }}' must define a 'state'"
+      loop:
+        "{{ custom_paths_for_fail }}"
+
+    # Covers any target state beside "copy" and "template".
+    # https://docs.ansible.com/ansible/latest/modules/file_module.html
+    - name:
+        "paths : file"
+      file:
+        follow: "{{ item.value.follow | default(omit) }}"
+        force: "{{ item.value.force | default(omit) }}"
+        group: "{{ item.value.group | default(omit) }}"
+        mode: "{{ item.value.mode | default(omit) }}"
+        owner: "{{ item.value.owner | default(omit) }}"
+        path: "{{ item.key }}"
+        recurse: "{{ item.value.recurse | default(omit) }}"
+        selevel: "{{ item.value.selevel | default(omit) }}"
+        serole: "{{ item.value.serole | default(omit) }}"
+        setype: "{{ item.value.setype | default(omit) }}"
+        seuser: "{{ item.value.seuser | default(omit) }}"
+        src: "{{ item.value.src | default(omit) }}"
+        state: "{{ item.value.state | default(omit) }}"
+      loop:
+        "{{ custom_paths_for_file | sort(attribute='key') }}"
+      loop_control:
+        label: "{{ item.key }}"
+
+    # Covers (virtual) target state "copy".
+    # https://docs.ansible.com/ansible/latest/modules/copy_module.html
+    - name:
+        "paths : copy"
+      copy:
+        backup: "{{ item.value.backup | default(omit) }}"
+        checksum: "{{ item.value.checksum | default(omit) }}"
+        content: "{{ item.value.content | default(omit) }}"
+        dest: "{{ item.key }}"
+        directory_mode: "{{ item.value.directory_mode | default(omit) }}"
+        follow: "{{ item.value.follow | default(omit) }}"
+        force: "{{ item.value.force | default(omit) }}"
+        group: "{{ item.value.group | default(omit) }}"
+        mode: "{{ item.value.mode | default(omit) }}"
+        owner: "{{ item.value.owner | default(omit) }}"
+        selevel: "{{ item.value.selevel | default(omit) }}"
+        serole: "{{ item.value.serole | default(omit) }}"
+        setype: "{{ item.value.setype | default(omit) }}"
+        seuser: "{{ item.value.seuser | default(omit) }}"
+        src: "{{ item.value.src | default(omit) }}"
+        validate: "{{ item.value.validate | default(omit) }}"
+      loop:
+        "{{ custom_paths_for_copy | sort(attribute='key') }}"
+      loop_control:
+        label: "{{ item.key }}"
+
+    # Covers (virtual) target state "template".
+    # https://docs.ansible.com/ansible/latest/modules/template_module.html
+    - name:
+        "paths : template"
+      template:
+        backup: "{{ item.value.backup | default(omit) }}"
+        dest: "{{ item.key }}"
+        force: "{{ item.value.force | default(omit) }}"
+        group: "{{ item.value.group | default(omit) }}"
+        mode: "{{ item.value.mode | default(omit) }}"
+        owner: "{{ item.value.owner | default(omit) }}"
+        selevel: "{{ item.value.selevel | default(omit) }}"
+        serole: "{{ item.value.serole | default(omit) }}"
+        setype: "{{ item.value.setype | default(omit) }}"
+        seuser: "{{ item.value.seuser | default(omit) }}"
+        src: "{{ item.value.src | default(omit) }}"
+      vars:
+        custom: "{{ item.value.custom | default({}) }}"
+      loop:
+        "{{ custom_paths_for_template | sort(attribute='key') }}"
+      loop_control:
+        label: "{{ item.key }}"
+
+  vars:
+
+    # Identifies all custom_paths with a missing state.
+    custom_paths_for_fail:
+      "{{ lookup('dict', custom_paths)
+        | selectattr('value.state', 'undefined')
+        | list
+        }}"
+
+    # Identifies all custom_paths with a target state that is not "copy"
+    # or "template".
+    custom_paths_for_file:
+      "{{ lookup('dict', custom_paths)
+        | rejectattr('value.state', 'equalto', 'copy')
+        | rejectattr('value.state', 'equalto', 'template')
+        | list
+        }}"
+
+    # Identifies all custom_paths with target state "copy".
+    custom_paths_for_copy:
+      "{{ lookup('dict', custom_paths)
+        | selectattr('value.state', 'equalto', 'copy')
+        | list
+        }}"
+
+    # Identifies all custom_paths with target state "template".
+    custom_paths_for_template:
+      "{{ lookup('dict', custom_paths)
+        | selectattr('value.state', 'equalto', 'template')
+        | list
+        }}"
+
+  become:
+    true

@@ -37,6 +37,8 @@
         "tasks/packages.yml"
     - import_tasks:
         "tasks/users.yml"
+    - import_tasks:
+        "tasks/paths.yml"
 
     # action_plugins/merge_variable.py
     - name:
