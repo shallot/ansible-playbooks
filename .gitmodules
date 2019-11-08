@@ -28,3 +28,6 @@
 [submodule "roles/tmate"]
 	path = roles/tmate
 	url = https://gitlab.com/eyeo/devops/ansible-role-tmate.git
+[submodule "roles/adblockplus-builder"]
+	path = roles/adblockplus-builder
+	url = https://gitlab.com/eyeo/devops/ansible-role-adblockplus-builder.git
