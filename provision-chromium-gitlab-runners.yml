@@ -22,51 +22,8 @@
     "chromium-gitlab-runners"
 
   tasks:
-    # The `orca-android` project
-    # (https://gitlab.com/eyeo/adblockplus/orca-android) relies on unstaged
-    # private data, which must be present and accessible at CI run time, i.e.
-    # after provisioning. The below tasks handle copying and accessibility of
-    # arbitrary files for this purpose, for the `chromium-builder` role.
-    # See also hub #20780
-    # https://docs.ansible.com/ansible/latest/modules/file_module.html
-    - name:
-        "directories : resources"
-      file:
-        state: "directory"
-        mode: "0755"
-        path: "/opt/orca/{{ item | dirname }}"
-        recurse: "yes"
-      with_items: "{{ orca_resources | default([]) }}"
-      loop_control:
-        label: "/opt/orca/{{ item | dirname }}"
-      become: "true"
-
-    # https://docs.ansible.com/ansible/latest/modules/copy_module.html
-    # Recusively copying a whole direcotry is currently not an elegant option:
-    # https://github.com/ansible/ansible/issues/53958
-    - name:
-        "copy : resources"
-      copy:
-        src: "{{ item }}"
-        dest: "/opt/orca/{{ item }}"
-        directory_mode: "0755"
-      with_items: "{{ orca_resources | default([]) }}"
-      register: "copied_resources"
-      become: "true"
-
-    # https://docs.ansible.com/ansible/latest/modules/template_module.html
-    # Running this task in checkmode (-C/--check) would execute the `template`
-    # module without data in `copied_resources.[].dest`, causing the reference
-    # in the used template to fail. We introduce the default string
-    # `skip_this_in_check_mode` in the actual template to handle this.
-    - name:
-        "template : prepare-orca-resources"
-      template:
-        src: "prepare-orca-resources"
-        dest: "/usr/local/bin/prepare-orca-resources"
-        mode: "0755"
-      when: "copied_resources.results"
-      become: "true"
+    # Please find additional handling of custom paths in the inventory, using
+    # https://gitlab.com/eyeo/devops/ansible-playbooks/merge_requests/16
 
     # https://gitlab.com/eyeo/devops/ansible-role-chromium-builder
     - import_role:
