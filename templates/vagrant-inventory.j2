@@ -25,7 +25,7 @@
 {%      set _ = custom_host_groups.setdefault(custom_host_group, []) %}
 {%      set _ = custom_host_groups[custom_host_group].append(custom_host_name) %}
 {%    endfor %}
-{%    set custom_host_key =  '/vagrant/.vagrant/machines/' + custom_host_name + '/virtualbox/private_key' %}
+{%    set custom_host_key =  '/home/vagrant/.ssh/id-' + custom_host_name %}
 {%    set custom_host_options = ['ansible_ssh_private_key_file=' + custom_host_key] %}
 {%    if custom_host_vars.vagrant_networks %}
 {%      set custom_host_address = custom_host_vars.vagrant_networks[0].private_network.ip %}
