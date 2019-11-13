@@ -111,6 +111,37 @@ Vagrant.configure('2') do |vagrant|
 
       end
 
+      # https://www.vagrantup.com/docs/synced-folders/rsync.html
+      if hostvars.fetch('vagrant_rsync', false)
+
+        # https://www.vagrantup.com/docs/synced-folders/rsync.html#options
+        rsync_options = {}
+        rsync_options[:rsync__ownership] = true
+
+        # Avoid --copy-links (which is included by default) because it would
+        # cause the synchronization to fail due to infinite recursion when the
+        # source directory contains links to paths within itself.
+        # See https://github.com/hashicorp/vagrant/issues/5471 for details.
+        rsync_args = ['--archive', '--compress', '--delete', '--verbose']
+        rsync_options[:rsync__args] = rsync_args
+
+        # Exclude transient data as well as the Git sub-modules because at this
+        # point only the playbooks repository itself is required, and in one
+        # single case only. Refer to the provision-ansible-masters.yml playbook
+        # and the host_vars/admin-0.test file for details.
+        rsync_exclude = ['.vagrant/', 'builds/', 'roles/']
+        rsync_options[:rsync__exclude] = rsync_exclude
+
+        # https://www.vagrantup.com/docs/synced-folders/rsync.html#example
+        config.vm.synced_folder('.', '/vagrant', type: 'rsync', **rsync_options)
+
+      else
+
+        # https://www.vagrantup.com/docs/synced-folders/basic_usage.html#disabling
+        config.vm.synced_folder('.', '/vagrant', disabled: true)
+
+      end
+
       # https://www.vagrantup.com/docs/vagrantfile/machine_settings.html
       settings = hostvars.fetch('vagrant_settings', {})
       settings['hostname'] = hostname

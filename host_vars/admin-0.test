@@ -50,3 +50,7 @@ vagrant_networks:
 vagrant_playbooks:
   - "provision-custom-systems.yml"
   - "provision-ansible-masters.yml"
+
+# https://www.vagrantup.com/docs/synced-folders/rsync.html
+vagrant_rsync:
+  true
