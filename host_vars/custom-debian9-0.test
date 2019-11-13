@@ -57,7 +57,7 @@ host_specific_custom_paths__to_merge:
     state: "copy"
   /tmp/test-files/template:
     custom:
-      recipient: "{{ ansible_user }}"
+      recipient: "{{ lookup('env', 'LOGNAME') }}"
     src: "{{ playbook_dir }}/templates/test.j2"
     state: "template"
 # Uncomment the 2 lines below to test the mandatory `state` attribute.
