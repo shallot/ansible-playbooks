@@ -22,9 +22,14 @@ required dependencies to be available:
 
     ansible-playbook --ask-become-pass provision-localhost.yml
 
-By default, the tasks associated with [VirtualBox][virtualbox] are not run.
-One can either use the `--tags virtualbox` option to explicitly perform those,
-or run both the regular (`untagged`) and `virtualbox` tasks together:
+By default, the tasks associated with the Vagrant providers of
+virtual machines are not run, because there are multiple options,
+typically [libvirt][libvirt] or [VirtualBox][virtualbox].
+
+Some options come with eponymous example tags that invoke helper playbooks
+which in turn set those up. One can either use the option `--tags
+virtualbox` to explicitly perform those, or run both the regular
+(`untagged`) and `virtualbox` tasks together:
 
     ansible-playbook -K --tags untagged,virtualbox provision-localhost.yml
 
@@ -43,7 +48,9 @@ within this repository:
 For development a few more tools are needed:
 
 - The [Vagrant][vagrant] software, for operating virtual environments
-- The [VirtualBox][virtualbox] software, a hypervisor for virtual machines
+- Software that provides Vagrant with virtual machines, such as:
+  - [libvirt][libvirt]
+  - [VirtualBox][virtualbox]
 - The [virtualenv][virtualenv] software, for isolating *Python* packages
 
 The lists above do not include the dependencies of the listed items themselves.
@@ -53,6 +60,7 @@ The lists above do not include the dependencies of the listed items themselves.
 [clone]:      https://git-scm.com/docs/git-clone
 [eyeo]:       https://eyeo.com/
 [git]:        https://git-scm.com/
+[libvirt]:    https://libvirt.org/
 [openssh]:    https://www.openssh.com/
 [playbook]:   https://docs.ansible.com/ansible/latest/user_guide/playbooks.html
 [python]:     https://www.python.org/
