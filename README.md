@@ -28,10 +28,12 @@ typically [libvirt][libvirt] or [VirtualBox][virtualbox].
 
 Some options come with eponymous example tags that invoke helper playbooks
 which in turn set those up. One can either use the option `--tags
-virtualbox` to explicitly perform those, or run both the regular
-(`untagged`) and `virtualbox` tasks together:
+libvirt` to explicitly perform those, or run both the regular
+(`untagged`) and `libvirt` tasks together:
 
-    ansible-playbook -K --tags untagged,virtualbox provision-localhost.yml
+    ansible-playbook -K --tags untagged,libvirt provision-localhost.yml
+
+The analogous syntax should also work for `virtualbox`.
 
 When the operating system is not supported, one needs to manually ensure the
 dependencies being available before working with the repository.

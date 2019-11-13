@@ -58,6 +58,21 @@
     - import_role:
         name: "openssh/client"
     - import_role:
+        name: "libvirt/host"
+      tags:
+        - "never"
+        - "libvirt"
+    - import_role:
+        name: "libvirt/vagrant"
+      tags:
+        - "never"
+        - "libvirt"
+    - import_role:
+        name: "libvirt/manager"
+      tags:
+        - "never"
+        - "libvirt"
+    - import_role:
         name: "virtualbox/host"
       tags:
         - "never"
