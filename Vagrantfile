@@ -91,7 +91,7 @@ Vagrant.configure('2') do |vagrant|
       # https://github.com/vagrant-libvirt/vagrant-libvirt#domain-specific-options
       config.vm.provider('libvirt') do |libvirt|
         libvirt.cpus = hostvars.fetch('vagrant_cpus', 1)
-        libvirt.memory = hostvars.fetch('vagrant_memory', 256)
+        libvirt.memory = hostvars.fetch('vagrant_memory', 384)
       end
 
       # https://www.vagrantup.com/intro/getting-started/networking.html
