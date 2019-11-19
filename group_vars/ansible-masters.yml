@@ -29,3 +29,13 @@ custom_ansible_configuration_settings:
   defaults.gathering: "smart"
   defaults.retry_files_enabled: false
   ssh_connection.pipelining: true
+
+# When users are able to access confidential files in the Ansible inventory
+# their home directory shall not be accessible to other users, in order to
+# protect sensitive information. Hence the default home directory access mode
+# of custom_users on Ansible master hosts is based on whether a user is a
+# member of the "ansible" group. Refer to the provision-ansible-masters.yml
+# playbook and the tasks/users.yml file for more information.
+custom_users_default_home_mode:
+  "{{ (custom_user_name in custom_ansible_group_members | default([]))
+    | ternary('0750', '0755') }}"
