@@ -1,0 +1,81 @@
+# Copyright (c) 2018-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+- name:
+    "provision-public-git-web-servers"
+
+  hosts:
+    "public-git-web-servers"
+
+  pre_tasks:
+
+    # https://docs.ansible.com/ansible/latest/import_tasks_module.html
+    - import_tasks:
+        "tasks/os/main.yml"
+
+  tasks:
+
+    # https://docs.ansible.com/ansible/latest/import_tasks_module.html
+    - import_tasks:
+        "tasks/apache2.yml"
+
+    # https://docs.ansible.com/ansible/latest/import_role_module.html
+    - import_role:
+        name: "gitlab/runner"
+
+    # https://docs.ansible.com/ansible/latest/modules/apt_module.html
+    - name:
+        "apt"
+      apt:
+        cache_valid_time: "{{ apt_cache_valid_time }}"
+        default_release: "{{ apt_default_release | default(omit) }}"
+        name:
+          - "cgit"
+        state: "present"
+        update_cache: "{{ apt_update_cache }}"
+      become:
+        true
+
+    # https://docs.ansible.com/ansible/latest/modules/blockinfile_module.html
+    - name:
+        "blockinfile : /etc/cgitrc"
+      blockinfile:
+        block: |
+          {% for key, value in cgit_configuration | dictsort %}
+          {{ key }}={{ value }}
+          {% endfor %}
+        insertafter: "EOF"
+        path: "/etc/cgitrc"
+      become:
+        true
+
+    # https://docs.ansible.com/ansible/latest/copy_module.html
+    - name:
+        "file : /usr/local/sbin/deploy_public_git_web"
+      copy:
+        dest: "/usr/local/sbin/deploy_public_git_web"
+        mode: "0755"
+        content: |
+          #!/bin/sh -ex
+          for DEST_GIT_DIR in $@; do
+            test -d "$DEST_GIT_DIR" || exit 1
+            cd "$DEST_GIT_DIR"
+            git fetch --all --tags --prune
+            git update-server-info
+          done
+      become:
+        true
