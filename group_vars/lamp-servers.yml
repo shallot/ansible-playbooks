@@ -1,0 +1,44 @@
+# Copyright (c) 2018-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+# https://httpd.apache.org/docs/2.4/mod/core.html#virtualhost
+# _SITE_NAME_ comes from a replace() filter on input
+lamp_shared_apache_config: |
+  ServerName _SITE_NAME_
+
+  ErrorLog ${APACHE_LOG_DIR}/_SITE_NAME_-error.log
+  CustomLog ${APACHE_LOG_DIR}/_SITE_NAME_-access.log combined
+
+  # if necessary for rewrite debug
+  #LogLevel alert rewrite:trace3
+
+  DocumentRoot "/var/www/_SITE_NAME_"
+  <Directory "/var/www/_SITE_NAME_">
+    AllowOverride All
+    Require all granted
+  </Directory>
+
+  RewriteEngine On
+
+  # https://issues.adblockplus.org/ticket/4068
+  RewriteCond %{HTTP_HOST} ^(.+)\.$"
+  RewriteRule ^(.*)$ http://%1/$1 [R=permanent,L]
+
+# tasks/apache2.yml
+# Reduced here because of GDPR compliance recommendations
+apache2_logrotate_count:
+  7

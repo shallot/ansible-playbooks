@@ -1,0 +1,240 @@
+# Copyright (c) 2018-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+- name:
+    "provision-lamp-servers"
+
+  hosts:
+    "lamp-servers"
+
+  pre_tasks:
+
+    # https://docs.ansible.com/ansible/latest/import_tasks_module.html
+    - import_tasks:
+        "tasks/os/main.yml"
+
+  tasks:
+
+    # action_plugins/merge_variable.py
+    - name:
+        "merge_variable : lamp_web_spaces"
+      merge_variable:
+        default: {}
+        name: "lamp_web_spaces"
+        suffix: "lamp_web_spaces__to_merge"
+
+    # https://docs.ansible.com/ansible/latest/modules/group_module.html
+    - name:
+        "group"
+      group:
+        name: "{{ item.value.owner }}"
+        state: "present"
+      with_dict:
+        "{{ lamp_web_spaces }}"
+      become:
+        true
+
+    # https://docs.ansible.com/ansible/latest/modules/user_module.html
+    - name:
+        "user"
+      user:
+        # yamllint disable rule:line-length
+        comment: "{{ item.value.owner_comment | default('Web content owner') }}"
+        # yamllint enable rule:line-length
+        group: "{{ item.value.owner }}"
+        home: "/home/{{ item.value.owner }}"
+        name: "{{ item.value.owner }}"
+        password: "{{ item.value.owner_password | default(omit) }}"
+        state: "present"
+      with_dict:
+        "{{ lamp_web_spaces }}"
+      become:
+        true
+
+    # https://docs.ansible.com/ansible/latest/modules/authorized_key_module.html
+    - name:
+        "authorized_key"
+      authorized_key:
+        exclusive: "yes"
+        key: |
+          # Generated with Ansible
+          {{ item.value.owner_ssh_authorized_keys }}
+        manage_dir: "yes"
+        user: "{{ item.value.owner }}"
+      when:
+        "item.value.owner_ssh_authorized_keys is defined"
+      with_dict:
+        "{{ lamp_web_spaces }}"
+      become:
+        true
+
+    # https://docs.ansible.com/ansible/latest/modules/user_module.html
+    - name:
+        "user : www-data"
+      user:
+        name: "www-data"
+        groups: "{{ item.value.owner }}"
+        append: true
+      with_dict:
+        "{{ lamp_web_spaces }}"
+      become:
+        true
+
+    # https://docs.ansible.com/ansible/latest/modules/apt_module.html
+    - name:
+        "apt"
+      apt:
+        cache_valid_time: "{{ apt_cache_valid_time }}"
+        default_release: "{{ apt_default_release | default(omit) }}"
+        name:
+          - "git"
+          - "php-mysql"
+        state: "present"
+        update_cache: "{{ apt_update_cache }}"
+      become:
+        true
+
+    # https://docs.ansible.com/ansible/latest/modules/file_module.html
+    - name:
+        "directory : /var/www/*"
+      file:
+        group: "{{ item.value.owner }}"
+        mode: "0775"
+        owner: "{{ item.value.owner }}"
+        path: "/var/www/{{ item.directory_prefix | default('') }}{{ item.key }}"
+        state: "directory"
+      with_dict:
+        "{{ lamp_web_spaces }}"
+      become:
+        true
+
+    # https://docs.ansible.com/ansible/latest/modules/file_module.html
+    # NB: assumes no N:1 mapping owner->owned, otherwise it'll croak
+    - name:
+        "link : /home/<owner>/www-data -> /var/www/<owned>"
+      file:
+        dest: "/home/{{ item.value.owner }}/web"
+        group: "{{ item.value.owner }}"
+        owner: "{{ item.value.owner }}"
+        src: "/var/www/{{ item.directory_prefix | default('') }}{{ item.key }}"
+        state: "link"
+      with_dict:
+        "{{ lamp_web_spaces }}"
+      become:
+        true
+      become_user:
+        "{{ item.value.owner }}"
+
+    # https://docs.ansible.com/ansible/latest/modules/git_module.html
+    - name:
+        "git : /var/www/*"
+      git:
+        dest: "/var/www/{{ item.directory_prefix | default('') }}{{ item.key }}"
+        repo: "{{ item.value.repo }}"
+        version: "{{ item.value.version | default(omit) }}"
+      register:
+        "content_repo"
+      when:
+        "item.value.repo is defined"
+      with_dict:
+        "{{ lamp_web_spaces }}"
+      become:
+        true
+      become_user:
+        "{{ item.value.owner }}"
+
+    # https://docs.ansible.com/ansible/latest/modules/find_module.html
+    - name:
+        "find : /var/www/*/*"
+      find:
+        depth: 1
+        file_type: "any"
+        hidden: true
+        # yamllint disable rule:line-length
+        paths: "/var/www/{{ item.directory_prefix | default('') }}{{ item.key }}"
+        # yamllint enable rule:line-length
+        recurse: true
+      changed_when:
+        false
+      register:
+        "lamp_web_document_root_files"
+      with_dict:
+        "{{ lamp_web_spaces }}"
+      become:
+        true
+      become_user:
+        "{{ item.value.owner }}"
+
+    # https://docs.ansible.com/ansible/latest/modules/set_fact_module.html
+    - name:
+        "set_fact : lamp_web_document_root_file_counts"
+      set_fact:
+        lamp_web_document_root_file_counts:
+          "{{ lamp_web_document_root_file_counts
+            | default({})
+            | combine( {
+                item.item.key: {
+                  'path': item.invocation.module_args.paths[0],
+                  'matched': item.matched,
+                  'owner': item.item.value.owner
+                }
+              } )
+            }}"
+      with_items:
+        "{{ lamp_web_document_root_files.results }}"
+      loop_control:
+        label: "{{ [item.item.key, item.files | count] | to_json }}"
+
+    # https://docs.ansible.com/ansible/latest/modules/copy_module.html
+    # Apparently we can't use become_user to switch to the arbitrary user here
+    # because it causes a fatal error such as this one:
+    # "Failed to set permissions on the temporary files Ansible needs to
+    # create when becoming an unprivileged user (rc: 1, err:
+    # yamllint disable rule:line-length
+    # chown: changing ownership of '/var/tmp/ansible-tmp-1550139244.25-195264894578718/': Operation not permitted
+    # chown: changing ownership of '/var/tmp/ansible-tmp-1550139244.25-195264894578718/source': Operation not permitted
+    # yamllint enable rule:line-length
+    # ...
+    # This one happens to be safe to run as root, but this is not normal
+    - name:
+        "seed : /var/www/*/index.php"
+      copy:
+        dest: "{{ item.value.path }}/index.php"
+        force: false
+        group: "{{ item.value.owner }}"
+        mode: "0664"
+        owner: "{{ item.value.owner }}"
+        content: |
+          <?php
+          # FIXME for initial testing purposes only!
+          # otherwise it's an information disclosure vulnerability
+          echo phpinfo();
+          ?>
+      when:
+        "item.value.matched | int == 0"
+      with_dict:
+        "{{ lamp_web_document_root_file_counts }}"
+      become:
+        true
+
+    # https://docs.ansible.com/ansible/latest/import_tasks_module.html
+    - import_tasks:
+        "tasks/apache2-php-fpm.yml"
+
+    # https://docs.ansible.com/ansible/latest/import_tasks_module.html
+    - import_tasks:
+        "tasks/mysql-server.yml"

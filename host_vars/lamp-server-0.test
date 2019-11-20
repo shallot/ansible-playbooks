@@ -1,0 +1,110 @@
+# Copyright (c) 2018-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+# provision-lamp-servers.yml
+test_lamp_web_spaces__to_merge:
+  lamp-server-0.test:
+    repo: "https://gitlab.com/eyeo/devops/examples/eyeo-wordpress.git"
+    version: "master"
+    directory_prefix: "web."
+    owner: "www"
+  manually-operated.lamp-server-0.test:
+    directory_prefix: "web."
+    owner: "someone-1"
+    # changeme @ mkpasswd -m sha-512
+    owner_password: "$6$vgHd3kL6YYU$znTqvJ0VlcXzcxYDD8o5pUtASM/by45vkYeIH6D8UhMxk2ZY2xNO6gjqKL0xrVd/fT4UdNU7d2gCgbNlXcXam0"
+    owner_ssh_authorized_keys: "ssh-rsa AAA... j.doe+key-comment@eyeo.com"
+
+# roles/mysql/tasks/main.yml
+# provision-lamp-servers.yml
+test_mysql_users__to_merge:
+  wordpress_test:
+    password: "changeme"
+    priv: "wordpress_test.*:ALL"
+    state: "present"
+  manually_operated:
+    password: "changeme"
+    priv: "manually_operated.*:ALL"
+    state: "present"
+
+# roles/mysql/tasks/main.yml
+# provision-lamp-servers.yml
+test_mysql_databases__to_merge:
+  wordpress_test:
+    state: "present"
+  manually_operated:
+    state: "present"
+
+# roles/apache2/tasks/main.yml
+# provision-lamp-servers.yml
+test_apache2_modules__to_merge:
+  headers: &apache2_standard_module
+    package: false
+  proxy_fcgi:
+    *apache2_standard_module
+  rewrite:
+    *apache2_standard_module
+  setenvif:
+    *apache2_standard_module
+  socache:
+    <<: *apache2_standard_module
+    name: "socache_shmcb"
+  ssl:
+    *apache2_standard_module
+
+# roles/apache2/tasks/main.yml
+# provision-lamp-servers.yml
+test_apache2_sites__to_merge:
+  default:
+    name: "000-default"
+    enabled: false
+  lamp-server-0.test:
+    configuration: |
+      <VirtualHost *:80>
+
+        {{ lamp_shared_apache_config
+         | replace("_SITE_NAME_", "lamp-server-0.test")
+         | indent(2)
+        }}
+
+        ServerAlias www.lamp-server-0.test
+        RewriteCond %{HTTP_HOST} ^www.lamp-server-0.test$
+        RewriteRule ^/(.*)$ http://lamp-server-0.test/$1 [R,L]
+
+      </VirtualHost>
+  manually-operated.lamp-server-0.test:
+    configuration: |
+      <VirtualHost *:80>
+        {{ lamp_shared_apache_config
+         | replace("_SITE_NAME_", "manually-operated.lamp-server-0.test")
+         | indent(2)
+        }}
+      </VirtualHost>
+
+# https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
+vagrant_groups:
+  - "lamp-servers"
+
+# https://www.vagrantup.com/intro/getting-started/networking.html
+vagrant_networks:
+  - private_network:
+      ip: "10.8.100.32"
+
+# https://www.vagrantup.com/docs/provisioning/ansible.html
+vagrant_playbooks:
+  - "provision-custom-systems.yml"
+  - "provision-lamp-servers.yml"

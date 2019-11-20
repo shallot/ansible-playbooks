@@ -1,0 +1,44 @@
+# Copyright (c) 2018-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+# https://docs.ansible.com/ansible/latest/modules/apt_module.html
+- name:
+    "apt"
+  apt:
+    cache_valid_time: "{{ apt_cache_valid_time | default(omit) }}"
+    default_release: "{{ apt_default_release | default(omit) }}"
+    name:
+      - "php-fpm"
+    state: "present"
+    update_cache: "{{ apt_update_cache | default(omit) }}"
+  become:
+    true
+
+# https://docs.ansible.com/ansible/latest/command_module.html
+- name:
+    "command : a2enconf php-fpm"
+  command:
+    "a2enconf {{ php_fpm_apache_conf | mandatory }}"
+  args:
+    creates: "/etc/apache2/conf-enabled/{{ php_fpm_apache_conf }}.conf"
+  notify:
+    "service : apache2"
+  vars:
+    php_version: "{{ '7.0' if ansible_distribution_release == 'stretch' }}"
+    php_fpm_apache_conf: "php{{ php_version }}-fpm"
+  become:
+    true
