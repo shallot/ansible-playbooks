@@ -15,6 +15,15 @@
 
 ---
 
+# https://docs.ansible.com/ansible/latest/modules/include_tasks_module.html
+- include_vars:
+    "{{ apache2_php_fpm_codename_vars }}"
+  with_first_found:
+    - files:
+        - "{{ ansible_distribution_release }}/apache2-php-fpm.yml"
+  loop_control:
+    loop_var: "apache2_php_fpm_codename_vars"
+
 # https://docs.ansible.com/ansible/latest/modules/apt_module.html
 - name:
     "apt"
@@ -38,7 +47,6 @@
   notify:
     "service : apache2"
   vars:
-    php_version: "{{ '7.0' if ansible_distribution_release == 'stretch' }}"
     php_fpm_apache_conf: "php{{ php_version }}-fpm"
   become:
     true
