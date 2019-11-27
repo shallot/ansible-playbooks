@@ -1,0 +1,73 @@
+# Copyright (c) 2020-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+modsecurity_apache2_custom_packages__to_merge:
+  modsecurity-crs: "present"
+
+modsecurity_apache2_modules__to_merge:
+  proxy_http: &apache2_standard_module
+    package: false
+  ssl:
+    *apache2_standard_module
+  proxy:
+    *apache2_standard_module
+  headers:
+    *apache2_standard_module
+  security2: &apache2_non_standard_module
+    package: true
+
+# roles/apache2/tasks/main.yml
+modsecurity_apache2_sites__to_merge:
+  modsecurity.test:
+    enabled: true
+    configuration: |
+      <VirtualHost *:80>
+        ServerAdmin hostmaster@modsecurity.test
+        ErrorLog ${APACHE_LOG_DIR}/error.log
+        CustomLog ${APACHE_LOG_DIR}/access.log combined
+      </VirtualHost>
+
+apache2_logrotate_count:
+  7
+
+# provision-apache2-modsecurity-servers.yml
+# tasks/paths.yml
+custom_modsecurity_paths:
+  /etc/modsecurity/modsecurity.conf:
+    mode: "0644"
+    state: "link"
+    src: "/etc/modsecurity/modsecurity.conf-recommended"
+    notify: "service : apache2"
+  /etc/modsecurity/custom_modsecurity.conf:
+    mode: "0644"
+    state: "copy"
+    src: "files/custom_modsecurity.conf"
+    notify: "service : apache2"
+
+# https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
+vagrant_groups:
+  - "apache2-modsecurity-servers"
+
+# https://www.vagrantup.com/intro/getting-started/networking.html
+vagrant_networks:
+  - private_network:
+      ip: "10.8.100.35"
+
+# https://www.vagrantup.com/docs/provisioning/ansible.html
+vagrant_playbooks:
+  - "provision-custom-systems.yml"
+  - "provision-apache2-modsecurity-servers.yml"
