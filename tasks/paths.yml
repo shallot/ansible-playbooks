@@ -66,6 +66,8 @@
         "{{ custom_paths_for_file | sort(attribute='key') }}"
       loop_control:
         label: "{{ item.key }}"
+      notify:
+        "{{ item.value.notify | default(none) or omit }}"
 
     # Covers (virtual) target state "copy".
     # https://docs.ansible.com/ansible/latest/modules/copy_module.html
@@ -85,6 +87,8 @@
         "{{ custom_paths_for_copy | sort(attribute='key') }}"
       loop_control:
         label: "{{ item.key }}"
+      notify:
+        "{{ item.value.notify | default(none) or omit }}"
 
     # Covers (virtual) target state "template".
     # https://docs.ansible.com/ansible/latest/modules/template_module.html
@@ -101,6 +105,8 @@
         "{{ custom_paths_for_template | sort(attribute='key') }}"
       loop_control:
         label: "{{ item.key }}"
+      notify:
+        "{{ item.value.notify | default(none) or omit }}"
 
   vars:
 
