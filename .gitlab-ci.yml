@@ -18,6 +18,7 @@
 # https://docs.gitlab.com/ee/ci/yaml/#stages
 stages:
   - "test"
+  - "vagrant"
 
 # Use `gitlab-runner exec docker rubocop` to execute in development
 rubocop:
@@ -38,8 +39,66 @@ yamllint:
     - "set -- $@ `find group_vars/ host_vars/ -type f`"
     - "set -- $@ `find tasks/ -type f`"
     - "set -- $@ .gitlab-ci.yml"
+    - "set -- $@ .vagrant-jobs.gitlab-ci.yml"
     - "set -- $@ .rubocop.yml"
     - "set -- $@ .yamllint.yml"
     - "yamllint -c .yamllint.yml $@"
   stage:
     "test"
+
+include:
+  local: ".vagrant-jobs.gitlab-ci.yml"
+
+admin-0:
+  extends: ".vagrantjob"
+  variables:
+    TEST_HOST: "admin-0.test"
+
+apache2-server-0:
+  extends: ".vagrantjob"
+  variables:
+    TEST_HOST: "apache2-server-0.test"
+
+chromium-gitlab-runner-0:
+  extends: ".vagrantjob"
+  variables:
+    TEST_HOST: "chromium-gitlab-runner-0.test"
+  # https://gitlab.com/eyeo/devops/ansible-playbooks/issues/25
+  allow_failure: true
+
+custom-centos7-0:
+  extends: ".vagrantjob"
+  variables:
+    TEST_HOST: "custom-centos7-0.test"
+
+custom-debian9-0:
+  extends: ".vagrantjob"
+  variables:
+    TEST_HOST: "custom-debian9-0.test"
+
+docker-0:
+  extends: ".vagrantjob"
+  variables:
+    TEST_HOST: "docker-0.test"
+
+docker-gitlab-runner-0:
+  extends: ".vagrantjob"
+  variables:
+    TEST_HOST: "docker-gitlab-runner-0.test"
+
+gitlab-runner-0:
+  extends: ".vagrantjob"
+  variables:
+    TEST_HOST: "gitlab-runner-0.test"
+
+mumble-0:
+  extends: ".vagrantjob"
+  variables:
+    TEST_HOST: "mumble-0.test"
+  # https://gitlab.com/eyeo/devops/ansible-playbooks/issues/24
+  allow_failure: true
+
+postgresql-0:
+  extends: ".vagrantjob"
+  variables:
+    TEST_HOST: "postgresql-0.test"
