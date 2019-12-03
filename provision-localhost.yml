@@ -22,64 +22,8 @@
   hosts:
     "localhost"
 
-  pre_tasks:
-
-    # https://docs.ansible.com/ansible/latest/import_tasks_module.html
-    - import_tasks:
-        "tasks/os/main.yml"
-
   tasks:
-
-    # https://docs.ansible.com/ansible/latest/modules/include_tasks_module.html
-    - include_tasks:
-        "{{ bootstrap_tasks }}"
-      with_first_found:
-        - "tasks/os/{{ ansible_os_family | lower }}/bootstrap.yml"
-      loop_control:
-        loop_var: "bootstrap_tasks"
-
-    # https://docs.ansible.com/ansible/latest/modules/command_module.html
-    # https://docs.python.org/library/venv.html
-    - name:
-        "command : virtualenv"
-      command: >
-        virtualenv
-        --prompt '({{ playbook_dir | basename }}) '
-        --python {{ ansible_python.executable | quote }}
-        -- {{ custom_ansible_pip_virtualenv | quote }}
-      args:
-        creates: "{{ custom_ansible_pip_virtualenv }}"
 
     # https://docs.ansible.com/ansible/latest/modules/import_tasks_module.html
     - import_tasks:
-        "tasks/ansible.yml"
-
-    # https://docs.ansible.com/ansible/latest/modules/import_role_module.html
-    - import_role:
-        name: "openssh/client"
-    - import_role:
-        name: "libvirt/host"
-      tags:
-        - "never"
-        - "libvirt"
-    - import_role:
-        name: "libvirt/vagrant"
-      tags:
-        - "never"
-        - "libvirt"
-    - import_role:
-        name: "libvirt/manager"
-      tags:
-        - "never"
-        - "libvirt"
-    - import_role:
-        name: "virtualbox/host"
-      tags:
-        - "never"
-        - "virtualbox"
-
-  vars:
-
-    # The location of the Python virtual environment used to install Ansible
-    # and its dependencies in the officially supported versions.
-    custom_ansible_pip_virtualenv: "{{ playbook_dir }}/builds/virtualenv"
+        "tasks/development.yml"
