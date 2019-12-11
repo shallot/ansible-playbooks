@@ -37,3 +37,6 @@
 [submodule "roles/eyeo"]
 	path = roles/eyeo
 	url = https://gitlab.com/eyeo/devops/ansible-role-eyeo.git
+[submodule "roles/postfix"]
+	path = roles/postfix
+	url = https://gitlab.com/eyeo/devops/ansible-role-postfix.git
