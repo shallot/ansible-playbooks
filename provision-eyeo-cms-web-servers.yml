@@ -50,23 +50,34 @@
     - import_tasks:
         "tasks/apache2.yml"
 
-    # https://docs.ansible.com/ansible/latest/modules/set_fact_module.html
-    - name:
-        "set_fact : eyeo_cms_site_hostnames"
-      set_fact:
-        eyeo_cms_site_hostnames:
-          "{{ eyeo_cms_site_hostnames
-            | default({})
-            | combine({ item.key: 'eyeo_cms_web_required' })
-            }}"
+    # https://docs.ansible.com/ansible/latest/user_guide/playbooks_blocks.html
+    - block:
+
+        # https://docs.ansible.com/ansible/latest/modules/set_fact_module.html
+        - name:
+            "set_fact : eyeo_cms_site_hostnames"
+          loop_control:
+            label: "{{ item.key }}"
+          set_fact:
+            eyeo_cms_site_hostnames:
+              "{{ eyeo_cms_site_hostnames
+                | default({})
+                | combine({ item.key: 'eyeo_cms_web_required' })
+                }}"
+          when:
+            "item.value.eyeo_cms_web_required | default(false)"
+          with_dict:
+            "{{ apache2_sites }}"
+
       when:
-        "item.key != 'default'"
-      with_dict:
-        "{{ apache2_sites }}"
+        "eyeo_cms_site_hostnames is not defined"
 
     # https://docs.ansible.com/ansible/latest/modules/fail_module.html
     - fail:
-        msg: "Must have apache2_sites defined for eyeo CMS to be installed in"
+        msg: |
+          For eyeo CMS to be built in a virtual host, one must define
+          eyeo_cms_site_hostnames, or set apache2_sites with
+          the eyeo_cms_web_required flag
       when: "eyeo_cms_site_hostnames is not defined"
 
     # action_plugins/merge_variable.py

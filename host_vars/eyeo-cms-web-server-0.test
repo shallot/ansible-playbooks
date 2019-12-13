@@ -63,6 +63,20 @@ test_apache2_sites__to_merge:
 
       </VirtualHost>
     # yamllint enable rule:line-length
+    eyeo_cms_web_required:
+      true
+  example.com:
+    configuration: |
+      <VirtualHost *:80>
+        ServerName example.com
+      </VirtualHost>
+    eyeo_cms_web_required:
+      false
+  example.org:
+    configuration: |
+      <VirtualHost *:80>
+        ServerName example.org
+      </VirtualHost>
 
 # https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
 vagrant_groups:
