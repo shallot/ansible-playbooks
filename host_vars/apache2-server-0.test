@@ -33,6 +33,8 @@ host_specific_apache2_sites__to_merge:
         ErrorLog ${APACHE_LOG_DIR}/error.log
         CustomLog ${APACHE_LOG_DIR}/access.log combined
       </VirtualHost>
+    enabled_site_name:
+      "000-example"
   example-reverse-proxy:
     configuration: |
       <VirtualHost *:80>
