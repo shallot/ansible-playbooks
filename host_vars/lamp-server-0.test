@@ -69,9 +69,6 @@ test_apache2_modules__to_merge:
 # roles/apache2/tasks/main.yml
 # provision-lamp-servers.yml
 test_apache2_sites__to_merge:
-  default:
-    name: "000-default"
-    enabled: false
   lamp-server-0.test:
     configuration: |
       <VirtualHost *:80>

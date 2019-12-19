@@ -37,12 +37,6 @@ eyeo_cms_apache2_modules__to_merge:
   ssl:
     *apache2_standard_module
 
-# https://httpd.apache.org/docs/current/vhosts/
-eyeo_cms_apache2_sites__to_merge:
-  default:
-    name: "000-default"
-    enabled: false
-
 # https://httpd.apache.org/docs/2.4/mod/core.html#virtualhost
 # _SITE_NAME_ comes from a replace() filter on input
 # yamllint disable rule:line-length
