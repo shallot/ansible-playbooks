@@ -79,3 +79,29 @@
           done
       become:
         true
+
+    # https://docs.ansible.com/ansible/latest/copy_module.html
+    - name:
+        "file : /usr/local/sbin/deploy_public_git_web_branch"
+      copy:
+        dest: "/usr/local/sbin/deploy_public_git_web_branch"
+        mode: "0755"
+        content: |
+          #!/bin/sh -ex
+          case "$1" in
+            *[^A-Za-z0-9._-]*) echo "unsupported branch name: $1" >&2
+                            exit 1
+                            ;;
+          esac
+          DEST_GIT_BRANCH=$1
+          shift
+          for DEST_GIT_DIR in $@; do
+            test -d "$DEST_GIT_DIR" || exit 1
+            cd "$DEST_GIT_DIR"
+            git fetch --tags --prune
+            git fetch origin \
+                      $DEST_GIT_BRANCH:refs/remotes/origin/$DEST_GIT_BRANCH
+            git update-server-info
+          done
+      become:
+        true
