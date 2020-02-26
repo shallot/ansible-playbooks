@@ -88,6 +88,10 @@
         mode: "0755"
         content: |
           #!/bin/sh -ex
+          if [ "$#" -ne 1 ]; then
+            echo "script requires one argument for the branch name" >&2
+            exit 1
+          fi
           case "$1" in
             *[^A-Za-z0-9._-]*) echo "unsupported branch name: $1" >&2
                             exit 1
