@@ -104,7 +104,7 @@
             cd "$DEST_GIT_DIR"
             git fetch --tags --prune
             git fetch origin \
-                      $DEST_GIT_BRANCH:refs/remotes/origin/$DEST_GIT_BRANCH
+                      $DEST_GIT_BRANCH:$DEST_GIT_BRANCH
             git update-server-info
           done
       become:
