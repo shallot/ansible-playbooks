@@ -1,0 +1,87 @@
+# Copyright (c) 2020-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+# roles/apache/tasks/main.yml
+# https://httpd.apache.org/docs/current/mod/
+test_apache2_modules__to_merge:
+  proxy: &apache2_standard_module
+    package: false
+  proxy_http:
+    *apache2_standard_module
+
+# roles/eyeo/mimeo/tasks/main.yml
+# provision-apache2-mimeo-servers.yml
+test_custom_mimeo_settings__to_merge:
+  first:
+    port: "8000"
+    response: "This is the first mimeo"
+    output_directory: "/var/log/mimeo"
+    output_filename: "first.log"
+  second:
+    port: "9000"
+    response: "This is the second mimeo"
+    output_directory: "/var/log/mimeo"
+    output_filename: "second.log"
+
+# roles/apache2/tasks/main.yml
+# provision-apache2-mimeo-servers.yml
+test_apache2_sites__to_merge:
+  mimeo-test.example:
+    # yamllint disable rule:line-length
+    configuration: |
+      <VirtualHost *:80>
+        ServerName mimeo-test.example
+
+        ErrorLog ${APACHE_LOG_DIR}/mimeo-test.example-error.log
+        CustomLog ${APACHE_LOG_DIR}/mimeo-test.example-access.log combined
+
+        DocumentRoot "/var/www/mimeo-test.example"
+        <Directory "/var/www/mimeo-test.example">
+          AllowOverride All
+          Require all granted
+        </Directory>
+
+        # this part is supported by mimeo.py
+        <Location /first-location-for-first-mimeo>
+          ProxyPass http://127.0.0.1:{{ custom_mimeo_settings.first.port }}/submit-feedback
+          ProxyPassReverse http://127.0.0.1:{{ custom_mimeo_settings.first.port }}/submit-feedback
+          ProxyPreserveHost On
+        </Location>
+
+        # this part is supported by mimeo.py
+        <Location /second-location-for-second-mimeo>
+          ProxyPass http://127.0.0.1:{{ custom_mimeo_settings.second.port }}/submit-feedback
+          ProxyPassReverse http://127.0.0.1:{{ custom_mimeo_settings.second.port }}/submit-feedback
+          ProxyPreserveHost On
+        </Location>
+
+      </VirtualHost>
+    # yamllint enable rule:line-length
+
+# https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
+vagrant_groups:
+  - "apache2-mimeo-servers"
+
+# https://www.vagrantup.com/intro/getting-started/networking.html
+vagrant_networks:
+  - private_network:
+      ip: "10.8.100.90"
+
+# https://www.vagrantup.com/docs/provisioning/ansible.html
+vagrant_playbooks:
+  - "provision-custom-systems.yml"
+  - "provision-apache2-mimeo-servers.yml"
