@@ -1,0 +1,81 @@
+# Copyright (c) 2020-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+# roles/apache2/tasks/main.yml
+mobile_telemetry_apache2_modules__to_merge:
+  proxy_http: &apache2_standard_module
+    package: false
+  ssl:
+    *apache2_standard_module
+
+custom_mimeo_settings__to_merge:
+  apple:
+    port: "8000"
+    response: "OK"
+    output_directory: "/var/log/mimeo"
+    output_filename: "apple.log"
+  android:
+    port: "9000"
+    response: "OK"
+    output_directory: "/var/log/mimeo"
+    output_filename: "android.log"
+
+mobile_telemetry_apache2_sites__to_merge:
+  000-default:
+    enabled: false
+  mobile-telemetry.adblockplus.org:
+    # yamllint disable rule:line-length
+    configuration: |
+      <VirtualHost *:80>
+        ServerName mobile-telemetry.adblockplus.org
+        ErrorLog ${APACHE_LOG_DIR}/mobile-telemetry-error.log
+        CustomLog ${APACHE_LOG_DIR}/mobile-telemetry-access.log combined
+
+        # this part is supported by mimeo.py
+        <Location /apple>
+          ProxyPass http://127.0.0.1:{{ custom_mimeo_settings.apple.port }}
+          ProxyPassReverse http://127.0.0.1:{{ custom_mimeo_settings.apple.port }}
+          ProxyPreserveHost On
+        </Location>
+
+        # this part is supported by mimeo.py
+        <Location /android>
+          ProxyPass http://127.0.0.1:{{ custom_mimeo_settings.android.port }}
+          ProxyPassReverse http://127.0.0.1:{{ custom_mimeo_settings.android.port }}
+          ProxyPreserveHost On
+        </Location>
+
+      </VirtualHost>
+      # yamllint enable rule:line-length
+
+# tasks/apache2.yml
+apache2_logrotate_count:
+  7
+
+# https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
+vagrant_groups:
+  - "mobile-telemetry-servers"
+
+# https://www.vagrantup.com/intro/getting-started/networking.html
+vagrant_networks:
+  - private_network:
+      ip: "10.8.100.200"
+
+# https://www.vagrantup.com/docs/provisioning/ansible.html
+vagrant_playbooks:
+  - "provision-custom-systems.yml"
+  - "provision-mobile-telemetry-servers.yml"
