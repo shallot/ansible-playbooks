@@ -21,6 +21,13 @@ host_specific_custom_packages__to_merge:
   gimp: "absent"
   joe: "present"
 
+# tasks/groups.yml
+host_specific_custom_groups__to_merge:
+  example_group:
+    state: "present"
+    gid: "1234"
+    system: "false"
+
 # tasks/users.yml
 host_specific_custom_users__to_merge:
   example:
@@ -28,6 +35,7 @@ host_specific_custom_users__to_merge:
     groups:
       - "users"
       - "staff"
+      - "example_group"
     password: "$6$bCrd2ylJ$uQ.uN7Oy1QStmunslSMzYX0vM4wYXKdO9tgu.SE.hPdKBqcHk.CrHsUMxzN8rwiPcwRI3nzvzd9W4T0sJJmNz."
 
 # tasks/files.yml

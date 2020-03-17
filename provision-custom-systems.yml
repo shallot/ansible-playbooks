@@ -34,6 +34,8 @@
     - import_tasks:
         "tasks/common.yml"
     - import_tasks:
+        "tasks/groups.yml"
+    - import_tasks:
         "tasks/packages.yml"
     - import_tasks:
         "tasks/users.yml"
