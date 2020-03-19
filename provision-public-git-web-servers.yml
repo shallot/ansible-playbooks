@@ -103,7 +103,8 @@
             test -d "$DEST_GIT_DIR" || exit 1
             cd "$DEST_GIT_DIR"
             git fetch --tags --prune
-            git fetch origin \
+            git fetch --force \
+                      origin \
                       $DEST_GIT_BRANCH:$DEST_GIT_BRANCH
             git update-server-info
           done
