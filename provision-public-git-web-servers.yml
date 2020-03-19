@@ -108,6 +108,10 @@
                       origin \
                       $DEST_GIT_BRANCH:$DEST_GIT_BRANCH
             git update-server-info
+            test -n "$CI_DEFAULT_BRANCH" || continue
+            git_default_branch=$(git symbolic-ref --short HEAD)
+            test "$git_default_branch" != "$CI_DEFAULT_BRANCH" || continue
+            git symbolic-ref HEAD refs/heads/"$CI_DEFAULT_BRANCH"
           done
       become:
         true
