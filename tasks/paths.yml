@@ -80,6 +80,7 @@
         dest: "{{ item.key }}"
         directory_mode: "{{ item.value.directory_mode | default(omit) }}"
         follow: "{{ item.value.follow | default(omit) }}"
+        remote_src: "{{ item.value.remote_src | default(omit) }}"
         validate: "{{ item.value.validate | default(omit) }}"
       args:
         *shared_parameters
