@@ -38,6 +38,9 @@ test_sitescripts_ini_settings__to_merge:
 test_custom_mimeo_settings__to_merge:
   submitfeedback:
     port: "8000"
+    response: "Feedback submitted"
+    output_directory: "/var/log/mimeo"
+    output_filename: "submit-feedback.log"
 
 # roles/apache2/tasks/main.yml
 # provision-eyeo-cms-web-servers.yml
