@@ -24,7 +24,7 @@ test_apache2_modules__to_merge:
     *apache2_standard_module
 
 # roles/eyeo/mimeo/tasks/main.yml
-# provision-apache2-mimeo-servers.yml
+# tasks/mimeo.yml
 test_custom_mimeo_settings__to_merge:
   first:
     port: "8000"

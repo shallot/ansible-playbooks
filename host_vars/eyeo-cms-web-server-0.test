@@ -33,6 +33,12 @@ test_sitescripts_ini_settings__to_merge:
     key: "email_template"
     value: "send_installation_link/template/adblockbrowser_installation_link.tmpl"
 
+# roles/eyeo/mimeo/tasks/main.yml
+# tasks/mimeo.yml
+test_custom_mimeo_settings__to_merge:
+  submitfeedback:
+    port: "8000"
+
 # roles/apache2/tasks/main.yml
 # provision-eyeo-cms-web-servers.yml
 test_apache2_sites__to_merge:
@@ -50,8 +56,8 @@ test_apache2_sites__to_merge:
 
         # this part is supported by mimeo.py
         <Location /submit-feedback>
-          ProxyPass http://127.0.0.1:{{ mimeo_port }}/submit-feedback
-          ProxyPassReverse http://127.0.0.1:{{ mimeo_port }}/submit-feedback
+          ProxyPass http://127.0.0.1:{{ custom_mimeo_settings.submitfeedback.port }}/submit-feedback
+          ProxyPassReverse http://127.0.0.1:{{ custom_mimeo_settings.submitfeedback.port }}/submit-feedback
           ProxyPreserveHost On
         </Location>
 

@@ -42,9 +42,9 @@
     - import_role:
         name: "eyeo/sitescripts"
 
-    # https://docs.ansible.com/ansible/latest/import_role_module.html
-    - import_role:
-        name: "eyeo/mimeo"
+    # https://docs.ansible.com/ansible/latest/import_tasks_module.html
+    - import_tasks:
+        "tasks/mimeo.yml"
 
     # https://docs.ansible.com/ansible/latest/import_tasks_module.html
     - import_tasks:
@@ -229,4 +229,3 @@
 
     eyeo_cms_content_output_dir: "/var/www"
     eyeo_cms_system_username: "www"
-    mimeo_port: "8000"
