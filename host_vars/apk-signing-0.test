@@ -1,0 +1,52 @@
+# Copyright (c) 2020-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+# tasks/apk-signing-host.yml
+signing_users: &signing_users
+  signer:
+    comment: "Host-specific example user (via Ansible)"
+  signer2:
+    comment: "Host-specific example user (via Ansible)"
+
+# tasks/users.yml
+# https://yaml.org/type/merge.html
+apk_sign_custom_users__to_merge:
+  <<: *signing_users
+
+# tasks/apk-signing-host.yml
+APK_KEYSTORE_NAME: "test_name"
+APK_KEY_ALIAS_NAME: "alias_test_name"
+APK_STOREPASS: "test_store_password"
+APK_KEYPASS: "test_key_password"
+
+# https://www.vagrantup.com/docs/vagrantfile/machine_settings.html
+vagrant_box:
+  "debian/buster64"
+
+# https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
+vagrant_groups:
+  - "apk-signing-hosts"
+
+# https://www.vagrantup.com/intro/getting-started/networking.html
+vagrant_networks:
+  - private_network:
+      ip: "10.8.10.13"
+
+# https://www.vagrantup.com/docs/provisioning/ansible.html
+vagrant_playbooks:
+  - "provision-custom-systems.yml"
+  - "provision-apk-signing-hosts.yml"

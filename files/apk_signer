@@ -1,0 +1,53 @@
+#!/bin/sh -e
+# Copyright (c) 2020-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+SIGNER=`which jarsigner`
+APK_SIG_ALGORITHM=${APK_SIG_ALGORITHM:-"SHA1withRSA"}
+APK_DIGEST_ALGORITHM=${APK_DIGEST_ALGORITHM:-"SHA1"}
+
+test -n "$SIGNER" || { echo "Missing jarsigner" >&2; exit 1; }
+test -n "$APK_KEYSTORE_NAME" || { echo "Missing environment variable APK_KEYSTORE_NAME" >&2; exit 1; }
+test -n "$APK_KEY_ALIAS_NAME" || { echo "Missing environment variable APK_KEY_ALIAS_NAME" >&2; exit 1; }
+test -n "$APK_STOREPASS" || { echo "Missing environment variable APK_STOREPASS" >&2; exit 1; }
+test -n "$APK_KEYPASS" || { echo "Missing environment variable APK_KEYPASS" >&2; exit 1; }
+
+
+OUTPUT_FILE=`mktemp "/tmp/output.apk.XXXXXXXXXXX"`
+if [ -z "$OUTPUT_FILE" ]; then
+    echo "Temporary output file creation failed" >&2
+    exit 1
+fi
+
+INPUT_FILE=`mktemp "/tmp/input.apk.XXXXXXXXXXX"`
+if [ -z "$INPUT_FILE" ]; then
+    echo "Temporary input file creation failed" >&2
+    exit 1
+fi
+trap "rm $INPUT_FILE $OUTPUT_FILE" EXIT
+cat > "$INPUT_FILE"
+
+sudo "$SIGNER" \
+     -sigalg "$APK_SIG_ALGORITHM" \
+     -digestalg "$APK_DIGEST_ALGORITHM" \
+     -keystore "$APK_KEYSTORE_NAME" \
+     -storepass "$APK_STOREPASS" \
+     -keypass "$APK_KEYPASS" \
+     -signedjar "$OUTPUT_FILE" \
+     "$INPUT_FILE" "$APK_KEY_ALIAS_NAME" >&2
+
+cat "$OUTPUT_FILE"
+
+exit 0
