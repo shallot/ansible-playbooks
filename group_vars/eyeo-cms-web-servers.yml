@@ -100,6 +100,7 @@ eyeo_cms_shared_apache_config: |
 
   # if there is no language translation, try canonical page for default language
   # example /es/page -> /page
+  RewriteCond %{REQUEST_URI} !^/js/.+
   RewriteCond %{REQUEST_URI} ^/([a-z][a-z])(/.+)
   RewriteCond %{DOCUMENT_ROOT}/%{REQUEST_URI} !-f
   RewriteCond %{REQUEST_FILENAME} !-f
