@@ -111,7 +111,7 @@
             true
 
       when:
-        "adblockplus_donate_server_dir_files.matched == 0"
+        "adblockplus_donate_server_dir_files.matched < 2"
 
     # https://docs.ansible.com/ansible/latest/copy_module.html
     - name:
