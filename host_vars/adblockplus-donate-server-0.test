@@ -1,0 +1,112 @@
+# Copyright (c) 2020-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+# tasks/groups.yml
+# this tries to fix the chicken and egg problem between gitlab role
+# and custom system tasks
+adblockplus_donate_server_test_custom_groups__to_merge:
+  gitlab-runner:
+    gid: 998
+    state: "present"
+adblockplus_donate_server_test_custom_users__to_merge:
+  gitlab-runner:
+    uid: 998
+    group: "gitlab-runner"
+    state: "present"
+
+# provision-adblockplus-donate-servers.yml
+adblockplus_donate_system_username:
+  "gitlab-runner"
+adblockplus_donate_server_dir:
+  "/srv/adblockplus-donate-server"
+
+# tasks/paths.yml
+# TODO: ideally we'd just reference adblockplus_donate_server_dir here,
+# but it doesn't work
+adblockplus_donate_server_test_custom_paths__to_merge:
+  "/srv/adblockplus-donate-server/etc":
+    state: "directory"
+    mode: "0755"
+    owner: "gitlab-runner"
+  "/srv/adblockplus-donate-server/etc/stripe.secret":
+    state: "copy"
+    content: |
+      changeme
+    mode: "0644"
+  /var/www/adblockplus-donate-server-0.test:
+    state: "directory"
+    mode: "0755"
+  /var/www/adblockplus-donate-server-0.test/index.html:
+    state: "copy"
+    src: "/dev/null"
+    mode: "0644"
+# roles/apache2/tasks/main.yml
+# provision-apache2-servers.yml
+adblockplus_donate_server_test_apache2_modules__to_merge:
+  vhost_alias: &apache2_standard_module
+    package: false
+  proxy_http:
+    *apache2_standard_module
+  rewrite:
+    *apache2_standard_module
+  ssl:
+    *apache2_standard_module
+
+# roles/apache2/tasks/main.yml
+# provision-apache2-servers.yml
+adblockplus_donate_server_test_apache2_sites__to_merge:
+  adblockplus-donate-server-0.test:
+    configuration: |
+      UseCanonicalName    Off
+      VirtualDocumentRoot "/var/www/%0"
+
+      <VirtualHost *:80>
+
+        ServerName adblockplus-donate-server-0.test
+
+        ErrorLog ${APACHE_LOG_DIR}/adblockplus-donate-server-0.test-error.log
+        CustomLog ${APACHE_LOG_DIR}/adblockplus-donate-server-0.test-access.log combined
+
+        # if necessary for rewrite debug
+        #LogLevel alert rewrite:trace3
+
+        DocumentRoot "/var/www/adblockplus-donate-server-0.test"
+        <Directory "/var/www/adblockplus-donate-server-0.test">
+          AllowOverride All
+          Require all granted
+        </Directory>
+
+        ProxyPass /server-status !
+        ProxyPreserveHost On
+        ProxyPass / "http://localhost:5000/"
+        ProxyPassReverse / "http://localhost:5000/"
+
+      </VirtualHost>
+
+# https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
+vagrant_groups:
+  - "adblockplus-donate-servers"
+
+# https://www.vagrantup.com/intro/getting-started/networking.html
+vagrant_networks:
+  - private_network:
+      ip: "10.8.100.120"
+
+# https://www.vagrantup.com/docs/provisioning/ansible.html
+vagrant_playbooks:
+  - "provision-custom-systems.yml"
+  - "provision-adblockplus-donate-servers.yml"
