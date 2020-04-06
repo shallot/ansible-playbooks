@@ -21,7 +21,8 @@
   merge_variable:
     default: {}
     name: "custom_packages"
-    suffix: "custom_packages__to_merge"
+    suffix: "{{ custom_packages_suffix
+              | default('custom_packages__to_merge') }}"
 
 # https://docs.ansible.com/ansible/latest/modules/include_tasks_module.html
 - include_tasks:
