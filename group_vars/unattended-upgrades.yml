@@ -1,0 +1,34 @@
+# Copyright (c) 2020-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+# tasks/packages.yml
+# tasks/unattended-upgrades.yml
+unattended_upgrades_packages__to_merge:
+  unattended-upgrades: "present"
+  apt-listchanges: "present"
+  bsd-mailx: "present"
+
+# tasks/paths.yml
+# tasks/unattended-upgrades.yml
+unattended_upgrades_paths:
+  /etc/apt/apt.conf.d/99local-auto-upgrades:
+    state: "copy"
+    src: "files/unattended-upgrades/99local-auto-upgrades"
+    mode: "0644"
+  /etc/apt/apt.conf.d/99local-unattended-upgrades:
+    state: "copy"
+    src: "files/unattended-upgrades/99local-unattended-upgrades"
+    mode: "0644"
