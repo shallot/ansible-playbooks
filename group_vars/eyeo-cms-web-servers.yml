@@ -37,14 +37,54 @@ eyeo_cms_apache2_modules__to_merge:
   ssl:
     *apache2_standard_module
 
+# tasks/paths.yml
+eyeo_cms_custom_paths__to_merge:
+  "/var/log/eyeo-apache2":
+    state: "directory"
+    mode: "0755"
+    group: "adm"
+  "/etc/eyeo-apache2-logrotate.conf":
+    state: "copy"
+    # basically /etc/logrotate.d/apache2 from Debian 10 with exceptions
+    content: |
+      /var/log/eyeo-apache2/*.log {
+        daily
+        missingok
+        rotate {{ apache2_logrotate_count | default('14') }}
+        dateext
+        dateyesterday
+        dateformat .%Y-%m-%d
+        compress
+        delaycompress
+        notifempty
+        create 640 root adm
+        sharedscripts
+        postrotate
+                if invoke-rc.d apache2 status > /dev/null 2>&1; then \
+                    invoke-rc.d apache2 reload > /dev/null 2>&1; \
+                fi;
+        endscript
+        prerotate
+                if [ -d /etc/logrotate.d/httpd-prerotate ]; then \
+                        run-parts /etc/logrotate.d/httpd-prerotate; \
+                fi; \
+        endscript
+      }
+    mode: "0644"
+  "/etc/cron.d/local-logrotate-eyeo-apache2":
+    state: "copy"
+    content: |
+      0 0 * * * root /usr/sbin/logrotate /etc/eyeo-apache2-logrotate.conf
+    mode: "0644"
+
 # https://httpd.apache.org/docs/2.4/mod/core.html#virtualhost
 # _SITE_NAME_ comes from a replace() filter on input
 # yamllint disable rule:line-length
 eyeo_cms_shared_apache_config: |
   ServerName _SITE_NAME_
 
-  ErrorLog ${APACHE_LOG_DIR}/_SITE_NAME_-error.log
-  CustomLog ${APACHE_LOG_DIR}/_SITE_NAME_-access.log combined
+  ErrorLog /var/log/eyeo-apache2/_SITE_NAME_-error.log
+  CustomLog /var/log/eyeo-apache2/_SITE_NAME_-access.log combined
 
   # if necessary for rewrite debug
   #LogLevel alert rewrite:trace3
