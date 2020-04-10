@@ -141,7 +141,7 @@
             final_dest_dir=$dest_dir/$CI_COMMIT_REF_SLUG.$DOMAIN
           fi
           sudo install -d -o $user $final_dest_dir
-          sudo -u $user rsync -aHAX --del -vP --stats $SOURCE_DIR $final_dest_dir/
+          sudo -u $user rsync -aHAX --del -vP --stats $SOURCE_DIR/ $final_dest_dir/
           if [ $CI_COMMIT_REF_SLUG != "master" ]; then
             base_virtual_host_file=/etc/apache2/sites-available/$DOMAIN.conf
             test -e "$base_virtual_host_file" || exit 5
