@@ -129,7 +129,8 @@
           Type=simple
           User={{ adblockplus_donate_system_username }}
           EnvironmentFile={{ adblockplus_donate_server_dir }}/server.env
-          ExecStart={{ adblockplus_donate_server_dir }}/adblockplusDonationServer.py
+          ExecStart={{ adblockplus_donate_server_dir }}/bin/python3 \
+                    {{ adblockplus_donate_server_dir }}/adblockplusDonationServer.py
           Restart=on-failure
 
           [Install]
