@@ -42,6 +42,7 @@ eyeo_cms_apache2_modules__to_merge:
 # yamllint disable rule:line-length
 eyeo_cms_shared_apache_config: |
   ServerName _SITE_NAME_
+  ServerAlias *._SITE_NAME_
 
   ErrorLog ${APACHE_LOG_DIR}/_SITE_NAME_-error.log
   CustomLog ${APACHE_LOG_DIR}/_SITE_NAME_-access.log combined
@@ -49,7 +50,7 @@ eyeo_cms_shared_apache_config: |
   # if necessary for rewrite debug
   #LogLevel alert rewrite:trace3
 
-  DocumentRoot "/var/www/_SITE_NAME_"
+#  DocumentRoot "/var/www/_SITE_NAME_"
   <Directory "/var/www/_SITE_NAME_">
     AllowOverride All
     Require all granted
@@ -60,6 +61,10 @@ eyeo_cms_shared_apache_config: |
   # https://issues.adblockplus.org/ticket/4068
   RewriteCond %{HTTP_HOST} ^(.+)\.$"
   RewriteRule ^(.*)$ http://%1/$1 [R=permanent,L]
+
+  # VirtualDocumentRoot implementation within mod_rewrite
+  RewriteMap  lowercase  int:tolower
+  RewriteRule ^ - [E=virtual_document_root:/var/www/${lowercase:%{HTTP_HOST}}]
 
   AddDefaultCharset UTF-8
   DefaultType text/html
@@ -82,28 +87,31 @@ eyeo_cms_shared_apache_config: |
   RewriteRule ^ - [E=preferredLang:%1,E=preferredRegion:%1]
 
   # Redirect canonical URLs to language-specific versions
-  RewriteCond %{DOCUMENT_ROOT}/%{ENV:preferredLang}_%{ENV:preferredRegion}%{REQUEST_URI} -f
-  RewriteRule ^ /%{ENV:preferredLang}_%{ENV:preferredRegion}%{REQUEST_URI} [L]
+  RewriteCond %{ENV:virtual_document_root}/%{ENV:preferredLang}_%{ENV:preferredRegion}%{REQUEST_URI} -f
+  RewriteRule ^ %{ENV:virtual_document_root}/%{ENV:preferredLang}_%{ENV:preferredRegion}%{REQUEST_URI} [L]
 
-  RewriteCond %{DOCUMENT_ROOT}/%{ENV:preferredLang}%{REQUEST_URI} -f
-  RewriteRule ^ /%{ENV:preferredLang}%{REQUEST_URI} [L]
+  RewriteCond %{ENV:virtual_document_root}/%{ENV:preferredLang}%{REQUEST_URI} -f
+  RewriteRule ^ %{ENV:virtual_document_root}/%{ENV:preferredLang}%{REQUEST_URI} [L]
 
-  RewriteCond %{DOCUMENT_ROOT}/en%{REQUEST_URI} -f
-  RewriteRule ^ /en%{REQUEST_URI} [L]
+  RewriteCond %{ENV:virtual_document_root}/en%{REQUEST_URI} -f
+  RewriteRule ^ %{ENV:virtual_document_root}/en%{REQUEST_URI} [L]
 
   # Redirect language URIs if no translations are found for the requested page
   RewriteCond %{REQUEST_URI} ^/([a-z][a-z]\_[A-Z][A-Z])(/.+)
-  RewriteCond %{DOCUMENT_ROOT}/%{REQUEST_URI} !-f
+  RewriteCond %{ENV:virtual_document_root}/%{REQUEST_URI} !-f
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME}/%{ENV:index_page} !-f
-  RewriteRule ^/([a-z][a-z])\_([A-Z][A-Z])(/.+) /$1$3 [R]
+  RewriteRule ^/([a-z][a-z])\_([A-Z][A-Z])(/.+) %{ENV:virtual_document_root}/$1$3 [R]
 
   # if there is no language translation, try canonical page for default language
   # example /es/page -> /page
   RewriteCond %{REQUEST_URI} !^/js/.+
-  RewriteCond %{REQUEST_URI} ^/([a-z][a-z])(/.+)
-  RewriteCond %{DOCUMENT_ROOT}/%{REQUEST_URI} !-f
+  RewriteCond %{REQUEST_URI} ^/([a-z][a-z])/(.+)
+  RewriteCond %{ENV:virtual_document_root}/%{REQUEST_URI} !-f
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME}/%{ENV:index_page} !-f
-  RewriteRule ^/([a-z][a-z])(/.+) $2 [R]
+  RewriteRule ^/([a-z][a-z])(/.+) %{ENV:virtual_document_root}/$2 [R]
 # yamllint enable rule:line-length
+
+  # catch-all, DocumentRoot implementation within mod_rewrite
+  RewriteRule "^/(.*)$" %{ENV:virtual_document_root}/$1 [L]
