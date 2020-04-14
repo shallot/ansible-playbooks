@@ -80,7 +80,7 @@ eyeo_cms_custom_paths__to_merge:
     state: "copy"
     # yamllint disable rule:line-length
     content: |
-      LogFormat "%h %l %u %t \"%r\" %>s %O \"%{Referer}i\" \"%{User-Agent}i\" \"%{X-Forwarded-For}i\" %{REQUEST_SCHEME}x \"%{Accept-Language}i\" \"%{Host}i\" \"%{X-Client-Id}i\"" eyeo-combined
+      LogFormat "%h %l %u %t \"%r\" %>s %O \"%{Referer}i\" \"%{User-Agent}i\" \"%{X-Forwarded-For}i\" %{REQUEST_SCHEME}x \"%{Accept-Language}i\" \"%{Host}i\" \"%{X-Client-ID}i\"" eyeo-combined
     # yamllint disable rule:line-length
     mode: "0644"
   "/etc/apache2/conf-enabled/local-eyeo-combined-logformat.conf":
