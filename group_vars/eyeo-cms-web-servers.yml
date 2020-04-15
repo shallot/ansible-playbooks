@@ -90,8 +90,13 @@ eyeo_cms_custom_paths__to_merge:
 
 # https://httpd.apache.org/docs/2.4/mod/core.html#virtualhost
 # _SITE_NAME_ comes from a replace() filter on input
-# yamllint disable rule:line-length
 eyeo_cms_shared_apache_config: |
+  {{ eyeo_cms_shared_apache_config_preamble }}
+
+  {{ eyeo_cms_shared_apache_config_specifics }}
+
+# yamllint disable rule:line-length
+eyeo_cms_shared_apache_config_preamble: |
   ServerName _SITE_NAME_
 
   ErrorLog /var/log/eyeo-apache2/_SITE_NAME_-error.log
@@ -111,7 +116,10 @@ eyeo_cms_shared_apache_config: |
   # https://issues.adblockplus.org/ticket/4068
   RewriteCond %{HTTP_HOST} ^(.+)\.$"
   RewriteRule ^(.*)$ http://%1/$1 [R=permanent,L]
+# yamllint enable rule:line-length
 
+# yamllint disable rule:line-length
+eyeo_cms_shared_apache_config_specifics: |
   AddDefaultCharset UTF-8
   DefaultType text/html
   DirectoryIndex index
