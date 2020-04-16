@@ -22,3 +22,54 @@ aa_default_apache2_sites__to_merge:
   default:
     name: "000-default"
     enabled: false
+
+# tasks/paths.yml
+eyeo_apache2_custom_paths__to_merge:
+  "/var/log/eyeo-apache2":
+    state: "directory"
+    mode: "0755"
+    group: "adm"
+  "/etc/eyeo-apache2-logrotate.conf":
+    state: "copy"
+    # basically /etc/logrotate.d/apache2 from Debian 10 with exceptions
+    content: |
+      /var/log/eyeo-apache2/*.log {
+        daily
+        missingok
+        rotate {{ apache2_logrotate_count | default('14') }}
+        dateext
+        dateyesterday
+        dateformat .%Y-%m-%d
+        compress
+        delaycompress
+        notifempty
+        create 640 root adm
+        sharedscripts
+        postrotate
+                if invoke-rc.d apache2 status > /dev/null 2>&1; then \
+                    invoke-rc.d apache2 reload > /dev/null 2>&1; \
+                fi;
+        endscript
+        prerotate
+                if [ -d /etc/logrotate.d/httpd-prerotate ]; then \
+                        run-parts /etc/logrotate.d/httpd-prerotate; \
+                fi; \
+        endscript
+      }
+    mode: "0644"
+  "/etc/cron.d/local-logrotate-eyeo-apache2":
+    state: "copy"
+    content: |
+      0 0 * * * root /usr/sbin/logrotate /etc/eyeo-apache2-logrotate.conf
+    mode: "0644"
+  "/etc/apache2/conf-available/local-eyeo-combined-logformat.conf":
+    state: "copy"
+    # yamllint disable rule:line-length
+    content: |
+      LogFormat "%h %l %u %t \"%r\" %>s %O \"%{Referer}i\" \"%{User-Agent}i\" \"%{X-Forwarded-For}i\" %{REQUEST_SCHEME}x \"%{Accept-Language}i\" \"%{Host}i\" \"%{X-Client-ID}i\"" eyeo-combined
+    # yamllint disable rule:line-length
+    mode: "0644"
+  "/etc/apache2/conf-enabled/local-eyeo-combined-logformat.conf":
+    state: "link"
+    src: "../conf-available/local-eyeo-combined-logformat.conf"
+    force: true
