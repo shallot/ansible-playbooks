@@ -22,7 +22,6 @@
     "postfix-agents"
 
   tasks:
-
-    # https://docs.ansible.com/ansible/latest/import_role_module.html
-    - import_role:
-        name: "postfix/agent"
+    # https://docs.ansible.com/ansible/latest/import_tasks_module.html
+    - import_tasks:
+        "tasks/postfix-agent.yml"

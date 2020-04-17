@@ -20,8 +20,16 @@ postfix_configuration:
   mydomain:
     "example.com"
 
+# tasks/postfix-agent.yml
+host_specific_postfix_aliases__to_merge:
+  "root":
+    targets: "\\root, specific-hostmaster@example.com"
+  "staff":
+    targets: "user1@example.com, user2@example.com"
+
 # https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
 vagrant_groups:
+  - "examples.test"
   - "postfix-agents"
 
 # https://www.vagrantup.com/intro/getting-started/networking.html

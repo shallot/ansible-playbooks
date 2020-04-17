@@ -35,7 +35,7 @@ vagrant_box:
 
 # https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
 vagrant_groups:
-  - "examples"
+  - "examples.test"
 
 # https://www.vagrantup.com/intro/getting-started/networking.html
 vagrant_networks:

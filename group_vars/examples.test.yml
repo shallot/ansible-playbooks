@@ -15,20 +15,7 @@
 
 ---
 
-# https://docs.ansible.com/ansible/latest/import_tasks_module.html
-- import_tasks:
-    "tasks/postfix-agent.yml"
-
-# https://docs.ansible.com/ansible/latest/import_tasks_module.html
-- import_tasks:
-    "tasks/packages.yml"
-  vars:
-    custom_packages_suffix:
-      "unattended_upgrades_packages__to_merge"
-
-# https://docs.ansible.com/ansible/latest/import_tasks_module.html
-- import_tasks:
-    "tasks/paths.yml"
-  vars:
-    custom_paths:
-      "{{ unattended_upgrades_paths }}"
+# tasks/postfix-agent.yml
+example_postfix_aliases__to_merge:
+  "root":
+    targets: "\\root, hostmaster@example.com"
