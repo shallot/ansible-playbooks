@@ -1,4 +1,4 @@
-# Copyright (c) 2018-present eyeo GmbH
+# Copyright (c) 2020-present eyeo GmbH
 #
 # This module is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,31 +15,15 @@
 
 ---
 
-# https://docs.ansible.com/ansible/latest/user_guide/playbooks_intro.html
+# https://docs.ansible.com/ansible/latest/user_guide/playbooks.html
 - name:
-    "provision-custom-systems"
+    "provision-openssh-servers"
 
   hosts:
     "all"
 
-  pre_tasks:
-
-    # https://docs.ansible.com/ansible/latest/import_tasks_module.html
-    - import_tasks:
-        "tasks/os/main.yml"
-
   tasks:
 
     # https://docs.ansible.com/ansible/latest/import_tasks_module.html
-    - import_tasks:
-        "tasks/common.yml"
-    - import_tasks:
-        "tasks/groups.yml"
-    - import_tasks:
-        "tasks/packages.yml"
-    - import_tasks:
-        "tasks/users.yml"
-    - import_tasks:
-        "tasks/paths.yml"
     - import_tasks:
         "tasks/openssh.yml"

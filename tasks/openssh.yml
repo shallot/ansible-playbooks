@@ -1,0 +1,33 @@
+# Copyright (c) 2020-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+# roles/openssh/server/defaults/main.yml
+# action_plugins/merge_variable.py
+- name:
+    "merge_variable : openssh_server_configuration"
+  merge_variable:
+    name: "openssh_server_configuration"
+    suffix: "sshd_config__to_merge"
+
+# https://docs.ansible.com/ansible/latest/import_role_module.html
+# https://gitlab.com/eyeo/devops/ansible-role-openssh
+# roles/openssh/server/tasks/main.yml
+- import_role:
+    name: "openssh/server"
+# roles/openssh/client/tasks/main.yml
+- import_role:
+    name: "openssh/client"
