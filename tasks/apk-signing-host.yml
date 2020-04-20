@@ -32,7 +32,7 @@
     "copy : /usr/local/bin/apk_signer"
   copy:
     dest: "/usr/local/bin/apk_signer"
-    mode: "0750"
+    mode: "0755"
     src: "files/apk_signer"
     validate:
       "/bin/sh -n %s"
@@ -79,6 +79,8 @@
       APK_KEYPASS={{ APK_KEYPASS | mandatory }}
     validate:
       "/bin/sh -n %s"
+    owner: "{{ item.key }}"
+    group: "{{ item.key }}"
   become:
     true
   with_dict:
