@@ -18,7 +18,10 @@
 ---
 
 # https://docs.ansible.com/ansible/latest/user_guide/playbooks.html
-- hosts:
+- name:
+    "provision-postfix-agents"
+
+  hosts:
     "postfix-agents"
 
   tasks:
