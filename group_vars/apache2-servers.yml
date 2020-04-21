@@ -79,3 +79,9 @@ eyeo_apache2_custom_paths__to_merge:
     state: "link"
     src: "../conf-available/local-eyeo-combined-logformat.conf"
     force: true
+
+# https://httpd.apache.org/docs/current/mod/
+# roles/apache2/defaults/main.yml
+eyeo_apache2_modules__to_merge:
+  ssl: &apache2_standard_module
+    package: false
