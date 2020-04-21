@@ -33,6 +33,15 @@
     name: "apache2_modules"
     suffix: "apache2_modules__to_merge"
 
+# roles/apache2/defaults/main.yml
+# action_plugins/merge_variable.py
+- name:
+    "merge_variable : apache2_conf"
+  merge_variable:
+    default: {}
+    name: "apache2_conf"
+    suffix: "apache2_conf__to_merge"
+
 # https://docs.ansible.com/ansible/latest/import_role_module.html
 # https://gitlab.com/eyeo/devops/ansible-role-apache2
 # roles/apache2/tasks/main.yml
