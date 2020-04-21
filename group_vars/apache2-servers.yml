@@ -62,25 +62,17 @@ eyeo_apache2_custom_paths__to_merge:
     content: |
       0 0 * * * root /usr/sbin/logrotate /etc/eyeo-apache2-logrotate.conf
     mode: "0644"
-  /etc/apache2/conf-available:
-    state: "directory"
-    mode: "0755"
-  "/etc/apache2/conf-available/local-eyeo-combined-logformat.conf":
-    state: "copy"
+
+# roles/apache2/defaults/main.yml
+eyeo_apache2_conf__to_merge:
+  local-eyeo-combined-logformat.conf:
     # yamllint disable rule:line-length
-    content: |
+    configuration: |
       LogFormat "%h %l %u %t \"%r\" %>s %O \"%{Referer}i\" \"%{User-Agent}i\" \"%{X-Forwarded-For}i\" %{REQUEST_SCHEME}x \"%{Accept-Language}i\" \"%{Host}i\" \"%{X-Client-ID}i\"" eyeo-combined
     # yamllint disable rule:line-length
-    mode: "0644"
-  /etc/apache2/conf-enabled:
-    state: "directory"
-    mode: "0755"
-  "/etc/apache2/conf-enabled/local-eyeo-combined-logformat.conf":
-    state: "link"
-    src: "../conf-available/local-eyeo-combined-logformat.conf"
-    force: true
+    enabled: true
 
-# https://httpd.apache.org/docs/current/mod/
+# prerequisite for LogFormat %{...}x
 # roles/apache2/defaults/main.yml
 eyeo_apache2_modules__to_merge:
   ssl: &apache2_standard_module
