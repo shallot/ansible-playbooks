@@ -29,18 +29,9 @@
 
   tasks:
 
-    # action_plugins/merge_variable.py
-    # roles/eyeo/sitescripts/defaults/main.yml
-    - name:
-        "merge_variable : sitescripts_ini_settings"
-      merge_variable:
-        default: []
-        name: "sitescripts_ini_settings"
-        suffix: "sitescripts_ini_settings__to_merge"
-
-    # https://docs.ansible.com/ansible/latest/import_role_module.html
-    - import_role:
-        name: "eyeo/sitescripts"
+    # https://docs.ansible.com/ansible/latest/import_tasks_module.html
+    - import_tasks:
+        "tasks/sitescripts.yml"
 
     # https://docs.ansible.com/ansible/latest/import_tasks_module.html
     - import_tasks:

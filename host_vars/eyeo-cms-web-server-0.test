@@ -91,6 +91,8 @@ test_apache2_sites__to_merge:
 vagrant_groups:
   - "eyeo-cms-web-servers"
   - "apache2-servers"
+  - "apache2-mimeo-servers"
+  - "apache2-sitescripts-servers"
   - "gitlab-runners"
 
 # https://docs.ansible.com/ansible/latest/user_guide/playbooks_tags.html
