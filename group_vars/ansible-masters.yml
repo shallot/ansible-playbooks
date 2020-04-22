@@ -24,12 +24,6 @@ ansible_master_custom_packages__to_merge:
   ca-certificates: "present"
   git: "present"
 
-# https://docs.ansible.com/ansible/latest/reference_appendices/config.html
-custom_ansible_configuration_settings:
-  defaults.gathering: "smart"
-  defaults.retry_files_enabled: false
-  ssh_connection.pipelining: true
-
 # When users are able to access confidential files in the Ansible inventory
 # their home directory shall not be accessible to other users, in order to
 # protect sensitive information. Hence the default home directory access mode

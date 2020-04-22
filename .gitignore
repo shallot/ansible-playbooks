@@ -15,9 +15,6 @@
 
 # https://git-scm.com/docs/gitignore
 
-# Avoid tracking of any local Ansible configuration settings
-/ansible.cfg
-
 # Fragments created locally by `bootstrap.yml` and  `gitlab-runner exec ...`
 /builds/
 

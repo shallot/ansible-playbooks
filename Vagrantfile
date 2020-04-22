@@ -30,9 +30,6 @@ unless ENV.key?('VIRTUAL_ENV')
   end
 end
 
-# https://docs.ansible.com/ansible/latest/reference_appendices/config.html
-ENV['ANSIBLE_CONFIG'] ||= File.join(__dir__, '.ansible.cfg')
-
 # https://api.rubyonrails.org/classes/Hash.html#method-i-symbolize_keys
 # https://docs.ruby-lang.org/en/trunk/Object.html#method-i-send
 # https://docs.ruby-lang.org/en/trunk/Module.html#method-i-define_method
