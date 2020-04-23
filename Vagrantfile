@@ -44,6 +44,11 @@ Vagrant.configure('2') do |vagrant|
 
   # https://docs.ansible.com/ansible/latest/user_guide/playbooks_variables.html
   ansible_extra_vars = {
+    'icinga_ssh_agent_server_associations' => [{
+      'name' => 'icinga-0.test',
+      'user' => 'nagios',
+      'service' => 'icinga2',
+    }],
   }
 
   # https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
@@ -109,6 +114,13 @@ Vagrant.configure('2') do |vagrant|
           settings.symbolize_keys!
           config.vm.network(type, **settings)
         end
+      end
+
+      if hostvars['vagrant_groups'].include?('icinga-ssh-agents')
+        ansible_extra_vars = ansible_extra_vars.merge(
+          'icinga_ssh_agent_ipv4_address' =>
+            hostvars['vagrant_networks'][0]['private_network'][:ip],
+        )
       end
 
       # https://docs.ansible.com/ansible/latest/user_guide/playbooks.html

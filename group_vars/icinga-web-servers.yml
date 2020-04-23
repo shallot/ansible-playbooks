@@ -1,4 +1,4 @@
-# Copyright (c) 2019-present eyeo GmbH
+# Copyright (c) 2020-present eyeo GmbH
 #
 # This module is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,18 +15,17 @@
 
 ---
 
-# https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
-vagrant_groups:
-  - "gitlab-runners"
-  - "icinga-ssh-agents"
+# provision-icinga-web-servers.yml
+# roles/icinga/web/defaults/main.yml
+icinga_web_httpd_handlers:
+  - "service : apache2"
 
-# https://www.vagrantup.com/intro/getting-started/networking.html
-vagrant_networks:
-  - private_network:
-      ip: "10.8.30.10"
-
-# https://www.vagrantup.com/docs/provisioning/ansible.html
-vagrant_playbooks:
-  - "provision-custom-systems.yml"
-  - "provision-gitlab-runners.yml"
-  - "provision-icinga-ssh-agents.yml"
+# https://httpd.apache.org/docs/current/mod/
+icinga_apache2_modules__to_merge:
+  # TODO: this one could be loaded by tasks/apache2-php-fpm.yml itself
+  proxy_fcgi:
+    state: "enabled"
+  rewrite:
+    state: "enabled"
+  setenvif:
+    state: "enabled"

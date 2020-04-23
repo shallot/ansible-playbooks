@@ -1,0 +1,143 @@
+# Copyright (c) 2018-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# This playbook is intended for development use only: Neither importing nor
+# including the role in other playbooks will cause evaluation of this file.
+---
+
+# https://docs.ansible.com/ansible/latest/user_guide/playbooks.html
+- name:
+    "provision-icinga-servers"
+
+  hosts:
+    "icinga-servers"
+
+  module_defaults:
+
+    # https://docs.ansible.com/ansible/latest/modules/apt_module.html
+    apt:
+      cache_valid_time: 600
+      update_cache: true
+
+  tasks:
+
+    # https://docs.ansible.com/ansible/latest/import_role_module.html
+    - import_role:
+        name: "icinga/server"
+
+    # https://docs.ansible.com/ansible/latest/import_role_module.html
+    - import_role:
+        name: "roles/monitoring-plugins"
+      vars:
+        monitoring_plugins:
+          check_content:
+            command: "check_content"
+            dest: "{{ icinga_server_plugin_directory }}"
+            group: "root"
+            owner: "root"
+            mode: "0755"
+            package: "curl"
+            src: "files/plugins/check_content"
+          check_http_response_time:
+            command: "check_http_response_time"
+            dest: "{{ icinga_server_plugin_directory }}"
+            group: "root"
+            owner: "root"
+            mode: "0775"
+            src: "files/plugins/check_http_response_time"
+          check_https_response_time:
+            command: "check_https_response_time"
+            dest: "{{ icinga_server_plugin_directory }}"
+            group: "root"
+            owner: "root"
+            mode: "0775"
+            src: "files/plugins/check_https_response_time"
+          check_port:
+            command: "check_port"
+            dest: "{{ icinga_server_plugin_directory }}"
+            group: "root"
+            owner: "root"
+            mode: "0775"
+            src: "files/plugins/check_port"
+          check_ssl_cert:
+            command: "check_ssl_cert"
+            dest: "{{ icinga_server_plugin_directory }}"
+            group: "root"
+            owner: "root"
+            mode: "0775"
+            src: "files/plugins/check_ssl_cert"
+
+    - name:
+        "generate_service_definitions"
+      include_tasks:
+        "roles/icinga/server/tasks/generate_service_definitions.yml"
+      vars:
+        # yamllint disable rule:line-length
+        # yamllint disable rule:quoted-strings
+        # https://icinga.com/docs/icinga2/latest/doc/04-configuration/#servicesconf
+        # https://gitlab.com/eyeo/devops/utilities/monitoring-plugins/-/blob/master/files/icinga-services
+        custom_icinga_services:
+          content:
+            name: "content"
+            service_definition: |
+              {{ lookup('file', 'roles/monitoring-plugins/files/icinga-services/content.conf') }}
+            assign:
+              - "intersection({{ icinga_server_https_service_group | to_json }}, host.vars.ansible.groups)"
+          http_response_time:
+            name: "http-response-time"
+            service_definition: |
+              {{ lookup('file', 'roles/monitoring-plugins/files/icinga-services/http_response_time.conf') }}
+            assign:
+              - "intersection({{ icinga_server_http_service_group | to_json }}, host.vars.ansible.groups)"
+          https_response_time:
+            name: "https_response_time"
+            service_definition: |
+              {{ lookup('file', 'roles/monitoring-plugins/files/icinga-services/https_response_time.conf') }}
+            assign:
+              - "intersection({{ icinga_server_https_service_group | to_json }}, host.vars.ansible.groups)"
+          http_port:
+            name: "http-port"
+            service_definition: |
+              {{ lookup('file', 'roles/monitoring-plugins/files/icinga-services/http_port.conf') }}
+            assign:
+              - "intersection({{ icinga_server_http_service_group | to_json }}, host.vars.ansible.groups)"
+          https_port:
+            name: "http-port"
+            service_definition: |
+              {{ lookup('file', 'roles/monitoring-plugins/files/icinga-services/https_port.conf') }}
+            assign:
+              - "intersection({{ icinga_server_https_service_group | to_json }}, host.vars.ansible.groups)"
+        # ssl_cert:
+        #  name: "ssl-cert"
+        #  service_definition: |
+        #    {{ common_service_header }}
+        #    {{ lookup('file', 'roles/monitoring-plugins/files/icinga-services/ssl_cert.conf') }}
+        #  assign:
+        #    - "intersection({{ icinga_server_http_service_group | to_json }}, host.vars.ansible.groups)"
+        common_service_header: |
+          # generated by https://gitlab.com/eyeo/devops/ansible-playbooks/provision-icinga-servers.yml
+        # yamllint enable rule:line-length
+        # yamllint enable rule:quoted-strings
+
+  vars:
+    icinga_notification_handler:
+      "service : icinga2"
+    icinga_server_name:
+      "icinga-0.test"
+
+  handlers:
+
+    - import_tasks:
+        "roles/icinga/server/handlers/main.yml"

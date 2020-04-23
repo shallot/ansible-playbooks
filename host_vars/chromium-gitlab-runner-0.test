@@ -18,6 +18,7 @@
 # https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
 vagrant_groups:
   - "chromium-gitlab-runners"
+  - "icinga-ssh-agents"
 
 # https://www.vagrantup.com/intro/getting-started/networking.html
 vagrant_networks:
@@ -28,3 +29,4 @@ vagrant_networks:
 vagrant_playbooks:
   - "provision-custom-systems.yml"
   - "provision-chromium-gitlab-runners.yml"
+  - "provision-icinga-ssh-agents.yml"
