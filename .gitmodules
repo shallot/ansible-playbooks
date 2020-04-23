@@ -40,3 +40,9 @@
 [submodule "roles/libvirt"]
 	path = roles/libvirt
 	url = https://gitlab.com/eyeo/devops/ansible-role-libvirt.git
+[submodule "files/monitoring-plugins"]
+	path = files/monitoring-plugins
+	url = https://gitlab.com/eyeo/devops/utilities/monitoring-plugins.git
+[submodule "roles/icinga2"]
+	path = roles/icinga2
+	url = https://gitlab.com/eyeo/devops/ansible-role-icinga2.git

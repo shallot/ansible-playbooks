@@ -41,3 +41,4 @@ vagrant_networks:
 vagrant_playbooks:
   - "provision-custom-systems.yml"
   - "provision-postfix-agents.yml"
+  - "provision-icinga-clients.yml"

@@ -35,3 +35,4 @@ vagrant_networks:
 vagrant_playbooks:
   - "provision-custom-systems.yml"
   - "provision-mumble-servers.yml"
+  - "provision-icinga-clients.yml"

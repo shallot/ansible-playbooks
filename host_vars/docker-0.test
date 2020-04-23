@@ -36,3 +36,4 @@ vagrant_networks:
 vagrant_playbooks:
   - "provision-custom-systems.yml"
   - "provision-docker-hosts.yml"
+  - "provision-icinga-clients.yml"

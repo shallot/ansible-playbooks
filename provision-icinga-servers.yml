@@ -1,0 +1,59 @@
+# Copyright (c) 2018-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# This playbook is intended for development use only: Neither importing nor
+# including the role in other playbooks will cause evaluation of this file.
+---
+
+# https://docs.ansible.com/ansible/latest/user_guide/playbooks.html
+- name:
+    "provision-icinga-servers"
+
+  hosts:
+    "icinga2_servers"
+
+  module_defaults:
+
+    # https://docs.ansible.com/ansible/latest/modules/apt_module.html
+    apt:
+      cache_valid_time: 600
+      update_cache: true
+
+  tasks:
+
+    # https://docs.ansible.com/ansible/latest/import_role_module.html
+    - import_role:
+        name: "postgresql/server"
+      vars:
+        postgresql_databases: "{{ pgsql_databases | default([]) }}"
+        postgresql_users: "{{ pgsql_users | default([]) }}"
+    - import_role:
+        name: "icinga2/server"
+      vars:
+        icinga2_server_custom_packages:
+          - "curl"
+        icinga2_server_plugins:
+          - name: "check_content"
+          - name: "check_http_response_time"
+          - name: "check_https_response_time"
+          - name: "check_port"
+          - name: "check_ssl_cert"
+        icinga2_server_plugin_configuration_src:
+          "files/monitoring-plugins/configuration/icinga2/commands"
+        icinga2_server_plugin_src:
+          "files/monitoring-plugins/plugins/server"
+        icinga2_server_services:
+          - "{{ icinga2_server_default_services }}"
+          - "{{ icinga2_server_example_services }}"

@@ -105,3 +105,4 @@ vagrant_networks:
 vagrant_playbooks:
   - "provision-custom-systems.yml"
   - "provision-lamp-servers.yml"
+  - "provision-icinga-clients.yml"

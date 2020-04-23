@@ -1,0 +1,75 @@
+# Copyright (c) 2018-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# This playbook is intended for development use only: Neither importing nor
+# including the role in other playbooks will cause evaluation of this file.
+---
+
+# https://docs.ansible.com/ansible/latest/user_guide/playbooks.html
+- name:
+    "provision-icingaweb-servers"
+
+  hosts:
+    "icinga2_web_servers"
+
+  module_defaults:
+
+    # https://docs.ansible.com/ansible/latest/modules/apt_module.html
+    apt:
+      cache_valid_time: 600
+      update_cache: true
+
+  tasks:
+
+    # https://docs.ansible.com/ansible/latest/import_role_module.html
+    - import_role:
+        name: "postgresql/server"
+    - import_role:
+        name: "icinga2/web"
+    - import_role:
+        name: "apache2"
+
+  vars:
+
+    # https://httpd.apache.org/docs/current/mod/
+    apache2_modules:
+      php7.0:
+        package_name: "php"
+        state: "{{ (ansible_os_family | lower == 'debian')
+                 | ternary('present','absent')
+                 }}"
+
+    # https://gitlab.com/eyeo/devops/ansible-role-apache2
+    apache2_sites:
+      default:
+        name: "000-default"
+        enabled: false
+      icingaweb2:
+        configuration: |
+          <VirtualHost *:80>
+
+            ServerAdmin webmaster@localhost
+            DocumentRoot "{{ icinga2_web_httpd_document_root }}"
+            ErrorLog ${APACHE_LOG_DIR}/error.log
+            CustomLog ${APACHE_LOG_DIR}/access.log combined
+
+            {{ lookup('template', 'web/templates/apache2/icingaweb2.conf')
+             | indent(2) }}
+
+          </VirtualHost>
+
+    # web/defaults/main.yml
+    icinga2_web_httpd_handlers:
+      - "service : apache2"

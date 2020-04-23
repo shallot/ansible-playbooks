@@ -28,3 +28,4 @@ vagrant_networks:
 vagrant_playbooks:
   - "provision-custom-systems.yml"
   - "provision-chromium-gitlab-runners.yml"
+  - "provision-icinga-clients.yml"

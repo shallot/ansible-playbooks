@@ -47,6 +47,12 @@ Vagrant.configure('2') do |vagrant|
 
   # https://docs.ansible.com/ansible/latest/user_guide/playbooks_variables.html
   ansible_extra_vars = {
+    'icinga2_client_servers' => [{
+      'name' => 'admin-0.test',
+      'user' => 'nagios',
+    }],
+    'icinga2_server_name' => 'admin-0.test',
+    'icinga2_server_ip' => '10.8.10.8',
   }
 
   # https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
@@ -106,7 +112,7 @@ Vagrant.configure('2') do |vagrant|
       end
 
       # https://www.vagrantup.com/intro/getting-started/networking.html
-      networks_groups = hostvars.fetch('vagrant_networks', [])
+      networks_groups = hostvars['vagrant_networks']
       networks_groups.each do |networks|
         networks.each do |type, settings|
           settings.symbolize_keys!
@@ -121,7 +127,10 @@ Vagrant.configure('2') do |vagrant|
         # https://www.vagrantup.com/docs/provisioning/ansible.html
         config.vm.provision('ansible') do |ansible|
           ansible.compatibility_mode = '2.0'
-          ansible.extra_vars = ansible_extra_vars
+          ansible.extra_vars = ansible_extra_vars.merge({
+            'icinga2_client_ipv4_address' =>
+              hostvars['vagrant_networks'][0]['private_network'][:ip],
+          })
           ansible.tags = ansible_tags
           ansible.groups = ansible_host_groups
           ansible.playbook = File.join(__dir__, playbook)

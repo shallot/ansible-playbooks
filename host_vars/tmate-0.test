@@ -32,3 +32,4 @@ vagrant_networks:
 vagrant_playbooks:
   - "provision-custom-systems.yml"
   - "provision-tmate-servers.yml"
+  - "provision-icinga-clients.yml"

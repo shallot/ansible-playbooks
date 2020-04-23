@@ -94,4 +94,5 @@ vagrant_networks:
 # https://www.vagrantup.com/docs/provisioning/ansible.html
 vagrant_playbooks:
   - "provision-custom-systems.yml"
+  - "provision-icinga-clients.yml"
   - "provision-unattended-upgrades.yml"

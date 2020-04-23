@@ -1,0 +1,62 @@
+# Copyright (c) 2018-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# This playbook is intended for development use only: Neither importing nor
+# including the role in other playbooks will cause evaluation of this file.
+---
+
+# https://docs.ansible.com/ansible/latest/user_guide/playbooks.html
+- name:
+    "provision-icinga-clients"
+
+  hosts:
+    "all"
+
+  module_defaults:
+
+    # https://docs.ansible.com/ansible/latest/modules/apt_module.html
+    apt:
+      cache_valid_time: 600
+      update_cache: true
+
+  tasks:
+
+    # https://docs.ansible.com/ansible/latest/copy_module.html
+    - name:
+        "file : /etc/sudoers.d/nagios_*"
+      copy:
+        dest: "/etc/sudoers.d/nagios_{{ item }}"
+        group: "root"
+        mode: "0440"
+        owner: "root"
+        src: "files/monitoring-plugins/configuration/sudoers/{{ item }}"
+      loop:
+        - "check_bandwidth"
+      become:
+        true
+
+    # https://docs.ansible.com/ansible/latest/import_role_module.html
+    - import_role:
+        name: "icinga2/client"
+      vars:
+        icinga2_client_custom_packages:
+          - "tcpdump"
+        icinga2_client_plugins:
+          - name: "check_bandwidth"
+          - name: "check_connections"
+          - name: "check_memory"
+          - name: "check_raid"
+        icinga2_client_plugin_src:
+          "files/monitoring-plugins/plugins/client"

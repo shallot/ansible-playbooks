@@ -108,3 +108,4 @@ vagrant_networks:
 vagrant_playbooks:
   - "provision-custom-systems.yml"
   - "provision-eyeo-cms-web-servers.yml"
+  - "provision-icinga-clients.yml"
