@@ -20,7 +20,7 @@
     GIT_STRATEGY: "clone"
     GIT_SUBMODULE_STRATEGY: "recursive"
   tags:
-    - "vagrant"
+    - "eyeo-devops-ansible-playbooks-vagrant-1"
   before_script:
     - "vagrant destroy $TEST_HOST -f"
   script:
