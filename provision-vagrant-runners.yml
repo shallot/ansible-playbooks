@@ -29,6 +29,10 @@
     # https://docs.ansible.com/ansible/latest/import_tasks_module.html
     - import_tasks:
         "tasks/development.yml"
+      # TODO ideally we split this off into libvirt-host, libvirt-vagrant in
+      # order to omit pointless libvirt-manager on servers
+      tags:
+        "libvirt"
 
     # https://docs.ansible.com/ansible/latest/import_role_module.html
     - import_role:
