@@ -65,6 +65,11 @@ admin-0:
     TEST_HOST: "admin-0.test"
     VAGRANT_BOX_NEEDS_CHECKED_OUT_BRANCH: "admin-0.test"
 
+apache2-geoip-0:
+  extends: ".vagrantjob"
+  variables:
+    TEST_HOST: "apache2-geoip-0.test"
+
 apache2-server-0:
   extends: ".vagrantjob"
   variables:
