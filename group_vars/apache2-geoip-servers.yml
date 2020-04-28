@@ -1,0 +1,57 @@
+# Copyright (c) 2020-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+# tasks/apache2.yml
+custom_geoip_apache2_modules__to_merge:
+  geoip: &apache2_nonstandard_module
+    package: true
+
+# tasks/packages.yml
+custom_geoip_packages__to_merge:
+  wget: "present"
+
+custom_geoip_data_path:
+  "/usr/local/share/GeoIP"
+
+custom_geoip_data_country_ipv4:
+  "GeoIPv4.dat"
+
+# tasks/paths.yml
+apache_geoip_custom_paths__to_merge:
+  geoip_folder:
+    path: "{{ custom_geoip_data_path }}"
+    state: "directory"
+    mode: "0755"
+  /usr/local/sbin/update-geoip-eyeofiles:
+    content: |
+      #!/bin/sh -e
+      test -n "$1" || exit 1
+      wget -q {{ custom_geoip_data_remote_url }}/"$1" \
+           -O {{ custom_geoip_data_path }}/"$1".new
+      savelog -qnl {{ custom_geoip_data_path }}/"$1"
+      mv {{ custom_geoip_data_path }}/"$1".new \
+         {{ custom_geoip_data_path }}/"$1"
+    mode: "0755"
+    state: "copy"
+  /etc/cron.d/local-geoip-eyeofiles:
+    # yamllint disable rule:line-length
+    content: |
+      MAILTO={{ custom_geoip_email_notification_address }}
+      1 1 * * * root /usr/local/sbin/update-geoip-eyeofiles "{{ custom_geoip_data_country_ipv4 }}" && /bin/systemctl reload apache2
+    # yamllint enable rule:line-length
+    mode: "0644"
+    state: "copy"

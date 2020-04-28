@@ -1,0 +1,57 @@
+# Copyright (c) 2021-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+# group_vars/apache2-geoip-servers.yml
+custom_geoip_email_notification_address:
+  "root"
+
+custom_geoip_data_remote_url:
+  "localhost"
+
+# roles/apache2/tasks/main.yml
+example_geoip_apache2_sites__to_merge:
+  example-geoip:
+    # yamllint disable rule:line-length
+    configuration: |
+      <VirtualHost *:80>
+        ServerName example-geoip
+
+        ErrorLog ${APACHE_LOG_DIR}/example-geoip-error.log
+        CustomLog ${APACHE_LOG_DIR}/example-geoip-access.log combined
+
+        GeoIPEnable On
+        GeoIPDBFile {{ custom_geoip_data_path }}/{{ custom_geoip_data_country_ipv4 }} CheckCache
+
+      </VirtualHost>
+
+     # yamllint enable rule:line-lengt
+
+# https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
+vagrant_groups:
+  - "apache2-servers"
+  - "apache2-geoip-servers"
+
+# https://www.vagrantup.com/intro/getting-started/networking.html
+vagrant_networks:
+  - private_network:
+      ip: "10.8.100.147"
+
+# https://www.vagrantup.com/docs/provisioning/ansible.html
+vagrant_playbooks:
+  - "provision-custom-systems.yml"
+  - "provision-apache2-servers.yml"
+  - "provision-apache2-geoip-servers.yml"
