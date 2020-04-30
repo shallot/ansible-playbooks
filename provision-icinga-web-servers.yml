@@ -36,39 +36,38 @@
     # https://docs.ansible.com/ansible/latest/import_role_module.html
     - import_role:
         name: "postgresql/server"
+    - include_tasks:
+        "tasks/apache2-php-fpm.yml"
+      vars:
+        apache2_modules: # https://httpd.apache.org/docs/current/mod/
+          proxy_fcgi:
+            state: "enabled"
+          rewrite:
+            state: "enabled"
+          setenvif:
+            state: "enabled"
+
+        apache2_sites: # https://gitlab.com/eyeo/devops/ansible-role-apache2
+          default:
+            name: "000-default"
+            enabled: false
+          icingaweb2:
+            configuration: |
+              <VirtualHost *:80>
+
+                ServerAdmin webmaster@localhost
+                DocumentRoot "{{ icinga2_web_httpd_document_root }}"
+                ErrorLog ${APACHE_LOG_DIR}/error.log
+                CustomLog ${APACHE_LOG_DIR}/access.log combined
+
+                {{ lookup('template', 'roles/icinga2/web/templates/apache2/icingaweb2.conf')
+                 | indent(2) }}
+
+              </VirtualHost>
     - import_role:
         name: "icinga2/web"
-    - import_role:
-        name: "apache2"
 
   vars:
-
-    # https://httpd.apache.org/docs/current/mod/
-    apache2_modules:
-      php7.0:
-        package_name: "php"
-        state: "{{ (ansible_os_family | lower == 'debian')
-                 | ternary('present','absent')
-                 }}"
-
-    # https://gitlab.com/eyeo/devops/ansible-role-apache2
-    apache2_sites:
-      default:
-        name: "000-default"
-        enabled: false
-      icingaweb2:
-        configuration: |
-          <VirtualHost *:80>
-
-            ServerAdmin webmaster@localhost
-            DocumentRoot "{{ icinga2_web_httpd_document_root }}"
-            ErrorLog ${APACHE_LOG_DIR}/error.log
-            CustomLog ${APACHE_LOG_DIR}/access.log combined
-
-            {{ lookup('template', 'web/templates/apache2/icingaweb2.conf')
-             | indent(2) }}
-
-          </VirtualHost>
 
     # web/defaults/main.yml
     icinga2_web_httpd_handlers:
