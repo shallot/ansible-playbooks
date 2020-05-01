@@ -1,0 +1,48 @@
+# Copyright (c) 2020-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+# https://docs.ansible.com/ansible/latest/modules/find_module.html
+- name:
+    "find : {{ mattermost_directory }}"
+  find:
+    depth: 1
+    file_type: "any"
+    paths: "{{ mattermost_directory }}"
+    recurse: false
+  changed_when:
+    false
+  register:
+    "mattermost_directory_files"
+
+# https://docs.ansible.com/ansible/latest/modules/unarchive_module.html
+- name:
+    "unarchive : mattermost package"
+  unarchive:
+    dest: "/opt"
+    group: "{{ mattermost_system_group_name }}"
+    mode: "0775"
+    owner: "{{ mattermost_system_user_name }}"
+    # yamllint disable rule:line-length
+    src: "https://releases.mattermost.com/{{ mattermost_version }}/mattermost-{{ mattermost_version }}-linux-amd64.tar.gz"
+    # yamllint enable rule:line-length
+    remote_src: true
+  when:
+    "mattermost_directory_files.matched < 3"
+  become:
+    true
+  become_user:
+    "{{ mattermost_system_user_name }}"

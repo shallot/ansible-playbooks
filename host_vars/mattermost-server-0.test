@@ -1,0 +1,167 @@
+# Copyright (c) 2020-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+# provision-postgresql-servers.yml
+# https://gitlab.com/eyeo/devops/ansible-role-postgresql
+mattermost_database_name:
+  "mattermost"
+mattermost_database_password:
+  "changeme"
+mattermost_database_user:
+  "mattermost"
+mattermost_server_ipv4_address:
+  "10.8.38.8"
+postgresql_config__to_merge:
+  listen_addresses: "'*'"
+postgresql_databases__to_merge:
+  "{{ mattermost_database_name }}":
+    name: "{{ mattermost_database_name }}"
+    owner: "{{ mattermost_database_user }}"
+    encoding: "UTF8"
+postgresql_hba_entries__to_merge:
+  - type: "host"
+    database: "all"
+    user: "all"
+    address: "{{ mattermost_server_ipv4_address }}/32"
+    auth_method: "md5"
+postgresql_server_version:
+  "11"
+postgresql_users__to_merge:
+  "{{ mattermost_database_user }}":
+    name: "{{ mattermost_database_user }}"
+    password: "{{ mattermost_database_password }}"
+
+# roles/apache2/tasks/main.yml
+# provision-apache2-servers.yml
+mattermost_apache2_modules__to_merge:
+  proxy_http: &apache2_standard_module
+    package: false
+  rewrite:
+    *apache2_standard_module
+  ssl:
+    *apache2_standard_module
+
+# roles/apache2/tasks/main.yml
+# https://docs.mattermost.com/install/config-apache2.html
+mattermost_apache2_sites__to_merge:
+  mattermost-reverse-proxy:
+    configuration: |
+      <VirtualHost *:80>
+        ServerName mattermost-reverse-proxy
+
+        ErrorLog ${APACHE_LOG_DIR}/mattermost-reverse-proxy-error.log
+        CustomLog ${APACHE_LOG_DIR}/mattermost-reverse-proxy-access.log combined
+
+        ProxyPreserveHost On
+        RewriteEngine On
+        RewriteCond %{REQUEST_URI} /api/v[0-9]+/(users/)?websocket [NC,OR]
+        RewriteCond %{HTTP:UPGRADE} ^WebSocket$ [NC,OR]
+        RewriteCond %{HTTP:CONNECTION} ^Upgrade$ [NC]
+        RewriteRule .* ws://127.0.0.1:8065%{REQUEST_URI} [P,QSA,L]
+
+        <Location />
+          Require all granted
+          ProxyPass http://127.0.0.1:8065/
+          ProxyPassReverse http://127.0.0.1:8065/
+          ProxyPassReverseCookieDomain 127.0.0.1 mattermost-reverse-proxy
+        </Location>
+
+      </VirtualHost>
+
+# provision-mattermost-servers.yml
+mattermost_custom_packages__to_merge:
+  curl: "present"
+mattermost_directory:
+  "/opt/mattermost"
+mattermost_system_user_name:
+  "mattermost"
+mattermost_system_group_name:
+  "mattermost"
+mattermost_groups__to_merge:
+  "{{ mattermost_system_group_name }}":
+    name: "{{ mattermost_system_group_name }}"
+mattermost_users__to_merge:
+  "{{ mattermost_system_user_name }}":
+    create_home: false
+    group: "{{ mattermost_system_group_name }}"
+    name: "{{ mattermost_system_user_name }}"
+    system: true
+mattermost_paths__to_merge:
+  "{{ mattermost_directory }}":
+    path: "{{ mattermost_directory }}"
+    group: "{{ mattermost_system_group_name }}"
+    mode: "0775"
+    owner: "{{ mattermost_system_user_name }}"
+    state: "directory"
+  "{{ mattermost_directory }}/data":
+    path: "{{ mattermost_directory }}/data"
+    group: "{{ mattermost_system_group_name }}"
+    mode: "0775"
+    owner: "{{ mattermost_system_user_name }}"
+    state: "directory"
+mattermost_version:
+  "5.23.0"
+mattermost_service_enabled:
+  false
+mattermost_service_state:
+  "stopped"
+
+# Mattermost daemon's default setting as described in:
+# https://docs.mattermost.com/install/install-debian.html#installing-mattermost-server
+# tasks/services.yml
+mattermost_services__to_merge:
+  mattermost:
+    enabled: "{{ mattermost_service_enabled }}"
+    state: "{{ mattermost_service_state }}"
+    service:
+      Unit:
+        Description: "Mattermost"
+        After: "network.target"
+      Service:
+        Type: "notify"
+        ExecStart: "{{ mattermost_directory }}/bin/mattermost"
+        TimeoutStartSec: "3600"
+        Restart: "always"
+        RestartSec: "10"
+        WorkingDirectory: "{{ mattermost_directory }}"
+        User: "{{ mattermost_system_user_name }}"
+        Group: "{{ mattermost_system_group_name }}"
+        LimitNOFILE: "49152"
+      Install:
+        WantedBy: "multi-user.target"
+
+# https://www.vagrantup.com/docs/vagrantfile/machine_settings.html
+vagrant_box:
+  "debian/buster64"
+
+# https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
+vagrant_groups:
+  - "postgresql-servers"
+  - "apache2-servers"
+  - "mattermost-servers"
+
+# https://www.vagrantup.com/intro/getting-started/networking.html
+vagrant_networks:
+  - private_network:
+      ip: "10.8.38.8"
+
+# https://www.vagrantup.com/docs/provisioning/ansible.html
+vagrant_playbooks:
+  - "provision-custom-systems.yml"
+  - "provision-postgresql-servers.yml"
+  - "provision-apache2-servers.yml"
+  - "provision-mattermost-servers.yml"
