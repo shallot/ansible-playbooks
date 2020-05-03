@@ -46,7 +46,7 @@
             state: "enabled"
           setenvif:
             state: "enabled"
-
+        # yamllint disable rule:line-length
         apache2_sites: # https://gitlab.com/eyeo/devops/ansible-role-apache2
           default:
             name: "000-default"
@@ -64,6 +64,7 @@
                  | indent(2) }}
 
               </VirtualHost>
+        # yamllint enable rule:line-length
     - import_role:
         name: "icinga2/web"
 
