@@ -52,6 +52,8 @@ icinga2_web_database_password:
   "changeme"
 icinga2_web_database_user:
   "icingaweb"
+icinga2_web_server_ipv4_address:
+  "10.8.10.8"
 
 # https://gitlab.com/eyeo/devops/ansible-role-postgresql
 postgresql_databases: |
@@ -59,14 +61,14 @@ postgresql_databases: |
       "owner": "{{ icinga2_web_database_user }}",
       "encoding": "UTF8"
   }}
-#ostgresql_hba_entries:
-# - type: "host"
-#   database: "{{ icinga2_server_database_name }}"
-#   user: "{{ icinga2_server_database_user }}"
-#   address: "{{ 12 }}/32"
-#   auth_method: "md5"
-#postgresql_server_configuration:
-# listen_addresses: "'127.0.0.1'"
+postgresql_hba_entries:
+  - type: "host"
+    database: "{{ icinga2_server_database_name }}"
+    user: "{{ icinga2_server_database_user }}"
+    address: "{{ icinga2_web_server_ipv4_address }}/32"
+    auth_method: "md5"
+postgresql_server_configuration:
+  listen_addresses: "'*'"
 postgresql_server_version:
   "11"
 postgresql_service_strategy:
