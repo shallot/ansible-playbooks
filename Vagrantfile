@@ -127,10 +127,10 @@ Vagrant.configure('2') do |vagrant|
         # https://www.vagrantup.com/docs/provisioning/ansible.html
         config.vm.provision('ansible') do |ansible|
           ansible.compatibility_mode = '2.0'
-          ansible.extra_vars = ansible_extra_vars.merge({
+          ansible.extra_vars = ansible_extra_vars.merge(
             'icinga2_client_ipv4_address' =>
               hostvars['vagrant_networks'][0]['private_network'][:ip],
-          })
+          )
           ansible.tags = ansible_tags
           ansible.groups = ansible_host_groups
           ansible.playbook = File.join(__dir__, playbook)
