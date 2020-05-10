@@ -47,6 +47,16 @@
       become:
         true
 
+    # https://docs.ansible.com/ansible/latest/shell_module.html
+    - name:
+        "shell : visudo -cq /etc/sudoers.d/*"
+      shell:
+        "/usr/sbin/visudo -c -q"
+      changed_when:
+        false
+      become:
+        true
+
     # https://docs.ansible.com/ansible/latest/import_role_module.html
     - import_role:
         name: "icinga2/client"
