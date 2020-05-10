@@ -48,10 +48,10 @@ Vagrant.configure('2') do |vagrant|
   # https://docs.ansible.com/ansible/latest/user_guide/playbooks_variables.html
   ansible_extra_vars = {
     'icinga2_client_servers' => [{
-      'name' => 'admin-0.test',
+      'name' => 'icinga-0.test',
       'user' => 'nagios',
     }],
-    'icinga2_server_name' => 'admin-0.test',
+    'icinga2_server_name' => 'icinga-0.test',
     'icinga2_server_ip' => '10.8.10.8',
   }
 
