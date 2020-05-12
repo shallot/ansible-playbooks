@@ -1,0 +1,187 @@
+# Copyright (c) 2020-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+# https://docs.ansible.com/ansible/latest/user_guide/playbooks_blocks.html
+- block:
+
+    # https://docs.ansible.com/ansible/latest/modules/set_fact_module.html
+    - name:
+        "set_fact : eyeo_cms_site_hostnames"
+      loop_control:
+        label: "{{ item.key }}"
+      set_fact:
+        eyeo_cms_site_hostnames:
+          "{{ eyeo_cms_site_hostnames
+            | default({})
+            | combine({ item.key: 'eyeo_cms_web_required' })
+            }}"
+      when:
+        "item.value.eyeo_cms_web_required | default(false)"
+      with_dict:
+        "{{ apache2_sites }}"
+
+  when:
+    "eyeo_cms_site_hostnames is not defined"
+
+# https://docs.ansible.com/ansible/latest/modules/fail_module.html
+- fail:
+    msg: |
+      For eyeo CMS to be built in a virtual host, one must define
+      eyeo_cms_site_hostnames, or set apache2_sites with
+      the eyeo_cms_web_required flag
+  when: "eyeo_cms_site_hostnames is not defined"
+
+# action_plugins/merge_variable.py
+- name:
+    "merge_variable : eyeo_cms_content_repos"
+  merge_variable:
+    default: {}
+    name: "eyeo_cms_content_repos"
+    suffix: "eyeo_cms_content_repos__to_merge"
+
+# https://docs.ansible.com/ansible/latest/import_role_module.html
+- import_role:
+    name: "eyeo/cms"
+  tags:
+    - "generate_content"
+  vars:
+    cms_system_username: "{{ eyeo_cms_system_username }}"
+    cms_site_hostnames: "{{ eyeo_cms_site_hostnames }}"
+    cms_content_repos: "{{ eyeo_cms_content_repos }}"
+    cms_content_input_dir: "/home/{{ eyeo_cms_system_username }}"
+    cms_content_input_dir_prefix: "web."
+    cms_content_output_dir: "{{ eyeo_cms_content_output_dir }}"
+
+# https://docs.ansible.com/ansible/latest/modules/apt_module.html
+- name:
+    "apt"
+  apt:
+    cache_valid_time: "{{ apt_cache_valid_time }}"
+    default_release: "{{ apt_default_release | default(omit) }}"
+    name:
+      - "rsync"
+    state: "present"
+    update_cache: "{{ apt_update_cache }}"
+  become:
+    true
+
+# https://docs.ansible.com/ansible/latest/copy_module.html
+- name:
+    "file : /usr/local/sbin/deploy_eyeo_cms_web_*"
+  copy:
+    dest: "/usr/local/sbin/deploy_eyeo_cms_web_{{ item.key }}"
+    mode: "0744"
+    # yamllint disable rule:line-length
+    content: |
+      #!/bin/sh -ex
+      DOMAIN="{{ item.key }}"
+      test -n "$DOMAIN" || exit 1
+      user="{{ eyeo_cms_system_username }}"
+      id "$user" || exit 2
+      SOURCE_DIR=$1
+      test -d "$SOURCE_DIR" || exit 3
+      dest_dir="{{ eyeo_cms_content_output_dir }}"
+      test -d "$dest_dir" || exit 4
+      if [ "$CI_COMMIT_REF_SLUG" = "master" ]; then
+        final_dest_dir=$dest_dir/$DOMAIN
+      else
+        final_dest_dir=$dest_dir/$CI_COMMIT_REF_SLUG.$DOMAIN
+      fi
+      sudo install -d -o $user $final_dest_dir
+      sudo -u $user rsync -aHAX --del -vP --stats $SOURCE_DIR/ $final_dest_dir/
+      if [ $CI_COMMIT_REF_SLUG != "master" ]; then
+        base_virtual_host_file=/etc/apache2/sites-available/$DOMAIN.conf
+        test -e "$base_virtual_host_file" || exit 5
+        sed -e s,$DOMAIN,$CI_COMMIT_REF_SLUG.$DOMAIN,g \
+            $base_virtual_host_file | \
+          sudo tee /etc/apache2/sites-available/$CI_COMMIT_REF_SLUG.$DOMAIN.conf
+        sudo a2ensite $CI_COMMIT_REF_SLUG.$DOMAIN.conf
+        sudo service apache2 status
+        sudo service apache2 reload
+      fi
+    # yamllint enable rule:line-length
+  with_dict:
+    "{{ eyeo_cms_site_hostnames }}"
+  become:
+    true
+- name:
+    "file : /usr/local/sbin/undeploy_eyeo_cms_web_*"
+  copy:
+    dest: "/usr/local/sbin/undeploy_eyeo_cms_web_{{ item.key }}"
+    mode: "0744"
+    content: |
+      #!/bin/sh -ex
+      if [ "$CI_COMMIT_REF_SLUG" = "master" ]; then
+        echo "Can only remove staging system not production master"
+        exit 1
+      fi
+      DOMAIN="{{ item.key }}"
+      test -n "$DOMAIN" || exit 2
+      user="{{ eyeo_cms_system_username }}"
+      id "$user" || exit 3
+      dest_dir="{{ eyeo_cms_content_output_dir }}"
+      test -d "$dest_dir" || exit 4
+      final_dest_dir=$dest_dir/$CI_COMMIT_REF_SLUG.$DOMAIN
+      base_virtual_host_file=/etc/apache2/sites-available/$CI_COMMIT_REF_SLUG.$DOMAIN.conf
+      test -e "$base_virtual_host_file" || exit 5
+      sudo a2dissite $CI_COMMIT_REF_SLUG.$DOMAIN.conf
+      sudo service apache2 status
+      sudo service apache2 reload
+      sudo rm -v $base_virtual_host_file
+      sudo rm -rv $final_dest_dir
+  with_dict:
+    "{{ eyeo_cms_site_hostnames }}"
+  become:
+    true
+
+# https://docs.ansible.com/ansible/latest/copy_module.html
+- name:
+    "file : /etc/sudoers.d/deploy_eyeo_cms_web_*"
+  copy:
+    # yamllint disable rule:line-length
+    dest: "/etc/sudoers.d/deploy_eyeo_cms_web_{{ item.key | replace('.', '_') }}"
+    # yamllint enable rule:line-length
+    mode: "0440"
+    # yamllint disable rule:line-length
+    content: |
+      Defaults:gitlab-runner env_keep += "CI_COMMIT_REF_SLUG"
+      gitlab-runner ALL=(root) NOPASSWD: /usr/local/sbin/deploy_eyeo_cms_web_{{ item.key }}
+    # yamllint enable rule:line-length
+    validate:
+      "/usr/sbin/visudo --check --file=%s"
+  with_dict:
+    "{{ eyeo_cms_site_hostnames }}"
+  become:
+    true
+- name:
+    "file : /etc/sudoers.d/undeploy_eyeo_cms_web_*"
+  copy:
+    # yamllint disable rule:line-length
+    dest: "/etc/sudoers.d/undeploy_eyeo_cms_web_{{ item.key | replace('.', '_') }}"
+    # yamllint enable rule:line-length
+    mode: "0440"
+    # yamllint disable rule:line-length
+    content: |
+      Defaults:gitlab-runner env_keep += "CI_COMMIT_REF_SLUG"
+      gitlab-runner ALL=(root) NOPASSWD: /usr/local/sbin/undeploy_eyeo_cms_web_{{ item.key }}
+    # yamllint enable rule:line-length
+    validate:
+      "/usr/sbin/visudo --check --file=%s"
+  with_dict:
+    "{{ eyeo_cms_site_hostnames }}"
+  become:
+    true
