@@ -63,8 +63,8 @@ vagrant_box:
 
 # https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
 vagrant_groups:
-  - "icinga2_servers"
-  - "icinga2_web_servers"
+  - "icinga2-servers"
+  - "icinga2-web-servers"
 
 # https://www.vagrantup.com/intro/getting-started/networking.html
 vagrant_networks:

@@ -22,7 +22,7 @@
     "provision-icingaweb-servers"
 
   hosts:
-    "icinga2_web_servers"
+    "icinga2-web-servers"
 
   module_defaults:
 
