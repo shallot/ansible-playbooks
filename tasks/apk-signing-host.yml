@@ -51,6 +51,8 @@
       "/usr/sbin/visudo --check --file=%s"
   become:
     true
+  loop_control:
+    label: "{{ item.key }}"
   with_dict:
     "{{ signing_users | mandatory }}"
 
@@ -63,6 +65,8 @@
     mode: "0700"
   become:
     true
+  loop_control:
+    label: "{{ item.key }}"
   with_dict:
     "{{ signing_users | mandatory }}"
 
@@ -83,5 +87,7 @@
     group: "{{ item.key }}"
   become:
     true
+  loop_control:
+    label: "{{ item.key }}"
   with_dict:
     "{{ signing_users | mandatory }}"
