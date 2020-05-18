@@ -91,3 +91,24 @@
     label: "{{ item.key }}"
   with_dict:
     "{{ signing_users | mandatory }}"
+
+# https://docs.ansible.com/ansible/latest/modules/blockinfile_module.html
+- name:
+    "blockinfile : .bashrc"
+  blockinfile:
+    path: "~{{ item.key }}/.bashrc"
+    block: |
+      export APK_KEYSTORE_NAME={{ APK_KEYSTORE_NAME | mandatory }}
+      export APK_KEY_ALIAS_NAME={{ APK_KEY_ALIAS_NAME | mandatory }}
+      export APK_STOREPASS={{ APK_STOREPASS | mandatory }}
+      export APK_KEYPASS={{ APK_KEYPASS | mandatory }}
+  loop:
+    "{{ lookup('dict', signing_users | mandatory)
+      | selectattr('value.local', 'defined')
+      | selectattr('value.local', 'equalto', true)
+      | list
+      | sort(attribute='key')
+      }}"
+  loop_control:
+    label: "{{ item.key }}"
+  become: true

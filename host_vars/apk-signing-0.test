@@ -21,6 +21,9 @@ signing_users: &signing_users
     comment: "Host-specific example user (via Ansible)"
   signer2:
     comment: "Host-specific example user (via Ansible)"
+  local_signer:
+    comment: "User capable of signing apks locally"
+    local: true
 
 # tasks/users.yml
 # https://yaml.org/type/merge.html
