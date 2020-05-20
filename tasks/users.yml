@@ -66,7 +66,7 @@
     - "item['home'] is defined"
   vars:
     custom_user_home_mode:
-      "{{ custom_users[custom_user_name].home_mode
+      "{{ item.item.value.home_mode
         | default(custom_users_default_home_mode | default('0755')) }}"
     custom_user_home:
       "{{ item['home'] }}"
