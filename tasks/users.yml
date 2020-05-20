@@ -21,7 +21,8 @@
   merge_variable:
     default: {}
     name: "custom_users"
-    suffix: "custom_users__to_merge"
+    suffix: "{{ custom_users_suffix
+              | default('custom_users__to_merge') }}"
 
 # https://docs.ansible.com/ansible/latest/modules/user_module.html
 - name:

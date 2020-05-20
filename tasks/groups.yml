@@ -21,7 +21,8 @@
   merge_variable:
     default: {}
     name: "custom_groups"
-    suffix: "custom_groups__to_merge"
+    suffix: "{{ custom_groups_suffix
+              | default('custom_groups__to_merge') }}"
 
 # https://docs.ansible.com/ansible/latest/modules/group_module.html
 - name:
