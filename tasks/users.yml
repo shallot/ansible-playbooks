@@ -37,7 +37,7 @@
     groups: "{{ item.value['groups'] | default([]) }}"
     home: "{{ item.value['home'] | default(omit) }}"
     move_home: true
-    name: "{{ item.key }}"
+    name: "{{ item.value['name'] | default(item.key) }}"
     password: "{{ item.value['password'] | default(omit) }}"
     remove: true
     shell: "{{ item.value['shell'] | default('/bin/bash') }}"
@@ -84,7 +84,7 @@
       # Generated with Ansible
       {{ item.value['authorized_keys'] | default('') }}
     manage_dir: true
-    user: "{{ item.key }}"
+    user: "{{ item.value['user'] | default(item.key) }}"
   with_dict:
     "{{ custom_users }}"
   loop_control:
