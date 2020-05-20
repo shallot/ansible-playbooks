@@ -27,7 +27,8 @@
   merge_variable:
     default: {}
     name: "custom_paths"
-    suffix: "custom_paths__to_merge"
+    suffix: "{{ custom_paths_suffix
+              | default('custom_paths__to_merge') }}"
   when:
     - "custom_paths is not defined"
 
