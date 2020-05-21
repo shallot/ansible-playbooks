@@ -34,8 +34,6 @@
   tasks:
 
     # https://docs.ansible.com/ansible/latest/import_role_module.html
-    - import_role:
-        name: "postgresql/server"
     - include_tasks:
         "tasks/apache2-php-fpm.yml"
       vars:

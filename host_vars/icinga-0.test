@@ -34,11 +34,11 @@ icinga2_web_server_ipv4_address:
   "10.8.10.8"
 
 # https://gitlab.com/eyeo/devops/ansible-role-postgresql
-postgresql_databases: |
-  { "{{ icinga2_web_database_name }}": {
-      "owner": "{{ icinga2_web_database_user }}",
-      "encoding": "UTF8"
-  }}
+postgresql_databases__to_merge:
+  "{{ icinga2_web_database_name }}":
+    name: "{{ icinga2_web_database_name }}"
+    owner: "{{ icinga2_web_database_user }}"
+    encoding: "UTF8"
 postgresql_hba_entries:
   - type: "host"
     database: "{{ icinga2_server_database_name }}"
@@ -51,11 +51,10 @@ postgresql_server_version:
   "11"
 postgresql_service_strategy:
   "restart"
-postgresql_users: |
-  { "{{ icinga2_web_database_user }}": {
-      "password": "{{ icinga2_web_database_password }}",
-      "role_attr_flags": "SUPERUSER"
-  }}
+postgresql_users__to_merge:
+  "{{ icinga2_web_database_user }}":
+      password: "{{ icinga2_web_database_password }}"
+      role_attr_flags: "SUPERUSER"
 
 # https://www.vagrantup.com/docs/vagrantfile/machine_settings.html
 vagrant_box:
@@ -65,6 +64,7 @@ vagrant_box:
 vagrant_groups:
   - "icinga2-servers"
   - "icinga2-web-servers"
+  - "postgresql-servers"
 
 # https://www.vagrantup.com/intro/getting-started/networking.html
 vagrant_networks:
@@ -76,6 +76,7 @@ vagrant_playbooks:
   - "provision-custom-systems.yml"
   - "provision-icinga-servers.yml"
   - "provision-icinga-clients.yml"
+  - "provision-postgresql-servers.yml"
   - "provision-icinga-web-servers.yml"
 
 # https://www.vagrantup.com/docs/synced-folders/rsync.html
