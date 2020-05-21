@@ -38,6 +38,38 @@ host_specific_custom_users__to_merge:
       - "example_group"
     password: "$6$bCrd2ylJ$uQ.uN7Oy1QStmunslSMzYX0vM4wYXKdO9tgu.SE.hPdKBqcHk.CrHsUMxzN8rwiPcwRI3nzvzd9W4T0sJJmNz."
 
+# tasks/services.yml
+host_specific_custom_services__to_merge:
+  example_disabled_service:
+    enabled: false
+    state: "stopped"
+    service:
+      Unit:
+        Description: "Example disabled service"
+      Service:
+        Type: "oneshot"
+        ExecStart: "/bin/false"
+      Install:
+        WantedBy: "multi-user.target"
+  example_enabled_service:
+    enabled: true
+    service:
+      Unit:
+        Description: "Example enabled service"
+        After: "network.target"
+      Service:
+        Type: "notify"
+        ExecStart: "/bin/true"
+        TimeoutStartSec: "3600"
+        Restart: "always"
+        RestartSec: "10"
+        WorkingDirectory: "/var/tmp"
+        User: "nobody"
+        Group: "nogroup"
+        LimitNOFILE: "49152"
+      Install:
+        WantedBy: "multi-user.target"
+
 # provision-custom-systems.yml
 host_specific_sshd_config__to_merge:
   AllowAgentForwarding: "no"

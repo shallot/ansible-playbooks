@@ -1,0 +1,80 @@
+# Copyright (c) 2020-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+# action_plugins/merge_variable.py
+- name:
+    "merge_variable : custom_services"
+  merge_variable:
+    default: {}
+    name: "custom_services"
+    suffix: "{{ custom_services_suffix
+              | default('custom_services__to_merge') }}"
+
+# https://docs.ansible.com/ansible/latest/modules/ini_file_module.html
+# filter_plugins/ini_input_from_dict.py
+- name:
+    "service : ini_file"
+  ini_file:
+    dest: "{{ service_file_directory }}/{{ service_file_name }}"
+    group: "root"
+    mode: "0644"
+    option: "{{ item.option }}"
+    owner: "root"
+    section: "{{ item.section }}"
+    value: "{{ item.value }}"
+  vars:
+    service_file_directory:
+      "{{ custom_systemd_service_location
+        | default('/etc/systemd/system') }}"
+    service_file_name:
+      "{{ item.ini_file }}.service"
+  loop:
+    "{{ custom_services | ini_input_from_dict }}"
+  loop_control:
+    label: "{{ [service_file_name, item.section, item.option] | to_json }}"
+  register:
+    "custom_service"
+  become:
+    true
+
+# https://docs.ansible.com/ansible/latest/modules/systemd_module.html
+- name:
+    "systemd : daemon-reload"
+  systemd:
+    daemon_reload: true
+  when:
+    "custom_service.changed"
+  become:
+    true
+
+# https://docs.ansible.com/ansible/latest/modules/service_module.html
+- name:
+    "service : state enable"
+  service:
+    enabled: "{{ service_enabled }}"
+    name: "{{ service_name }}"
+    state: "{{ service_state }}"
+  with_dict:
+    "{{ custom_services }}"
+  loop_control:
+    label: "{{ [service_name, service_enabled, service_state] | to_json }}"
+  vars:
+    service_enabled: "{{ item.value.enabled | default(true) }}"
+    service_name: "{{ item.value.name | default(item.key) }}.service"
+    service_state: "{{ item.value.state | default('started') }}"
+  become:
+    true
