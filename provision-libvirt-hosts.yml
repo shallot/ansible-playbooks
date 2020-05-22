@@ -23,6 +23,6 @@
 
   tasks:
 
-    # https://gitlab.com/eyeo/devops/ansible-role-gitlab
+    # https://gitlab.com/eyeo/devops/ansible-role-libvirt
     - import_role:
         name: "libvirt/host"

@@ -1,0 +1,69 @@
+# Copyright (c) 2020-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+# NB: this doesn't actually currently work inside vagrant, but is useful
+# to provide an example of how to do it
+# provision-libvirt-hosts.yml
+libvirt_guests_volume_group: "vg0"
+libvirt_guests_bridge: "br0"
+libvirt_guests_debootstrap_packages:
+  - "linux-image-amd64"
+  - "less"
+  - "openssh-server"
+  - "acpid"
+  - "acpi-support-base"
+libvirt_guests:
+  "guest1":
+    hostname: "guest1a"
+    logical_volume_size: "20G"
+    debootstrap_distribution: "stretch"
+    virt_type: "kvm"
+    vcpus: 4
+    ram: "16G"
+    os_variant: "debian9"
+  "guest2":
+    name: "guest2-fancy-name"
+    logical_volume_size: "20G"
+    debootstrap_distribution: "buster"
+    debootstrap_packages:
+      - "linux-image-amd64"
+      - "less"
+      - "acpid"
+      - "acpi-support-base"
+      - "joe"
+    virt_type: "kvm"
+    vcpus: 4
+    ram: "16G"
+    os_variant: "debian10"
+
+# https://www.vagrantup.com/docs/vagrantfile/machine_settings.html
+vagrant_box:
+  "debian/buster64"
+
+# https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
+vagrant_groups:
+  - "libvirt-hosts"
+
+# https://www.vagrantup.com/intro/getting-started/networking.html
+vagrant_networks:
+  - private_network:
+      ip: "10.8.50.20"
+
+# https://www.vagrantup.com/docs/provisioning/ansible.html
+vagrant_playbooks:
+  - "provision-custom-systems.yml"
+  - "provision-libvirt-hosts.yml"
