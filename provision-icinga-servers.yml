@@ -59,4 +59,4 @@
           "files/monitoring-plugins/plugins/server"
         icinga2_server_services:
           - "{{ icinga2_server_default_services }}"
-          - "{{ icinga2_server_example_services }}"
+          - "{{ icinga2_server_custom_services }}"
