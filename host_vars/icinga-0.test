@@ -74,9 +74,9 @@ vagrant_networks:
 # https://www.vagrantup.com/docs/provisioning/ansible.html
 vagrant_playbooks:
   - "provision-custom-systems.yml"
+  - "provision-postgresql-servers.yml"
   - "provision-icinga-servers.yml"
   - "provision-icinga-clients.yml"
-  - "provision-postgresql-servers.yml"
   - "provision-icinga-web-servers.yml"
 
 # https://www.vagrantup.com/docs/synced-folders/rsync.html

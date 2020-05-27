@@ -33,15 +33,11 @@
 
   tasks:
 
+    # https://docs.ansible.com/ansible/latest/import_tasks_module.html
+    - import_tasks:
+        name: "tasks/postgresql-server.yml"
+
     # https://docs.ansible.com/ansible/latest/import_role_module.html
-    - import_role:
-        name: "postgresql/server"
-      vars:
-        # For non-Debian systems we add the following variables.
-        # This has to be done because only Debian uses dbconfig-common
-        # in order to create the Icinga database
-        postgresql_databases: "{{ pgsql_databases | default([]) }}"
-        postgresql_users: "{{ pgsql_users | default([]) }}"
     - import_role:
         name: "icinga2/server"
       vars:
