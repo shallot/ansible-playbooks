@@ -1,0 +1,84 @@
+# Copyright (c) 2020-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+# tasks/paths.yml
+
+# Succeeding arbitrary examples
+full_succeeding: &full_succeeding
+  /tmp/test-files/directory:
+    group: "vagrant"
+    mode: "0750"
+    state: "directory"
+  /tmp/test-files/directory/subdirectory:
+    owner: "nobody"
+    state: "directory"
+  /tmp/test-files/directory/file:
+    content: ""
+    owner: "nobody"
+    state: "copy"
+  /tmp/test-files/link:
+    src: "/dev/null"
+    state: "link"
+  /tmp/test-files/nonexistent:
+    state: "absent"
+  /tmp/test-files/recursive:
+    owner: "backup"
+    src: "{{ playbook_dir }}/tasks/os/"
+    state: "copy"
+  /tmp/test-files/static:
+    src: "{{ playbook_dir }}/templates/test.j2"
+    state: "copy"
+  /tmp/test-files/template:
+    custom:
+      recipient: "{{ lookup('env', 'LOGNAME') }}"
+    src: "{{ playbook_dir }}/templates/test.j2"
+    state: "template"
+
+# Test manadtory "state" parameter
+fail_for_missing_state: &fail_for_missing_state
+  /tmp/test-files/directory:
+    group: "vagrant"
+    mode: "0750"
+    state: "directory"
+  /tmp/this-will-fail:
+    src: "{{ playbook_dir }}/Vagrantfile"
+
+# test cases for regressions
+# https://gitlab.com/eyeo/devops/ansible-playbooks/-/issues/34
+single_entry: &single_entry
+  /tmp/test-files/directory:
+    group: "vagrant"
+    mode: "0750"
+    state: "directory"
+
+# Uncomment ONE yaml merge operation to verify the respective tests.
+host_specific_custom_paths__to_merge:
+  #  <<: *full_succeeding
+  #  <<: *fail_for_missing_state
+  <<: *single_entry
+
+# https://www.vagrantup.com/docs/vagrantfile/machine_settings.html
+vagrant_box:
+  "debian/stretch64"
+
+# https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
+vagrant_groups:
+  - "examples.test"
+
+# https://www.vagrantup.com/docs/provisioning/ansible.html
+vagrant_playbooks:
+  - "provision-custom-systems.yml"

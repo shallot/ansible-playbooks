@@ -38,40 +38,6 @@ host_specific_custom_users__to_merge:
       - "example_group"
     password: "$6$bCrd2ylJ$uQ.uN7Oy1QStmunslSMzYX0vM4wYXKdO9tgu.SE.hPdKBqcHk.CrHsUMxzN8rwiPcwRI3nzvzd9W4T0sJJmNz."
 
-# tasks/files.yml
-host_specific_custom_paths__to_merge:
-  /tmp/test-files/directory:
-    group: "vagrant"
-    mode: "0750"
-    state: "directory"
-  /tmp/test-files/directory/subdirectory:
-    owner: "nobody"
-    state: "directory"
-  /tmp/test-files/directory/file:
-    content: ""
-    owner: "nobody"
-    state: "copy"
-  /tmp/test-files/link:
-    src: "/dev/null"
-    state: "link"
-  /tmp/test-files/nonexistent:
-    state: "absent"
-  /tmp/test-files/recursive:
-    owner: "backup"
-    src: "{{ playbook_dir }}/tasks/os/"
-    state: "copy"
-  /tmp/test-files/static:
-    src: "{{ playbook_dir }}/templates/test.j2"
-    state: "copy"
-  /tmp/test-files/template:
-    custom:
-      recipient: "{{ lookup('env', 'LOGNAME') }}"
-    src: "{{ playbook_dir }}/templates/test.j2"
-    state: "template"
-# Uncomment the 2 lines below to test the mandatory `state` attribute.
-#  /tmp/this-will-fail:
-#    src: "{{ playbook_dir }}/Vagrantfile"
-
 # provision-custom-systems.yml
 host_specific_sshd_config__to_merge:
   AllowAgentForwarding: "no"

@@ -116,10 +116,12 @@
         "item.value.dest is not defined or item.value.dest != omit"
 
   vars:
+    _itemized_custom_paths:
+      "{{ custom_paths | dict2items }}"
 
     # Identifies all custom_paths with a missing state.
     custom_paths_for_fail:
-      "{{ lookup('dict', custom_paths)
+      "{{ _itemized_custom_paths
         | selectattr('value.state', 'undefined')
         | list
         }}"
@@ -127,7 +129,7 @@
     # Identifies all custom_paths with a target state that is not "copy"
     # or "template".
     custom_paths_for_file:
-      "{{ lookup('dict', custom_paths)
+      "{{ _itemized_custom_paths
         | rejectattr('value.state', 'equalto', 'copy')
         | rejectattr('value.state', 'equalto', 'template')
         | list
@@ -135,14 +137,14 @@
 
     # Identifies all custom_paths with target state "copy".
     custom_paths_for_copy:
-      "{{ lookup('dict', custom_paths)
+      "{{ _itemized_custom_paths
         | selectattr('value.state', 'equalto', 'copy')
         | list
         }}"
 
     # Identifies all custom_paths with target state "template".
     custom_paths_for_template:
-      "{{ lookup('dict', custom_paths)
+      "{{ _itemized_custom_paths
         | selectattr('value.state', 'equalto', 'template')
         | list
         }}"
