@@ -15,9 +15,6 @@
 
 ---
 
-modsecurity_apache2_custom_packages__to_merge:
-  modsecurity-crs: "present"
-
 modsecurity_apache2_modules__to_merge:
   proxy_http: &apache2_standard_module
     package: false
@@ -27,8 +24,6 @@ modsecurity_apache2_modules__to_merge:
     *apache2_standard_module
   headers:
     *apache2_standard_module
-  security2: &apache2_non_standard_module
-    package: true
 
 # roles/apache2/tasks/main.yml
 modsecurity_apache2_sites__to_merge:
