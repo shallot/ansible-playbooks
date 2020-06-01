@@ -1,0 +1,162 @@
+# Copyright (c) 2020-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+# provision-telemetry-pingv1-servers.yml
+# Because we re-using the gitlab-runner system user here, which is
+# provisioned by roles/gitlab/runner, in order to avoid the chicken
+# and egg problem between that and provision-custom-systems.yml, all later
+# references to this variable that evaluate at the time of provisioning
+# must come with a custom suffix that makes sure it won't choke up
+# provision-custom-systems.yml on initial bootstrap
+# References that evaluate later, at run-time, do not have to abide by this
+telemetry_pingv1_system_username:
+  "gitlab-runner"
+
+# provision-telemetry-pingv1-servers.yml
+telemetry_pingv1_server_dir:
+  "/srv/telemetry-pingv1-server"
+
+# tasks/services.yml
+telemetry_pingv1_services__to_merge:
+  telemetry-pingv1-server:
+    enabled: true
+    state: "started"
+    service:
+      Unit:
+        Description: "Run Telemetry PingV1 server"
+        After: "network.target"
+      Service:
+        Type: "simple"
+        User: "{{ telemetry_pingv1_system_username }}"
+        EnvironmentFile: "{{ telemetry_pingv1_server_dir }}/server.env"
+        ExecStart: "{{ telemetry_pingv1_server_dir }}/collector"
+        Restart: "on-failure"
+      Install:
+        WantedBy: "multi-user.target"
+
+# tasks/paths.yml
+telemetry_pingv1_prerequisite_paths__to_merge:
+  /srv/telemetry-pingv1-server:
+    state: "directory"
+    path: "{{ telemetry_pingv1_server_dir }}"
+    mode: "0755"
+    owner: "{{ telemetry_pingv1_system_username }}"
+  /srv/telemetry-pingv1-server/etc:
+    state: "directory"
+    path: "{{ telemetry_pingv1_server_dir }}/etc"
+    mode: "0755"
+    owner: "{{ telemetry_pingv1_system_username }}"
+
+# tasks/packages.yml
+deploy-telemetry-pingv1_custom_packages__to_merge:
+  rsync: "present"
+
+# tasks/paths.yml
+deploy-telemetry-pingv1_custom_paths__to_merge:
+  /usr/local/sbin/deploy-telemetry-pingv1:
+    state: "copy"
+    mode: "0744"
+    content: |
+      #!/bin/sh -ex
+      user="{{ telemetry_pingv1_system_username }}"
+      id "$user" || exit 1
+      dest_dir="{{ telemetry_pingv1_server_dir }}"
+      test -d "$dest_dir" || exit 2
+      SOURCE_DIR=$1
+      test -d "$SOURCE_DIR" || exit 3
+      sudo install -d -o $user $dest_dir
+      sudo -u $user rsync -aHAX --del \
+                          -vP --stats \
+                            $SOURCE_DIR/ \
+                            $dest_dir/
+      sudo systemctl status telemetry-pingv1-server || true
+      sudo systemctl restart telemetry-pingv1-server
+      sudo systemctl status telemetry-pingv1-server
+  /etc/sudoers.d/deploy-telemetry-pingv1:
+    state: "copy"
+    mode: "0440"
+    # yamllint disable rule:line-length
+    content: |
+      Defaults:{{ telemetry_pingv1_system_username }} env_keep += "CI_COMMIT_REF_SLUG"
+      {{ telemetry_pingv1_system_username }} ALL=(root) NOPASSWD: /usr/local/sbin/deploy-telemetry-pingv1
+    # yamllint enable rule:line-length
+    validate:
+      "/usr/sbin/visudo --check --file=%s"
+
+# TODO: fully parametrize port 8000, match it to server.env
+telemetry_pingv1_app_port:
+  "8000"
+
+telemetry_pingv1_app_proxy_custom_apache_config: |
+  ProxyPass /server-status !
+  ProxyPreserveHost On
+  ProxyPass / "http://localhost:{{ telemetry_pingv1_app_port }}/"
+  ProxyPassReverse / "http://localhost:{{ telemetry_pingv1_app_port }}/"
+
+telemetry_pingv1_extra_log_location:
+  "/var/log/apache2/test-telemetry-pingv1-post.log"
+
+telemetry_pingv1_extra_log_custom_apache_config: |
+  <Location />
+    # this is an Apache+mod_security2-native POST logger
+    SecRuleEngine DetectionOnly
+    SecAuditEngine RelevantOnly
+    SecDefaultAction "nolog,noauditlog,allow,phase:request"
+    SecRequestBodyAccess On
+    SecAuditLog {{ telemetry_pingv1_extra_log_location }}
+    # the change from default C->I makes sure we won't log any
+    # (large) uploaded files
+    SecAuditLogParts ABIFHZ
+    SecRule REQUEST_METHOD "^POST$" "chain,allow,phase:request,id:123"
+    SecRule REQUEST_URI ".*" "auditlog"
+  </Location>
+
+# roles/apache2/tasks/main.yml
+# provision-apache2-servers.yml
+telemetry-pingv1_apache2_modules__to_merge:
+  proxy_http: &apache2_standard_module
+    package: false
+  rewrite:
+    *apache2_standard_module
+  ssl:
+    *apache2_standard_module
+
+# tasks/paths.yml
+logrotate-telemetry-pingv1_custom_paths__to_merge:
+  /var/log/telemetry-pingv1-server:
+    state: "directory"
+    mode: "0750"
+    group: "adm"
+  # TODO hook a notifier for sudo service rsyslog restart
+  /etc/rsyslog.d/local-telemetry-pingv1-server.conf:
+    state: "copy"
+    content: |
+      # messages from /srv/telemetry-pingv1-server/
+      local0.*  -/var/log/telemetry-pingv1-server/trace.log
+      local4.*  -/var/log/telemetry-pingv1-server/user-error.log
+      local5.*  -/var/log/telemetry-pingv1-server/error.log
+      # stop processing other rules, leaving the default log files clean
+      & stop
+
+# provision-apache2-modsecurity-servers.yml
+# tasks/paths.yml
+custom_modsecurity_paths:
+  /etc/modsecurity/modsecurity.conf:
+    mode: "0644"
+    state: "link"
+    src: "/etc/modsecurity/modsecurity.conf-recommended"
+    notify: "service : apache2"

@@ -1,0 +1,70 @@
+# Copyright (c) 2020-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+# https://docs.ansible.com/ansible/latest/modules/find_module.html
+- name:
+    "find : {{ telemetry_pingv1_server_dir }}"
+  find:
+    depth: 1
+    file_type: "any"
+    paths: "{{ telemetry_pingv1_server_dir }}"
+    recurse: false
+  changed_when:
+    false
+  register:
+    "telemetry_pingv1_server_dir_files"
+  become:
+    true
+  become_user:
+    "{{ telemetry_pingv1_system_username }}"
+
+# https://docs.ansible.com/ansible/latest/user_guide/playbooks_blocks.html
+- block:
+
+    # https://docs.ansible.com/ansible/latest/modules/copy_module.html
+    - name:
+        "seed : {{ telemetry_pingv1_server_dir }}/server.env"
+      copy:
+        dest: "{{ telemetry_pingv1_server_dir }}/server.env"
+        force: false
+        mode: "0664"
+        owner: "{{ telemetry_pingv1_system_username }}"
+        content: |
+          # stub
+      become:
+        true
+
+    # https://docs.ansible.com/ansible/latest/modules/copy_module.html
+    - name:
+        # yamllint disable rule:line-length
+        "seed : {{ telemetry_pingv1_server_dir }}/collector"
+        # yamllint enable rule:line-length
+      copy:
+        # yamllint disable rule:line-length
+        dest: "{{ telemetry_pingv1_server_dir }}/collector"
+        # yamllint enable rule:line-length
+        force: false
+        mode: "0755"
+        owner: "{{ telemetry_pingv1_system_username }}"
+        content: |
+          #!/bin/sh
+          # stub
+      become:
+        true
+
+  when:
+    "telemetry_pingv1_server_dir_files.matched < 2"
