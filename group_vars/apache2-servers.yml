@@ -32,6 +32,8 @@ eyeo_apache2_custom_paths__to_merge:
   "/etc/eyeo-apache2-logrotate.conf":
     state: "copy"
     # basically /etc/logrotate.d/apache2 from Debian 10 with exceptions
+    # and with basic invoke-rc.d logging
+    # yamllint disable rule:line-length
     content: |
       /var/log/eyeo-apache2/*.log {
         daily
@@ -46,8 +48,8 @@ eyeo_apache2_custom_paths__to_merge:
         create 640 root adm
         sharedscripts
         postrotate
-                if invoke-rc.d apache2 status > /dev/null 2>&1; then \
-                    invoke-rc.d apache2 reload > /dev/null 2>&1; \
+                if invoke-rc.d apache2 status > /var/log/eyeo-apache2/apache2-status.log 2>&1; then \
+                    invoke-rc.d apache2 reload > /var/log/eyeo-apache2/apache2-reload.log 2>&1; \
                 fi;
         endscript
         prerotate
@@ -56,6 +58,7 @@ eyeo_apache2_custom_paths__to_merge:
                 fi; \
         endscript
       }
+    # yamllint enable rule:line-length
     mode: "0644"
   "/etc/cron.d/local-logrotate-eyeo-apache2":
     state: "copy"
@@ -69,7 +72,7 @@ eyeo_apache2_conf__to_merge:
     # yamllint disable rule:line-length
     configuration: |
       LogFormat "%h %l %u %t \"%r\" %>s %O \"%{Referer}i\" \"%{User-Agent}i\" \"%{X-Forwarded-For}i\" %{REQUEST_SCHEME}x \"%{Accept-Language}i\" \"%{Host}i\" \"%{X-Client-ID}i\"" eyeo-combined
-    # yamllint disable rule:line-length
+    # yamllint enable rule:line-length
     enabled: true
 
 # prerequisite for LogFormat %{...}x
