@@ -63,6 +63,7 @@ eyeo_apache2_custom_paths__to_merge:
   "/etc/cron.d/local-logrotate-eyeo-apache2":
     state: "copy"
     content: |
+      PATH=/sbin:/bin:/usr/sbin:/usr/bin
       0 0 * * * root /usr/sbin/logrotate /etc/eyeo-apache2-logrotate.conf
     mode: "0644"
 
