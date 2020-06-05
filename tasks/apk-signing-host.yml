@@ -27,7 +27,7 @@
   become:
     true
 
-# https://docs.ansible.com/ansible/latest/copy_module.html
+# https://docs.ansible.com/ansible/latest/modules/copy_module.html
 - name:
     "copy : /usr/local/bin/apk_signer"
   copy:
@@ -39,7 +39,7 @@
   become:
     true
 
-# https://docs.ansible.com/ansible/latest/copy_module.html
+# https://docs.ansible.com/ansible/latest/modules/copy_module.html
 - name:
     "copy : /etc/sudoers.d/{{ item.key }}"
   copy:
@@ -66,7 +66,7 @@
   with_dict:
     "{{ signing_users | mandatory }}"
 
-# https://docs.ansible.com/ansible/latest/copy_module.html
+# https://docs.ansible.com/ansible/latest/modules/copy_module.html
 - name:
     "copy : /home/{{ item.key }}/.ssh/environment"
   copy:
