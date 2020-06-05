@@ -17,6 +17,11 @@
 SIGNER=`which jarsigner`
 APK_SIG_ALGORITHM=${APK_SIG_ALGORITHM:-"SHA1withRSA"}
 APK_DIGEST_ALGORITHM=${APK_DIGEST_ALGORITHM:-"SHA1"}
+CREDENTIALS_FILE="{{ remote_credentials_file.dest }}"
+
+test -r "$CREDENTIALS_FILE" || { echo "Credentials file $CREDENTIALS_FILE not readable" >&2; exit 1; }
+
+. $CREDENTIALS_FILE;
 
 test -n "$SIGNER" || { echo "Missing jarsigner" >&2; exit 1; }
 test -n "$APK_KEYSTORE_NAME" || { echo "Missing environment variable APK_KEYSTORE_NAME" >&2; exit 1; }

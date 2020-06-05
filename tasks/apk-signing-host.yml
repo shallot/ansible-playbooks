@@ -27,13 +27,82 @@
   become:
     true
 
+# https://docs.ansible.com/ansible/latest/modules/group_module.html
+- name:
+    "group : apk_signing_group_name"
+  group:
+    name: "{{ apk_signing_group_name | mandatory }}"
+  become:
+    true
+
+# https://docs.ansible.com/ansible/latest/modules/user_module.html
+- name:
+    "user : apk_signing_group_name"
+  user:
+    append: true
+    group: "{{ apk_signing_group_name | mandatory }}"
+    name: "{{ item.key }}"
+  with_dict:
+    "{{ apk_signing_users | mandatory }}"
+  loop_control:
+    label: "{{ item.key | to_json }}"
+  become:
+    true
+
+# https://docs.ansible.com/ansible/latest/modules/file_module.html
+- name:
+    "file : apk_signing_group_credentials_source directory"
+  file:
+    state: "directory"
+    path: "{{ credentials_dirname }}"
+    owner: "root"
+    group: "{{ apk_signing_group_name | mandatory }}"
+    mode: "0750"
+  vars:
+    credentials_dirname:
+      "/{{ [apk_signing_group_name,
+            (apk_signing_group_credentials_source
+              | mandatory
+              | dirname
+              ).strip('/')]
+         | join('/')
+         }}"
+  register:
+    "credentials_directory"
+  become:
+    true
+
 # https://docs.ansible.com/ansible/latest/modules/copy_module.html
 - name:
-    "copy : /usr/local/bin/apk_signer"
+    "copy : apk_signing_group_credentials_source"
   copy:
+    dest:
+      "{{ [credentials_directory.path,
+           apk_signing_group_credentials_source | mandatory | basename]
+        | join('/')
+        }}"
+    mode: "0640"
+    content: |
+      APK_KEYSTORE_NAME={{ APK_KEYSTORE_NAME | mandatory }}
+      APK_KEY_ALIAS_NAME={{ APK_KEY_ALIAS_NAME | mandatory }}
+      APK_STOREPASS={{ APK_STOREPASS | mandatory }}
+      APK_KEYPASS={{ APK_KEYPASS | mandatory }}
+    validate:
+      "/bin/sh -n %s"
+    owner: "root"
+    group: "{{ apk_signing_group_name }}"
+  register:
+    "remote_credentials_file"
+  become:
+    true
+
+# https://docs.ansible.com/ansible/latest/modules/template_module.html
+- name:
+    "template : /usr/local/bin/apk_signer"
+  template:
+    src: "./files/apk_signer.j2"
     dest: "/usr/local/bin/apk_signer"
     mode: "0755"
-    src: "files/apk_signer"
     validate:
       "/bin/sh -n %s"
   become:
@@ -51,37 +120,7 @@
       "/usr/sbin/visudo --check --file=%s"
   become:
     true
+  loop_control:
+    label: "{{ item.key | to_json }}"
   with_dict:
-    "{{ signing_users | mandatory }}"
-
-# https://docs.ansible.com/ansible/latest/modules/file_module.html
-- name:
-    "file: /home/{{ item.key }}/.ssh"
-  file:
-    path: "/home/{{ item.key }}/.ssh"
-    state: "directory"
-    mode: "0700"
-  become:
-    true
-  with_dict:
-    "{{ signing_users | mandatory }}"
-
-# https://docs.ansible.com/ansible/latest/modules/copy_module.html
-- name:
-    "copy : /home/{{ item.key }}/.ssh/environment"
-  copy:
-    dest: "/home/{{ item.key }}/.ssh/environment"
-    mode: "0600"
-    content: |
-      APK_KEYSTORE_NAME={{ APK_KEYSTORE_NAME | mandatory }}
-      APK_KEY_ALIAS_NAME={{ APK_KEY_ALIAS_NAME | mandatory }}
-      APK_STOREPASS={{ APK_STOREPASS | mandatory }}
-      APK_KEYPASS={{ APK_KEYPASS | mandatory }}
-    validate:
-      "/bin/sh -n %s"
-    owner: "{{ item.key }}"
-    group: "{{ item.key }}"
-  become:
-    true
-  with_dict:
-    "{{ signing_users | mandatory }}"
+    "{{ apk_signing_users | mandatory }}"
