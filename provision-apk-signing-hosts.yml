@@ -25,4 +25,7 @@
 
     # https://docs.ansible.com/ansible/latest/import_tasks_module.html
     - import_tasks:
+        "tasks/users.yml"
+
+    - import_tasks:
         "tasks/apk-signing-host.yml"

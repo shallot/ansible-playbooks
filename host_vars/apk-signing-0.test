@@ -26,6 +26,8 @@ signing_users: &signing_users
 # https://yaml.org/type/merge.html
 apk_sign_custom_users__to_merge:
   <<: *signing_users
+  NonSigningUser1:
+    comment: "Arbitrary user NOT allowed so sign packages"
 
 # tasks/apk-signing-host.yml
 APK_KEYSTORE_NAME: "test_name"
