@@ -30,7 +30,7 @@
   group:
     gid: "{{ item.value['gid'] | default(omit) }}"
     local: "{{ item.value['local'] | default('false') }}"
-    name: "{{ item.key }}"
+    name: "{{ item.value['name'] | default(item.key) }}"
     state: "{{ item.value['state'] | default('present') }}"
     system: "{{ item.value['system'] | default('false') }}"
   with_dict:
