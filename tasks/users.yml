@@ -42,6 +42,7 @@
     remove: true
     shell: "{{ item.value['shell'] | default('/bin/bash') }}"
     state: "{{ item.value['state'] | default('present') }}"
+    uid: "{{ item.value['uid'] | default(omit) }}"
   with_dict:
     "{{ custom_users }}"
   loop_control:
