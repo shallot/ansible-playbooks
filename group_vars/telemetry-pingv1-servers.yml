@@ -107,9 +107,6 @@ telemetry_pingv1_app_proxy_custom_apache_config: |
   ProxyPass / "http://localhost:{{ telemetry_pingv1_app_port }}/"
   ProxyPassReverse / "http://localhost:{{ telemetry_pingv1_app_port }}/"
 
-telemetry_pingv1_extra_log_location:
-  "/var/log/apache2/test-telemetry-pingv1-post.log"
-
 telemetry_pingv1_extra_log_custom_apache_config: |
   <Location />
     # this is an Apache+mod_security2-native POST logger
