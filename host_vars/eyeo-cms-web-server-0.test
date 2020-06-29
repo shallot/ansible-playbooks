@@ -90,6 +90,7 @@ test_apache2_sites__to_merge:
 # https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
 vagrant_groups:
   - "eyeo-cms-web-servers"
+  - "eyeo-apache2-servers"
   - "apache2-servers"
   - "apache2-mimeo-servers"
   - "apache2-sitescripts-servers"
