@@ -74,7 +74,7 @@
   vars:
     custom_ansible_authorized_key_options:
       - "command=\"git-shell -c \\\"$SSH_ORIGINAL_COMMAND\\\"\""
-      - "from=\"127.0.0.1,::1\""
+      - "from=\"{{ custom_ansible_authorized_from_hosts | join(',') }}\""
       - "no-agent-forwarding"
       - "no-port-forwarding"
       - "no-pty"

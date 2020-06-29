@@ -23,6 +23,13 @@
 custom_ansible_authorized_keys:
   - "{{ custom_vagrant_user.ssh_public_key }}"
 
+# A list of hosts/IP addresses that can be used to access
+# ansible@localhost:inventory on the Ansible host. In production,
+# this should include the addresses of any slave/backup Ansible hosts.
+custom_ansible_authorized_from_hosts:
+  - "127.0.0.1"
+  - "::1"
+
 # A list of users to be included with group ansible, i.e. ones that can access
 # group-readable files within the ~ansible/inventory repository. In development
 # this includes only the vagrant user, while in production it includes the name
