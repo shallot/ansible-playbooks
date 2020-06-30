@@ -15,19 +15,6 @@
 
 ---
 
-# https://docs.ansible.com/ansible/latest/modules/apt_module.html
-- name:
-    "apt"
-  apt:
-    cache_valid_time: "{{ apt_cache_valid_time }}"
-    default_release: "{{ apt_default_release | default(omit) }}"
-    name:
-      - "cgit"
-    state: "present"
-    update_cache: "{{ apt_update_cache }}"
-  become:
-    true
-
 # https://docs.ansible.com/ansible/latest/modules/blockinfile_module.html
 - name:
     "blockinfile : /etc/cgitrc"
@@ -38,58 +25,5 @@
       {% endfor %}
     insertafter: "EOF"
     path: "/etc/cgitrc"
-  become:
-    true
-
-# https://docs.ansible.com/ansible/latest/copy_module.html
-- name:
-    "file : /usr/local/sbin/deploy_public_git_web"
-  copy:
-    dest: "/usr/local/sbin/deploy_public_git_web"
-    mode: "0755"
-    content: |
-      #!/bin/sh -ex
-      for DEST_GIT_DIR in $@; do
-        test -d "$DEST_GIT_DIR" || exit 1
-        cd "$DEST_GIT_DIR"
-        git fetch --all --tags --prune
-        git update-server-info
-      done
-  become:
-    true
-
-# https://docs.ansible.com/ansible/latest/copy_module.html
-- name:
-    "file : /usr/local/sbin/deploy_public_git_web_branch"
-  copy:
-    dest: "/usr/local/sbin/deploy_public_git_web_branch"
-    mode: "0755"
-    content: |
-      #!/bin/sh -ex
-      if [ "$#" -lt 2 ]; then
-        echo "script requires arguments"
-        echo "first the branch name, then one or more directories" >&2
-        exit 1
-      fi
-      case "$1" in
-        *[^A-Za-z0-9._-]*) echo "unsupported branch name: $1" >&2
-                        exit 1
-                        ;;
-      esac
-      DEST_GIT_BRANCH=$1
-      shift
-      for DEST_GIT_DIR in $@; do
-        test -d "$DEST_GIT_DIR" || exit 1
-        cd "$DEST_GIT_DIR"
-        git fetch --tags --prune
-        git fetch --force \
-                  origin \
-                  $DEST_GIT_BRANCH:$DEST_GIT_BRANCH
-        git update-server-info
-        test -n "$CI_DEFAULT_BRANCH" || continue
-        git_default_branch=$(git symbolic-ref --short HEAD)
-        test "$git_default_branch" != "$CI_DEFAULT_BRANCH" || continue
-        git symbolic-ref HEAD refs/heads/"$CI_DEFAULT_BRANCH"
-      done
   become:
     true
