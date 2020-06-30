@@ -1,0 +1,72 @@
+# Copyright (c) 2020-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+# provision-public-git-web-servers.yml
+cgit_configuration:
+  scan-path: "/srv/git.example.com/web/"
+
+# tasks/paths.yml
+test_public_git_web_server_custom_paths__to_merge:
+  /srv/git.example.com/web:
+    state: "directory"
+    mode: "0755"
+
+# roles/apache2/tasks/main.yml
+# provision-apache2-servers.yml
+test_public_git_web_server_apache2_modules__to_merge:
+  cgid: &apache2_standard_module
+    package: false
+
+# roles/apache2/tasks/main.yml
+# provision-apache2-servers.yml
+test_public_git_web_server_apache2_sites__to_merge:
+  git.example.com:
+    configuration: |
+      <VirtualHost *:80>
+        ServerName git.example.com
+
+        ErrorLog ${APACHE_LOG_DIR}/git-error.log
+        CustomLog ${APACHE_LOG_DIR}/git-access.log combined
+
+        DocumentRoot "/srv/git.example.com/web"
+        <Directory "/srv/git.example.com/web">
+          AllowOverride All
+          Require all granted
+        </Directory>
+
+        # this depends on /etc/apache2/conf-available/cgit.conf
+        # but replicates some of it under our own desired path
+        # rather than just /cgit/
+        ScriptAlias /repositories/ "/usr/lib/cgit/cgit.cgi/"
+        RedirectMatch ^/repositories$ /repositories/
+      </VirtualHost>
+
+# https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
+vagrant_groups:
+  - "public-git-web-servers"
+  - "apache2-servers"
+  - "gitlab-runners"
+
+# https://www.vagrantup.com/intro/getting-started/networking.html
+vagrant_networks:
+  - private_network:
+      ip: "10.8.100.190"
+
+# https://www.vagrantup.com/docs/provisioning/ansible.html
+vagrant_playbooks:
+  - "provision-custom-systems.yml"
+  - "provision-public-git-web-servers.yml"
