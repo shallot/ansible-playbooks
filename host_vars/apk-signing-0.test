@@ -15,11 +15,12 @@
 
 ---
 
-# tasks/apk-signing-host.yml
-apk_signing_group_name: "signers"
-
+apk_signing_group_name:
+  "signers"
+apk_signing_directory:
+  "/srv/{{ apk_signing_group_name }}/exampleproject"
 apk_signing_group_credentials_source:
-  "exampleproject/keystore.credentials"
+  "{{ apk_signing_directory }}/keystore.credentials"
 
 APK_KEYSTORE_NAME: "test_name"
 APK_KEY_ALIAS_NAME: "alias_test_name"
@@ -27,10 +28,8 @@ APK_STOREPASS: "test_store_password"
 APK_KEYPASS: "test_key_password"
 
 apk_signing_users: &apk_signing_users
-  signer:
-    comment: "Host-specific example user (via Ansible)"
-  signer2:
-    comment: "Host-specific example user (via Ansible)"
+  "signer1":
+  "signer2":
 
 # tasks/users.yml
 # https://yaml.org/type/merge.html

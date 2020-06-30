@@ -15,26 +15,6 @@
 
 ---
 
-# https://docs.ansible.com/ansible/latest/modules/apt_module.html
-- name:
-    "apt : jdk_package_name"
-  apt:
-    cache_valid_time: "{{ apt_cache_valid_time | default(omit) }}"
-    default_release: "{{ apt_default_release | default(omit) }}"
-    name: "{{ jdk_package_name | default('default-jdk') }}"
-    state: "present"
-    update_cache: "{{ apt_update_cache | default(omit) }}"
-  become:
-    true
-
-# https://docs.ansible.com/ansible/latest/modules/group_module.html
-- name:
-    "group : apk_signing_group_name"
-  group:
-    name: "{{ apk_signing_group_name | mandatory }}"
-  become:
-    true
-
 # https://docs.ansible.com/ansible/latest/modules/user_module.html
 - name:
     "user : apk_signing_group_name"
@@ -46,65 +26,6 @@
     "{{ apk_signing_users | mandatory }}"
   loop_control:
     label: "{{ item.key | to_json }}"
-  become:
-    true
-
-# https://docs.ansible.com/ansible/latest/modules/file_module.html
-- name:
-    "file : apk_signing_group_credentials_source directory"
-  file:
-    state: "directory"
-    path: "{{ credentials_dirname }}"
-    owner: "root"
-    group: "{{ apk_signing_group_name | mandatory }}"
-    mode: "0750"
-  vars:
-    credentials_dirname:
-      "/{{ [apk_signing_group_name,
-            (apk_signing_group_credentials_source
-              | mandatory
-              | dirname
-              ).strip('/')]
-         | join('/')
-         }}"
-  register:
-    "credentials_directory"
-  become:
-    true
-
-# https://docs.ansible.com/ansible/latest/modules/copy_module.html
-- name:
-    "copy : apk_signing_group_credentials_source"
-  copy:
-    dest:
-      "{{ [credentials_directory.path,
-           apk_signing_group_credentials_source | mandatory | basename]
-        | join('/')
-        }}"
-    mode: "0640"
-    content: |
-      APK_KEYSTORE_NAME={{ APK_KEYSTORE_NAME | mandatory }}
-      APK_KEY_ALIAS_NAME={{ APK_KEY_ALIAS_NAME | mandatory }}
-      APK_STOREPASS={{ APK_STOREPASS | mandatory }}
-      APK_KEYPASS={{ APK_KEYPASS | mandatory }}
-    validate:
-      "/bin/sh -n %s"
-    owner: "root"
-    group: "{{ apk_signing_group_name }}"
-  register:
-    "remote_credentials_file"
-  become:
-    true
-
-# https://docs.ansible.com/ansible/latest/modules/template_module.html
-- name:
-    "template : /usr/local/bin/apk_signer"
-  template:
-    src: "./files/apk_signer.j2"
-    dest: "/usr/local/bin/apk_signer"
-    mode: "0755"
-    validate:
-      "/bin/sh -n %s"
   become:
     true
 

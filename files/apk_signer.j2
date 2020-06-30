@@ -17,7 +17,7 @@
 SIGNER=`which jarsigner`
 APK_SIG_ALGORITHM=${APK_SIG_ALGORITHM:-"SHA1withRSA"}
 APK_DIGEST_ALGORITHM=${APK_DIGEST_ALGORITHM:-"SHA1"}
-CREDENTIALS_FILE="{{ remote_credentials_file.dest }}"
+CREDENTIALS_FILE="{{ apk_signing_group_credentials_source }}"
 
 test -r "$CREDENTIALS_FILE" || { echo "Credentials file $CREDENTIALS_FILE not readable" >&2; exit 1; }
 
