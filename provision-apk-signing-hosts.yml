@@ -26,6 +26,16 @@
     # https://docs.ansible.com/ansible/latest/import_tasks_module.html
     - import_tasks:
         "tasks/users.yml"
+      vars:
+        custom_users_suffix:
+          "apk_signing_hosts_users__to_merge"
+
+    # https://docs.ansible.com/ansible/latest/import_tasks_module.html
+    - import_tasks:
+        "tasks/paths.yml"
+      vars:
+        custom_users_suffix:
+          "apk_signing_hosts_paths__to_merge"
 
     - import_tasks:
         "tasks/apk-signing-host.yml"
