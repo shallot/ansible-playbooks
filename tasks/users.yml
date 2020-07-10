@@ -90,5 +90,10 @@
     "{{ custom_users }}"
   loop_control:
     label: "{{ item.key | to_json }}"
+  when:
+    "authorized_key_user_state"
   become:
     true
+  vars:
+    authorized_key_user_state:
+      "{{ (item.value.state | default('present') == 'present') }}"
