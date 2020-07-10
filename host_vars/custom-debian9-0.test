@@ -37,6 +37,10 @@ host_specific_custom_users__to_merge:
       - "staff"
       - "example_group"
     password: "$6$bCrd2ylJ$uQ.uN7Oy1QStmunslSMzYX0vM4wYXKdO9tgu.SE.hPdKBqcHk.CrHsUMxzN8rwiPcwRI3nzvzd9W4T0sJJmNz."
+  absentExample:
+    comment: "Absent example user (via Ansible)"
+    authorized_keys: "nokey"
+    state: "absent"
 
 # tasks/services.yml
 host_specific_custom_services__to_merge:

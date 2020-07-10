@@ -52,27 +52,49 @@
   become:
     true
 
+# https://docs.ansible.com/ansible/latest/modules/set_fact_module.html
+- name:
+    "set_fact : set defaults"
+  set_fact:
+    tmp_item: "{{ item
+                | combine({
+                  'exists': 'home' in item,
+                  'home_mode': item.item.value.home_mode
+                    | default(custom_users_default_home_mode
+                    | default('0755')),
+                  'name': item['name'] | default(omit)
+                })
+              }}"
+  with_items:
+    "{{ custom_user.results }}"
+  loop_control:
+    label: "{{ item.item['key'] | to_json }}"
+  register:
+    "paired_tmp_items"
+
+# https://docs.ansible.com/ansible/latest/modules/set_fact_module.html
+- name:
+    "set_fact : flatten list"
+  set_fact:
+    custom_user_info:
+      "{{ paired_tmp_items.results
+        | map(attribute='ansible_facts.tmp_item') | list }}"
+  register:
+    "custom_user_info"
+
 # https://docs.ansible.com/ansible/latest/modules/file_module.html
 - name:
     "users : home directory permissions"
   file:
-    mode: "{{ custom_user_home_mode }}"
-    path: "{{ custom_user_home }}"
+    mode: "{{ item.home_mode }}"
+    path: "{{ item.home }}"
     state: "directory"
   with_items:
-    "{{ custom_user.results }}"
+    "{{ custom_user_info }}"
   loop_control:
-    label: "{{ [custom_user_name, custom_user_home_mode] | to_json }}"
+    label: "{{ [item.name, item.home_mode] | to_json }}"
   when:
-    - "item['home'] is defined"
-  vars:
-    custom_user_home_mode:
-      "{{ item.item.value.home_mode
-        | default(custom_users_default_home_mode | default('0755')) }}"
-    custom_user_home:
-      "{{ item['home'] }}"
-    custom_user_name:
-      "{{ item['name'] }}"
+    "item.exists"
   become:
     true
 
@@ -83,12 +105,14 @@
     exclusive: true
     key: |
       # Generated with Ansible
-      {{ item.value['authorized_keys'] | default('') }}
+      {{ item.authorized_keys | default('') }}
     manage_dir: true
-    user: "{{ item.value['user'] | default(item.key) }}"
-  with_dict:
-    "{{ custom_users }}"
+    user: "{{ item.name }}"
+  with_items:
+    "{{ custom_user_info }}"
   loop_control:
-    label: "{{ item.key | to_json }}"
+    label: "{{ item.name }}"
+  when:
+    "item.exists"
   become:
     true
