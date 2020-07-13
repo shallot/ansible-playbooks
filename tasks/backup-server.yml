@@ -1,0 +1,49 @@
+# Copyright (c) 2020-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+# action_plugins/merge_variable.py
+- name:
+    "merge_variable : backup_ssh_keys"
+  merge_variable:
+    default: []
+    name: "backup_ssh_keys"
+    suffix: "backup_ssh_keys__to_merge"
+
+# create missing directories first
+# https://docs.ansible.com/ansible/latest/modules/file_module.html
+- name:
+    "create ssh key directories"
+  file:
+    path: "{{ ssh_key.path | dirname }}"
+    state: "directory"
+  loop: "{{ backup_ssh_keys }}"
+  loop_control:
+    loop_var: "ssh_key"
+  become:
+    true
+
+# https://docs.ansible.com/ansible/latest/modules/openssh_keypair_module.html
+- name:
+    "generate ssh_keys"
+  openssh_keypair:
+    "{{ ssh_key }}"
+  loop: "{{ backup_ssh_keys }}"
+  loop_control:
+    loop_var: "ssh_key"
+  become:
+    true
+
