@@ -46,4 +46,3 @@
     loop_var: "ssh_key"
   become:
     true
-
