@@ -1,0 +1,45 @@
+#!/bin/sh
+
+# Copyright (c) 2020-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# {{ ansible_managed }}
+
+case "$SSH_ORIGINAL_COMMAND" in
+    {%- for key, backup in custom_backups.items() %}
+    {%-   if backup.local_user == item.value.local_user %}
+    {%-     if backup.type == 'tar' %}
+    {%-       set cmd='tar czf - "' + backup.src + '"' %}
+    {%-     else %}
+    {#-
+              flags defined in backup-cmd-rsync.j2 template, "-a" equals "-logDtpr", "-z" for "z",
+              the rest are default rsync server flags.
+              Obtained by observing the command on the rsync destination host using ps
+    #}
+    {%-       set cmd='rsync --server --sender -logDtprze.iLsfxC . "' + backup.src + '"' %}
+    {%-     endif %}
+
+    '{{ cmd }}')
+        exec {{ cmd }}
+        ;;
+    {%-   endif %}
+    {%- endfor %}
+
+    *)
+        echo 'Command not allowed' >&2
+        exit 1
+        ;;
+esac
+

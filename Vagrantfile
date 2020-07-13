@@ -55,8 +55,7 @@ ICINGA_SERVER_VM = 'icinga-0.test'.freeze
 Vagrant.configure('2') do |vagrant|
 
   # https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
-  ansible_host_groups = {
-  }
+  ansible_host_groups = {}
 
   # https://docs.ruby-lang.org/en/trunk/File.html#method-c-expand_path
   ansible_host_vars_directory = File.expand_path('host_vars', __dir__)
@@ -119,22 +118,15 @@ Vagrant.configure('2') do |vagrant|
         end
       end
 
-      # https://docs.ansible.com/ansible/latest/user_guide/playbooks_variables.html
-      ansible_extra_vars = {}
-
       # provision-icinga-ssh-agents.yml
       if provisioned?(ICINGA_SERVER_VM) || hostname == ICINGA_SERVER_VM
-        ansible_extra_vars = ansible_extra_vars.merge(
-          'icinga_ssh_agent_server_associations' => [{
-            'name' => ICINGA_SERVER_VM,
-            'user' => 'nagios',
-            'service' => 'icinga2'
-          }],
-          'icinga_ssh_agent_ipv4_address' =>
-            hostvars['vagrant_networks'][0]['private_network'][:ip],
-        )
+        hostvars['vagrant_groups'] << 'icinga-ssh-agents'
         ansible_host_groups['icinga-ssh-agents'] << hostname
       end
+
+      # https://docs.ansible.com/ansible/latest/user_guide/playbooks_variables.html
+      ansible_extra_vars = {}
+      ansible_extra_vars = fill_extra_vars(hostvars, ansible_extra_vars)
 
       # https://docs.ansible.com/ansible/latest/user_guide/playbooks.html
       playbooks = hostvars.fetch('vagrant_playbooks', [])
@@ -193,4 +185,35 @@ Vagrant.configure('2') do |vagrant|
 
   end
 
+end
+
+def fill_extra_vars(hostvars, ansible_extra_vars)
+  # Ansible extra vars per ansible group.
+  # These are used for tests only and shouldn't go into group_vars.
+  # Otherwise they would take precedence over values defined in production.
+  extra_vars_map = {
+    # roles/icinga/ssh-agent/tasks/main.yml
+    'icinga-ssh-agents' => {
+      'icinga_ssh_agent_server_associations' => [{
+        'name' => 'icinga-0.test',
+        'user' => 'nagios',
+        'service' => 'icinga2'
+      }],
+      'icinga_ssh_agent_ipv4_address' =>
+        hostvars['vagrant_networks'][0]['private_network'][:ip]
+    },
+
+    # tasks/backup.yml
+    'backup-hosts' => {
+      'automated_backup_server_key' => '/opt/backup/keys/id_ed25519',
+      'automated_backup_server_directory' => '/var/backups'
+    }
+  }
+
+  extra_vars_map.each do |key, value|
+    ansible_extra_vars = ansible_extra_vars.merge(value) \
+      if hostvars['vagrant_groups'].include?(key)
+  end
+
+  ansible_extra_vars
 end

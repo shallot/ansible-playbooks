@@ -1,0 +1,46 @@
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+# action_plugins/merge_variable.py
+- name:
+    "merge_variable : custom_cron_jobs"
+  merge_variable:
+    default: {}
+    name: "custom_cron_jobs"
+    suffix: "{{ custom_cron_jobs_suffix
+              | default('custom_cron_jobs__to_merge') }}"
+
+# https://docs.ansible.com/ansible/latest/modules/cron_module.html
+- name:
+    "cron"
+  cron:
+    backup: "{{ cron_job.value.backup | default(omit) }}"
+    file: "{{ cron_job.value.file | default(omit) }}"
+    day: "{{ cron_job.value.day | default(omit) }}"
+    disabled: "{{ cron_job.value.disabled | default(omit) }}"
+    env: "{{ cron_job.value.env | default(omit) }}"
+    hour: "{{ cron_job.value.hour | default(omit) }}"
+    insertafter: "{{ cron_job.value.insertafter | default(omit) }}"
+    insertbefore: "{{ cron_job.value.insertbefore | default(omit) }}"
+    # not mandatory unless state=present
+    job: "{{ cron_job.value.job | default(omit) }}"
+    minute: "{{ cron_job.value.minute | default(omit) }}"
+    month: "{{ cron_job.value.month | default(omit) }}"
+    name: "{{ cron_job.value.name | default(omit) }}"
+    reboot: "{{ cron_job.value.reboot | default(omit) }}"
+    special_time: "{{ cron_job.value.special_time | default(omit) }}"
+    state: "{{ cron_job.value.state | default(omit) }}"
+    user: "{{ cron_job.value.user | default(omit) }}"
+    weekday: "{{ cron_job.value.weekday | default(omit) }}"
+  delegate_to:
+    "{{ delegate_to | default(inventory_hostname) }}"
+  become:
+    true
+  loop:
+    "{{ custom_cron_jobs | dict2items }}"
+  loop_control:
+    loop_var: "cron_job"

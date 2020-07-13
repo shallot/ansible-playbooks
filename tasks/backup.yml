@@ -1,0 +1,246 @@
+# Copyright (c) 2020-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+# action_plugins/merge_variable.py
+- name:
+    "merge_variable : custom_backups"
+  merge_variable:
+    default: {}
+    name: "custom_backups"
+    suffix: "{{ custom_backups_suffix
+              | default('custom_backups__to_merge') }}"
+
+# https://docs.ansible.com/ansible/latest/modules/file_module.html
+- name:
+    "file : dest"
+  file:
+    state: "directory"
+    path: "{{ item.value.dest | dirname }}"
+    owner: "{{ item.value.server_user | mandatory }}"
+    group: "{{ item.value.server_user | mandatory }}"
+  loop:
+    "{{ custom_backups | dict2items }}"
+  loop_control:
+    label: "{{ item.key | to_json }}"
+  delegate_to:
+    "{{ item.value.server | mandatory }}"
+  become:
+    true
+
+# https://docs.ansible.com/ansible/latest/modules/tempfile_module.html
+- name:
+    "tempfile"
+  tempfile:
+    state: "directory"
+    path: "{{ lookup('env', 'HOME') }}"
+  delegate_to:
+    "localhost"
+  register: "tmp_path"
+
+# https://docs.ansible.com/ansible/latest/modules/fetch_module.html
+- name:
+    "fetch : server_pubkey"
+  fetch:
+    src: "{{ item.value.server_pubkey_path | mandatory }}"
+    dest: "/{{ tmp_path.path }}/{{ item.value.server }}"
+  loop:
+    "{{ custom_backups | dict2items }}"
+  loop_control:
+    label: "{{ item.key | to_json }}"
+  delegate_to:
+    "{{ item.value.server | mandatory }}"
+  become:
+    true
+  # Make sure the backup user can actually read its keys
+  become_user:
+    "{{ item.value.server_user | mandatory }}"
+  register: "fetch_server_pubkey"
+
+# https://docs.ansible.com/ansible/latest/modules/template_module.html
+- name:
+    "template : backup-wrapper"
+  template:
+    src: "backup-wrapper.j2"
+    dest:
+      "/usr/local/bin/{{ item.value.local_user | mandatory }}-backup-wrapper"
+    mode: "0755"
+  loop:
+    "{{ custom_backups | dict2items }}"
+  loop_control:
+    label: "{{ item.key | to_json }}"
+  become:
+    true
+
+# https://docs.ansible.com/ansible/latest/import_tasks_module.html
+- include_tasks:
+    "tasks/authorized-keys.yml"
+  vars:
+    # override other defined authorized keys for this loop iteration
+    custom_authorized_keys:
+      backup_server:
+        user: "{{ item.value.local_user | mandatory }}"
+        key: "{{ lookup('file', fetch_server_pubkey.results[index].dest) }}"
+        manage_dir: "yes"
+        comment:
+          "Ansible: tasks/backup.yml: {{ item.value.server | mandatory }}"
+        key_options:
+          - "command=\"/usr/local/bin/\
+            {{ item.value.local_user | mandatory }}-backup-wrapper\""
+          - "no-agent-forwarding"
+          - "no-port-forwarding"
+          - "no-pty"
+          - "no-X11-forwarding"
+  loop:
+    "{{ custom_backups | dict2items }}"
+  loop_control:
+    label: "{{ item.key | to_json }}"
+    index_var: "index"
+
+# https://docs.ansible.com/ansible/latest/modules/file_module.html
+- name:
+    "file : server_pubkey"
+  file:
+    path: "{{ tmp_path }}"
+    state: "absent"
+  delegate_to:
+    "localhost"
+
+# fetch home directory
+# https://docs.ansible.com/ansible/latest/modules/user_module.html
+- user:
+    name: "{{ item.value.server_user | mandatory }}"
+    state: "present"
+  loop:
+    "{{ custom_backups | dict2items }}"
+  loop_control:
+    label: "{{ item.key | to_json }}"
+  delegate_to:
+    "{{ item.value.server | mandatory }}"
+  become:
+    true
+  register: "backup_users"
+
+# https://docs.ansible.com/ansible/latest/modules/fail_module.html
+- name:
+    "fail: backup_users"
+  fail:
+    msg: "Could not get user info from 'user' module"
+  when:
+    "not backup_users.results"
+
+# https://docs.ansible.com/ansible/latest/modules/file_module.html
+- name:
+    "file : $HOME/.ssh"
+  file:
+    state: "directory"
+    path: "{{ backup_users.results[index].home }}/.ssh"
+    owner: "{{ item.value.server_user | mandatory }}"
+    group: "{{ item.value.server_user | mandatory }}"
+    mode: "0700"
+  loop:
+    "{{ custom_backups | dict2items }}"
+  loop_control:
+    label: "{{ item.key | to_json }}"
+    index_var: "index"
+  delegate_to:
+    "{{ item.value.server | mandatory }}"
+  become:
+    true
+
+# https://docs.ansible.com/ansible/latest/modules/command_module.html
+- name:
+    "command : local_pubkey"
+  command:
+    cmd: "ssh-keyscan -H {{ inventory_hostname }}"
+  register: "backup_local_pubkey"
+
+# https://docs.ansible.com/ansible/latest/modules/fail_module.html
+- name:
+    "fail: local_pubkey"
+  fail:
+    msg: "Could not get local pubkey: {{ backup_local_pubkey.stderr }}"
+  when:
+    "not backup_local_pubkey.stdout"
+
+# https://docs.ansible.com/ansible/latest/modules/known_hosts_module.html
+- name:
+    "known_hosts : local_pubkey"
+  known_hosts:
+    name: "{{ inventory_hostname }}"
+    key: "{{ backup_local_pubkey.stdout }}"
+  loop:
+    "{{ custom_backups | dict2items }}"
+  loop_control:
+    label: "{{ item.key | to_json }}"
+  delegate_to:
+    "{{ item.value.server | mandatory }}"
+  become:
+    true
+  become_user:
+    "{{ item.value.server_user | mandatory }}"
+
+# https://docs.ansible.com/ansible/latest/modules/file_module.html
+- name:
+    "file : log_dir"
+  file:
+    state: "directory"
+    path: "/var/log/backup-{{ item.value.server_user | mandatory }}"
+    owner: "{{ item.value.server_user | mandatory }}"
+    group: "adm"
+    mode: "0750"
+  loop:
+    "{{ custom_backups | dict2items }}"
+  loop_control:
+    label: "{{ item.key | to_json }}"
+  delegate_to:
+    "{{ item.value.server | mandatory }}"
+  become:
+    true
+
+# https://docs.ansible.com/ansible/latest/import_tasks_module.html
+- include_tasks:
+    "tasks/cron-jobs.yml"
+  vars:
+    custom_cron_job: >-
+      {%- if item.value.type == 'tar' %}
+        {#- squash whitespace #}
+        {{- lookup('template', 'backup-cmd-tar.j2')
+          | regex_replace('\s+', ' ') }}
+      {%- else %}
+        {#- squash whitespace #}
+        {{- lookup('template', 'backup-cmd-rsync.j2')
+          | regex_replace('\s+', ' ') }}
+      {%- endif %}
+    custom_cron_jobs:
+      backup_jobs: >-
+        {{
+          item.value.cron | default({}) | combine({
+            'job': custom_cron_job,
+            'user': (item.value.server_user | mandatory),
+            'name': 'tasks/backup.yml: ' + inventory_hostname
+              + ',' + (item.value.name | default(item.key)),
+          })
+        }}
+    delegate_to:
+      "{{ item.value.server | mandatory }}"
+    backup_log_file_path:
+      "/var/log/backup-{{ item.value.server_user | mandatory }}/\
+      {{ item.value.name | default(item.key) }}.log"
+  loop:
+    "{{ custom_backups | dict2items }}"
+  loop_control:
+    label: "{{ item.key | to_json }}"
