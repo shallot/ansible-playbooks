@@ -85,6 +85,18 @@ apk-signing-0:
   variables:
     TEST_HOST: "apk-signing-0.test"
 
+backup-client-0.test:
+  extends: ".vagrantjob"
+  variables:
+    TEST_HOST: "backup-client-0.test"
+  # requires persistent backup-server-0.test to complete
+  allow_failure: true
+
+backup-server-0.test:
+  extends: ".vagrantjob"
+  variables:
+    TEST_HOST: "backup-server-0.test"
+
 chromium-gitlab-runner-0:
   extends: ".vagrantjob"
   variables:

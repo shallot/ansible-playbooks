@@ -79,6 +79,37 @@ host_specific_sshd_config__to_merge:
   AllowAgentForwarding: "no"
   AllowTcpForwarding: "no"
 
+# tasks/ssh-keys.yml
+host_specific_custom_ssh_keys__to_merge:
+  example_key:
+    path: "/root/test-ssh-key-example_id_ed25519"
+    type: "ed25519"
+    size: 521
+
+# tasks/authorized-keys.yml
+host_specific_custom_authorized_keys__to_merge:
+  example_authorized_key:
+    user: "root"
+    key: "ssh-ed25519 \
+      AAAAC3NzaC1lZDI1NTE5AAAAILob83aPj9IAcM4Tir1RFYBuDcepJrpP3PlfOv4qQiMC"
+    manage_dir: "yes"
+    comment:
+      "test comment with spaces"
+    key_options:
+      - "command=\"/bin/true\""
+      - "no-agent-forwarding"
+      - "no-port-forwarding"
+      - "no-pty"
+      - "no-X11-forwarding"
+
+# tasks/cron-jobs.yml
+host_specific_custom_cron_jobs__to_merge:
+  example_cron_job:
+    name: "example_job"
+    job: "/bin/true"
+    user: "root"
+    state: "present"
+
 # https://www.vagrantup.com/docs/vagrantfile/machine_settings.html
 vagrant_box:
   "debian/stretch64"
@@ -97,3 +128,6 @@ vagrant_networks:
 vagrant_playbooks:
   - "provision-custom-systems.yml"
   - "provision-unattended-upgrades.yml"
+  - "provision-ssh-keys.yml"
+  - "provision-authorized-keys.yml"
+  - "provision-cron-jobs.yml"

@@ -1,0 +1,71 @@
+# Copyright (c) 2020-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+# action_plugins/merge_variable.py
+- name:
+    "merge_variable : custom_ssh_keys"
+  merge_variable:
+    default: {}
+    name: "custom_ssh_keys"
+    suffix: "{{ custom_ssh_keys_suffix
+              | default('custom_ssh_keys__to_merge') }}"
+
+# https://docs.ansible.com/ansible/latest/modules/openssh_keypair_module.html
+- name:
+    "openssh_keypair : custom_ssh_keys"
+  openssh_keypair:
+    attributes: "{{ ssh_key.value.attributes | default(omit) }}"
+    comment: "{{ ssh_key.value.comment | default(omit) }}"
+    force: "{{ ssh_key.value.force | default(omit) }}"
+    group: "{{ ssh_key.value.group | default(omit) }}"
+    mode: "{{ ssh_key.value.mode | default(omit) }}"
+    owner: "{{ ssh_key.value.owner | default(omit) }}"
+    path: "{{ ssh_key.value.path | default(ssh_key.key) }}"
+    selevel: "{{ ssh_key.value.selevel | default(omit) }}"
+    serole: "{{ ssh_key.value.serole | default(omit) }}"
+    seuser: "{{ ssh_key.value.seuser | default(omit) }}"
+    size: "{{ ssh_key.value.size | default(omit) }}"
+    state: "{{ ssh_key.value.state | default(omit) }}"
+    type: "{{ ssh_key.value.type | default(omit) }}"
+    unsafe_writes: "{{ ssh_key.value.unsafe_writes | default(omit) }}"
+  when:
+    "ssh_key.value.path is not defined or ssh_key.value.path != omit"
+  loop:
+    "{{ custom_ssh_keys | dict2items }}"
+  loop_control:
+    loop_var: "ssh_key"
+  become:
+    true
+
+# https://github.com/ansible/ansible/pull/62037
+# https://docs.ansible.com/ansible/latest/modules/file_module.html
+- name:
+    "file : pub_ssh_keys"
+  file:
+    group: "{{ ssh_key.value.group | default(omit) }}"
+    mode: "{{ ssh_key.value.mode | default(omit) }}"
+    owner: "{{ ssh_key.value.owner | default(omit) }}"
+    path: "{{ ssh_key.value.path | default(ssh_key.key) }}.pub"
+  when:
+    - "ansible_version.full is version('2.9.0', '<')"
+    - "ssh_key.value.path is not defined or ssh_key.value.path != omit"
+  loop:
+    "{{ custom_ssh_keys | dict2items }}"
+  loop_control:
+    loop_var: "ssh_key"
+  become:
+    true
