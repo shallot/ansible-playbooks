@@ -27,8 +27,6 @@
 #         tag-list: "test-telemetry-pingv1-1"
 
 # tasks/paths.yml
-# TODO: ideally we'd just reference telemetry_pingv1_server_dir here,
-# but it doesn't work
 test-telemetry-pingv1-1_custom_paths__to_merge:
   /var/www/test-telemetry-pingv1:
     state: "directory"
