@@ -19,7 +19,7 @@
 - name:
     "merge_variable : ssh_keys"
   merge_variable:
-    default: []
+    default: {}
     name: "ssh_keys"
     suffix: "ssh_keys__to_merge"
 
@@ -28,9 +28,9 @@
 - name:
     "file : ssh_keys"
   file:
-    path: "{{ ssh_key.path | dirname }}"
+    path: "{{ ssh_key.key | dirname }}"
     state: "directory"
-  loop: "{{ ssh_keys }}"
+  loop: "{{ ssh_keys | dict2items }}"
   loop_control:
     loop_var: "ssh_key"
   become:
@@ -40,8 +40,15 @@
 - name:
     "openssh_keypair : ssh_keys"
   openssh_keypair:
-    "{{ ssh_key }}"
-  loop: "{{ ssh_keys }}"
+    state: "present"
+    path: "{{ ssh_key.key | mandatory }}"
+    type: "{{ ssh_key.value.type | default(omit) }}"
+    size: "{{ ssh_key.value.size | default(omit) }}"
+    owner: "{{ ssh_key.value.owner | default(omit) }}"
+    group: "{{ ssh_key.value.group | default(omit) }}"
+    mode: "{{ ssh_key.value.mode | default(omit) }}"
+    comment: "{{ ssh_key.value.comment | default(omit) }}"
+  loop: "{{ ssh_keys | dict2items }}"
   loop_control:
     loop_var: "ssh_key"
   become:
