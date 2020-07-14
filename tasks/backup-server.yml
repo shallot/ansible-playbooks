@@ -17,11 +17,11 @@
 
 # action_plugins/merge_variable.py
 - name:
-    "merge_variable : backup_ssh_keys"
+    "merge_variable : ssh_keys"
   merge_variable:
     default: []
-    name: "backup_ssh_keys"
-    suffix: "backup_ssh_keys__to_merge"
+    name: "ssh_keys"
+    suffix: "ssh_keys__to_merge"
 
 # create missing directories first
 # https://docs.ansible.com/ansible/latest/modules/file_module.html
@@ -30,7 +30,7 @@
   file:
     path: "{{ ssh_key.path | dirname }}"
     state: "directory"
-  loop: "{{ backup_ssh_keys }}"
+  loop: "{{ ssh_keys }}"
   loop_control:
     loop_var: "ssh_key"
   become:
@@ -41,7 +41,7 @@
     "generate ssh_keys"
   openssh_keypair:
     "{{ ssh_key }}"
-  loop: "{{ backup_ssh_keys }}"
+  loop: "{{ ssh_keys }}"
   loop_control:
     loop_var: "ssh_key"
   become:

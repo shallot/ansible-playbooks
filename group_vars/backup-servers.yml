@@ -17,7 +17,7 @@
 
 # parameters used as in
 # https://docs.ansible.com/ansible/latest/modules/openssh_keypair_module.html
-default_backup_ssh_keys__to_merge:
+default_ssh_keys__to_merge:
   - path: "/opt/backup/keys/id_ed25519"
     type: "ed25519"
     size: 521
