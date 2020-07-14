@@ -43,6 +43,23 @@ adblockplus_donate_server_prerequisite_paths__to_merge:
     mode: "0755"
     owner: "{{ adblockplus_donate_system_username }}"
 
+# tasks/paths.yml
+adblockplus_donate_server_log_custom_paths__to_merge:
+  /var/log/adblockplus-donate-server:
+    state: "directory"
+    mode: "0750"
+    group: "adm"
+  # TODO hook a notifier for sudo service rsyslog restart
+  /etc/rsyslog.d/local-adblockplus-donate-server.conf:
+    state: "copy"
+    content: |
+      # messages from /srv/adblockplus-donate-server/
+      local0.*  -/var/log/adblockplus-donate-server/trace.log
+      local4.*  -/var/log/adblockplus-donate-server/user-error.log
+      local5.*  -/var/log/adblockplus-donate-server/error.log
+      # stop processing other rules, leaving the default log files clean
+      & stop
+
 # TODO: fully parametrize port 5000, match it to server.env
 adblockplus_donate_server_app_port:
   "5000"
