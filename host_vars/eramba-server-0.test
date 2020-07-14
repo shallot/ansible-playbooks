@@ -1,0 +1,176 @@
+# Copyright (c) 2020-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+# tasks/mysql-server.yml
+# https://gitlab.com/eyeo/devops/ansible-role-mysql
+eramba_database_name:
+  "eramba"
+eramba_database_schema_file:
+  "{{ eramba_directory }}/app/Config/db_schema/e2.16.0.sql"
+eramba_database_password:
+  "changeme"
+eramba_database_user:
+  "eramba"
+eramba_server_ipv4_address:
+  "10.8.39.9"
+
+# https://docs.ansible.com/ansible/latest/modules/mysql_db_module.html
+eramba_mysql_databases__to_merge:
+  "{{ eramba_database_name }}":
+    state: "present"
+    encoding: "UTF8"
+
+# https://docs.ansible.com/ansible/latest/modules/mysql_user_module.html
+eramba_mysql_users__to_merge:
+  "{{ eramba_database_user }}":
+    state: "present"
+    password: "changeme"
+    priv: "eramba.*:ALL"
+
+# roles/apache2/tasks/main.yml
+# provision-apache2-servers.yml
+eramba_apache2_modules__to_merge:
+  headers: &apache2_standard_module
+    package: false
+  rewrite:
+    *apache2_standard_module
+  proxy_fcgi:
+    *apache2_standard_module
+
+# roles/apache2/tasks/main.yml
+# https://docs.mattermost.com/install/config-apache2.html
+eramba_apache2_sites__to_merge:
+  eramba-server-0.test:
+    configuration: |
+      <VirtualHost *:80>
+        ServerName eramba-server-0.test
+
+        DocumentRoot /var/www/eramba
+
+        ErrorLog ${APACHE_LOG_DIR}/eramba-error.log
+        CustomLog ${APACHE_LOG_DIR}/eramba-access.log combined
+
+        <Directory /var/www/eramba/>
+                Options +Indexes
+                AllowOverride All
+                Options FollowSymLinks 
+                Options -MultiViews
+                Require all granted
+        </Directory>
+
+      </VirtualHost>
+
+# provision-mattermost-servers.yml
+eramba_system_user_name:
+  "www-data"
+eramba_system_group_name:
+  "www-data"
+eramba_directory:
+  "/var/www/eramba"
+eramba_parent_directory:
+  "/var/www"
+eramba_archive_source:
+  "files/eramba_latest.tgz"
+eramba_version:
+  "e2.16.0"
+
+# provision_custom_systems.yml
+eramba_custom_packages__to_merge:
+  unzip: "present"
+  php7.3-common: "present"
+  php7.3-mysql: "present"
+  php7.3-curl: "present"
+  php7.3-bz2: "present"
+  php7.3-mbstring: "present"
+  php7.3-gd: "present"
+  php7.3-intl: "present"
+  php7.3-zip: "present"
+  php7.3-ldap: "present"
+  php7.3-xml: "present"
+# custom mysql settings
+# TODO: we need to trigger mysql and php-fpm to reload/restart
+eramba_paths__to_merge:
+  eramba_directory:
+    path: "{{ eramba_directory }}"
+    mode: "0775"
+    state: "directory"
+  /etc/mysql/mariadb.conf.d/99-server-local.cnf:
+    mode: "0664"
+    state: "copy"
+    content: |
+      # according to eramba install documentation (as of 9.7.2020)
+      # https://docs.google.com/document/d/1_w38Jb-qiWoDAkOSSgHlrr__bhOHrvoZWu9yinvAEjA
+      [mysqld]
+      max_allowed_packet='128M'
+      innodb_lock_wait_timeout='200'
+      sql_mode=''
+    notify: "service : mysql"
+# custom php.ini settings
+# https://wiki.debian.org/PHP#Debian_Stretch_and_up
+  /etc/php/7.3/fpm/conf.d/99-local.ini:
+    mode: "0664"
+    state: "copy"
+    content: |
+      ; according to eramba install documentation (as of 9.7.2020)
+      ; https://docs.google.com/document/d/1_w38Jb-qiWoDAkOSSgHlrr__bhOHrvoZWu9yinvAEjA
+      memory_limit = 4096M
+      post_max_size = 300M
+      file_uploads = On
+      upload_max_filesize = 300M
+      max_execution_time = 300
+      allow_url_fopen = On
+      max_input_vars = 3000
+      max_input_time = 600
+  /etc/php/7.3/cli/conf.d/99-local.ini:
+    src: "/etc/php/7.3/fpm/conf.d/99-local.ini"
+    state: "link"
+  /etc/cron.d/eramba:
+    mode: "0644"
+    state: "copy"
+    content: |
+      @hourly     www-data   /bin/bash -c "/var/www/eramba/app/Console/cake cron job hourly"
+      @daily     www-data   /bin/bash -c "/var/www/eramba/app/Console/cake cron job daily"
+      @yearly     www-data   /bin/bash -c "/var/www/eramba/app/Console/cake cron job yearly"
+# roles/mysql/server/defaults/main.yml
+# have to restart instead of reload because of the config tweaks above
+mysql_service_strategy:
+  "restart"
+
+# TODO: This requires a new role for PHP/FPM that provides a handler to reload the service
+# Currently a manual service restart is needed.
+#    notify: "service : php-fpm"
+
+# https://www.vagrantup.com/docs/vagrantfile/machine_settings.html
+vagrant_box:
+  "debian/buster64"
+
+# https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
+vagrant_groups:
+  - "apache2-servers"
+  - "mysql-servers"
+  - "lamp-servers"
+  - "eramba-servers"
+
+# https://www.vagrantup.com/intro/getting-started/networking.html
+vagrant_networks:
+  - private_network:
+      ip: "10.8.39.9"
+
+# https://www.vagrantup.com/docs/provisioning/ansible.html
+vagrant_playbooks:
+  - "provision-custom-systems.yml"
+  - "provision-eramba-servers.yml"
