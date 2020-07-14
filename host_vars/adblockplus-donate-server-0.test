@@ -28,12 +28,14 @@
 
 # tasks/paths.yml
 adblockplus_donate_server_test_custom_paths__to_merge:
-  "{{ adblockplus_donate_server_dir }}/etc/stripe.secret":
-    path: "{{ adblockplus_donate_server_dir }}/etc/stripe.secret"
-    state: "copy"
-    content: |
-      changeme
-    mode: "0644"
+# yamllint disable rule:comments-indentation
+#  "{{ adblockplus_donate_server_dir }}/etc/stripe.secret":
+#    path: "{{ adblockplus_donate_server_dir }}/etc/stripe.secret"
+#    state: "copy"
+#    content: |
+#      changeme
+#    mode: "0644"
+# yamllint enable rule:comments-indentation
   /var/www/adblockplus-donate-server-0.test:
     state: "directory"
     mode: "0755"
