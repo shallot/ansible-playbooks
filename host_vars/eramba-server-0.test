@@ -1,0 +1,64 @@
+# Copyright (c) 2020-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+# tasks/mysql-server.yml
+# https://gitlab.com/eyeo/devops/ansible-role-mysql
+eramba_database_password:
+  "changeme"
+
+# roles/apache2/tasks/main.yml
+eramba_apache2_sites__to_merge:
+  eramba-server-0.test:
+    configuration: |
+      <VirtualHost *:80>
+        ServerName eramba-server-0.test
+
+        DocumentRoot /var/www/eramba
+
+        ErrorLog ${APACHE_LOG_DIR}/eramba-error.log
+        CustomLog ${APACHE_LOG_DIR}/eramba-access.log combined
+
+        <Directory /var/www/eramba/>
+                Options +Indexes
+                AllowOverride All
+                Options FollowSymLinks
+                Options -MultiViews
+                Require all granted
+        </Directory>
+
+      </VirtualHost>
+
+# https://www.vagrantup.com/docs/vagrantfile/machine_settings.html
+vagrant_box:
+  "debian/buster64"
+
+# https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
+vagrant_groups:
+  - "apache2-servers"
+  - "mysql-servers"
+  - "lamp-servers"
+  - "eramba-servers"
+
+# https://www.vagrantup.com/intro/getting-started/networking.html
+vagrant_networks:
+  - private_network:
+      ip: "10.8.39.9"
+
+# https://www.vagrantup.com/docs/provisioning/ansible.html
+vagrant_playbooks:
+  - "provision-custom-systems.yml"
+  - "provision-eramba-servers.yml"

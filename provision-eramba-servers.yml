@@ -1,0 +1,69 @@
+# Copyright (c) 2020-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# This playbook is intended for development use only: Neither importing nor
+# including the role in other playbooks will cause evaluation of this file.
+---
+
+# https://docs.ansible.com/ansible/latest/user_guide/playbooks.html
+- name:
+    "provision-eramba-servers"
+
+  hosts:
+    "eramba-servers"
+
+  pre_tasks:
+    # https://docs.ansible.com/ansible/latest/import_tasks_module.html
+    - import_tasks:
+        "tasks/os/main.yml"
+
+  tasks:
+
+    # https://docs.ansible.com/ansible/latest/import_tasks_module.html
+    - import_tasks:
+        "tasks/apache2-php-fpm.yml"
+
+    # https://docs.ansible.com/ansible/latest/import_tasks_module.html
+    - import_tasks:
+        "tasks/mysql-server.yml"
+
+    # https://docs.ansible.com/ansible/latest/import_tasks_module.html
+    - import_tasks:
+        "tasks/paths.yml"
+      vars:
+        custom_paths_suffix:
+          "eramba_stage1_paths__to_merge"
+
+    # https://docs.ansible.com/ansible/latest/import_tasks_module.html
+    - import_tasks:
+        "tasks/eramba.yml"
+
+    # https://docs.ansible.com/ansible/latest/import_tasks_module.html
+    - import_tasks:
+        "tasks/paths.yml"
+      vars:
+        custom_paths_suffix:
+          "eramba_stage2_paths__to_merge"
+
+  handlers:
+
+    # https://docs.ansible.com/ansible/latest/modules/service_module.html
+    - name:
+        "service : php-fpm"
+      service:
+        name: "php{{ eramba_php_version }}-fpm"
+        state: "restarted"
+      become:
+        true

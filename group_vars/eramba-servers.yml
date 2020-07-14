@@ -1,0 +1,165 @@
+# Copyright (c) 2020-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+# provision-eramba-servers.yml
+eramba_system_user_name:
+  "www-data"
+eramba_system_group_name:
+  "www-data"
+eramba_directory:
+  "/var/www/eramba"
+eramba_parent_directory:
+  "/var/www"
+# The application code archive is a proprietary blob.
+# It needs to be manually downloaded using a license key
+# and then temporarily be placed somewhere in the inventory.
+eramba_archive_source:
+  "files/eramba_latest.tgz"
+eramba_version:
+  "e2.16.0"
+# as of 9.7.2020 eramba docs require PHP 7.3
+# TODO: Shall we verify / check this version against what our PHP role provides?
+# For now, just use PHP version from tasks/os/debian/buster/apache2-php-fpm.yml
+eramba_php_version:
+  "{{ php_version }}"
+
+# tasks/mysql-server.yml
+# https://gitlab.com/eyeo/devops/ansible-role-mysql
+eramba_database_name:
+  "eramba"
+eramba_database_user:
+  "eramba"
+eramba_database_schema_file:
+  "{{ eramba_directory }}/app/Config/db_schema/{{ eramba_version }}.sql"
+
+# https://docs.ansible.com/ansible/latest/modules/mysql_db_module.html
+eramba_mysql_databases__to_merge:
+  eramba_db:
+    name: "{{ eramba_database_name }}"
+    state: "present"
+    encoding: "UTF8"
+
+# https://docs.ansible.com/ansible/latest/modules/mysql_user_module.html
+eramba_mysql_users__to_merge:
+  eramba_user:
+    name: "{{ eramba_database_user }}"
+    state: "present"
+    password: "{{ eramba_database_password }}"
+    priv: "eramba.*:ALL"
+
+# roles/apache2/tasks/main.yml
+# provision-apache2-servers.yml
+eramba_apache2_modules__to_merge:
+  headers: &apache2_standard_module
+    package: false
+  rewrite:
+    *apache2_standard_module
+  proxy_fcgi:
+    *apache2_standard_module
+
+# provision_custom_systems.yml
+eramba_custom_packages__to_merge:
+  unzip: "present"
+  php-common: "present"
+  php-mysql: "present"
+  php-curl: "present"
+  php-bz2: "present"
+  php-mbstring: "present"
+  php-gd: "present"
+  php-intl: "present"
+  php-zip: "present"
+  php-ldap: "present"
+  php-xml: "present"
+  wkhtmltopdf: "present"
+
+eramba_stage1_paths__to_merge:
+  eramba_directory:
+    path: "{{ eramba_directory }}"
+    mode: "0775"
+    state: "directory"
+  # custom mysql settings
+  /etc/mysql/mariadb.conf.d/99-server-local.cnf:
+    mode: "0664"
+    state: "copy"
+    # yamllint disable rule:line-length
+    content: |
+      # according to eramba install documentation (as of 9.7.2020)
+      # https://docs.google.com/document/d/1_w38Jb-qiWoDAkOSSgHlrr__bhOHrvoZWu9yinvAEjA
+      [mysqld]
+      max_allowed_packet='128M'
+      innodb_lock_wait_timeout='200'
+      sql_mode=''
+    # yamllint enable rule:line-length
+    notify: "service : mysql"
+  # custom php.ini settings
+  # https://wiki.debian.org/PHP#Debian_Stretch_and_up
+  eramba_php_ini_fpm_local: &eramba_php_ini_local
+    dest: "/etc/php/{{ eramba_php_version }}/fpm/conf.d/99-local.ini"
+    mode: "0664"
+    state: "copy"
+    # yamllint disable rule:line-length
+    content: |
+      ; according to eramba install documentation (as of 9.7.2020)
+      ; https://docs.google.com/document/d/1_w38Jb-qiWoDAkOSSgHlrr__bhOHrvoZWu9yinvAEjA
+      memory_limit = 4096M
+      post_max_size = 300M
+      file_uploads = On
+      upload_max_filesize = 300M
+      max_execution_time = 300
+      allow_url_fopen = On
+      max_input_vars = 3000
+      max_input_time = 600
+    # yamllint enable rule:line-length
+    notify: "service : php-fpm"
+  eramba_php_ini_cli_local:
+    <<: *eramba_php_ini_local
+    dest: "/etc/php/{{ eramba_php_version }}/cli/conf.d/99-local.ini"
+  /etc/cron.d/eramba_local:
+    mode: "0644"
+    state: "copy"
+    # yamllint disable rule:line-length
+    content: |
+      @hourly     www-data   /bin/bash -c "/var/www/eramba/app/Console/cake cron job hourly"
+      @daily     www-data   /bin/bash -c "/var/www/eramba/app/Console/cake cron job daily"
+      @yearly     www-data   /bin/bash -c "/var/www/eramba/app/Console/cake cron job yearly"
+    # yamllint enable rule:line-length
+
+eramba_stage2_paths__to_merge:
+  eramba_database_config_file:
+    dest: "{{ eramba_directory }}/app/Config/database.php"
+    state: "copy"
+    content: |
+      <?php
+      class DATABASE_CONFIG {
+              public $default = array(
+                      'datasource' => 'Database/Mysql',
+                      'persistent' => false,
+                      'host' => 'localhost',
+                      'login' => '{{ eramba_database_user }}',
+                      'password' => '{{ eramba_database_password }}',
+                      'database' => '{{ eramba_database_name }}',
+                      'prefix' => '',
+                      'encoding' => 'utf8',
+              );
+      }
+    owner: "{{ eramba_system_user_name }}"
+    group: "{{ eramba_system_group_name }}"
+    mode: "0660"
+
+# roles/mysql/server/defaults/main.yml
+# have to restart instead of reload because of the config tweaks above
+mysql_service_strategy:
+  "restart"

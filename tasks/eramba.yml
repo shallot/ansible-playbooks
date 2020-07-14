@@ -1,0 +1,72 @@
+# Copyright (c) 2020-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+# https://docs.ansible.com/ansible/latest/modules/find_module.html
+- name:
+    "find : {{ eramba_directory }}"
+  find:
+    depth: 1
+    file_type: "any"
+    paths: "{{ eramba_directory }}"
+    recurse: false
+  changed_when:
+    false
+  register:
+    "eramba_directory_files"
+
+- block:
+    # https://docs.ansible.com/ansible/latest/modules/file_module.html
+    - name:
+        "file : {{ eramba_directory }}"
+      file:
+        path:
+          "{{ eramba_directory }}"
+        state:
+          "absent"
+    # https://docs.ansible.com/ansible/latest/modules/unarchive_module.html
+    - name:
+        "unarchive : eramba package"
+      unarchive:
+        dest: "{{ eramba_parent_directory }}"
+        group: "{{ eramba_system_group_name }}"
+        mode: "0775"
+        owner: "{{ eramba_system_user_name }}"
+        # yamllint disable rule:line-length
+        src: "{{ eramba_archive_source }}"
+        # yamllint enable rule:line-length
+        copy: true
+    # https://docs.ansible.com/ansible/latest/modules/command_module.html
+    - name:
+        "command : mv {{ eramba_parent_directory }}/eramba_v2"
+      command:
+        "mv {{ eramba_parent_directory }}/eramba_v2 {{ eramba_directory }}"
+    # WARNING: This should only be done on a fresh installation / database
+    # But this is generally true for this whole code block
+    # as it deletes / overwrites existing data
+    # https://docs.ansible.com/ansible/latest/modules/mysql_db_module.html
+    - name:
+        "mysql_db : import {{ eramba_database_schema_file }}"
+      mysql_db:
+        name: "{{ eramba_database_name }}"
+        state: "import"
+        target: "{{ eramba_database_schema_file }}"
+        login_user: "{{ eramba_database_user }}"
+        login_password: "{{ eramba_database_password }}"
+  when:
+    "eramba_directory_files.matched < 3"
+  become:
+    true
