@@ -26,7 +26,7 @@
 # create missing directories first
 # https://docs.ansible.com/ansible/latest/modules/file_module.html
 - name:
-    "create ssh key directories"
+    "file : ssh_keys"
   file:
     path: "{{ ssh_key.path | dirname }}"
     state: "directory"
@@ -38,7 +38,7 @@
 
 # https://docs.ansible.com/ansible/latest/modules/openssh_keypair_module.html
 - name:
-    "generate ssh_keys"
+    "openssh_keypair : ssh_keys"
   openssh_keypair:
     "{{ ssh_key }}"
   loop: "{{ ssh_keys }}"
