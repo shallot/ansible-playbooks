@@ -124,8 +124,8 @@ adblockplus_donate_server_deploy_custom_paths__to_merge:
 # tasks/services.yml
 adblockplus_donate_server_services__to_merge:
   adblockplus-donate-server:
-    enabled: true
-    state: "started"
+    enabled: "{{ adblockplus_donate_server_service_enabled }}"
+    state: "{{ adblockplus_donate_server_service_state }}"
     service:
       Unit:
         Description: "Run AdBlockPlus Donate server"

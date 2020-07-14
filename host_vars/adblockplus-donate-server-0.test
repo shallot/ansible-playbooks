@@ -71,6 +71,9 @@ adblockplus_donate_server_test_apache2_sites__to_merge:
       </VirtualHost>
     # yamllint enable rule:line-length
 
+adblockplus_donate_server_service_enabled: false
+adblockplus_donate_server_service_state: "stopped"
+
 # https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
 vagrant_groups:
   - "adblockplus-donate-servers"
