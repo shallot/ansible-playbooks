@@ -1,0 +1,128 @@
+# Copyright (c) 2020-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+# provision-adblockplus-donate-servers.yml
+# Because we re-using the gitlab-runner system user here, which is
+# provisioned by roles/gitlab/runner, in order to avoid the chicken
+# and egg problem between that and provision-custom-systems.yml, all later
+# references to this variable that evaluate at the time of provisioning
+# must come with a custom suffix that makes sure it won't choke up
+# provision-custom-systems.yml on initial bootstrap
+# References that evaluate later, at run-time, do not have to abide by this
+adblockplus_donate_system_username:
+  "gitlab-runner"
+
+# provision-adblockplus-donate-servers.yml
+adblockplus_donate_server_dir:
+  "/srv/adblockplus-donate-server"
+
+# tasks/paths.yml
+adblockplus_donate_server_prerequisite_paths__to_merge:
+  "{{ adblockplus_donate_server_dir }}":
+    path: "{{ adblockplus_donate_server_dir }}"
+    state: "directory"
+    mode: "0755"
+    owner: "{{ adblockplus_donate_system_username }}"
+  "{{ adblockplus_donate_server_dir }}/etc":
+    path: "{{ adblockplus_donate_server_dir }}/etc"
+    state: "directory"
+    mode: "0755"
+    owner: "{{ adblockplus_donate_system_username }}"
+
+# TODO: fully parametrize port 5000, match it to server.env
+adblockplus_donate_server_app_port:
+  "5000"
+
+# yamllint disable rule:line-length
+adblockplus_donate_server_app_proxy_custom_apache_config: |
+  ProxyPass /server-status !
+  ProxyPreserveHost On
+  ProxyPass / "http://localhost:{{ adblockplus_donate_server_app_port }}/"
+  ProxyPassReverse / "http://localhost:{{ adblockplus_donate_server_app_port }}/"
+# yamllint enable rule:line-length
+
+# roles/apache2/tasks/main.yml
+# provision-apache2-servers.yml
+adblockplus_donate_server_test_apache2_modules__to_merge:
+  vhost_alias: &apache2_standard_module
+    package: false
+  proxy_http:
+    *apache2_standard_module
+  rewrite:
+    *apache2_standard_module
+  ssl:
+    *apache2_standard_module
+
+# tasks/packages.yml
+adblockplus_donate_server_custom_packages__to_merge:
+  python3-pip: "present"
+  rsync: "present"
+  virtualenv: "present"
+
+# tasks/paths.yml
+adblockplus_donate_server_deploy_custom_paths__to_merge:
+  /usr/local/sbin/deploy-adblockplus-donate-server:
+    state: "copy"
+    mode: "0744"
+    content: |
+      #!/bin/sh -ex
+      user="{{ adblockplus_donate_system_username }}"
+      id "$user" || exit 1
+      dest_dir="{{ adblockplus_donate_server_dir }}"
+      test -d "$dest_dir" || exit 2
+      SOURCE_DIR=$1
+      test -d "$SOURCE_DIR" || exit 3
+      sudo install -d -o $user $dest_dir
+      sudo -u $user rsync -aHAX --del \
+                          --exclude=etc/stripe.secret \
+                          -vP --stats \
+                            $SOURCE_DIR/ \
+                            $dest_dir/
+      sudo systemctl status adblockplus-donate-server || true
+      sudo systemctl restart adblockplus-donate-server
+      sudo systemctl status adblockplus-donate-server
+  /etc/sudoers.d/deploy-adblockplus-donate-server:
+    state: "copy"
+    mode: "0440"
+    # yamllint disable rule:line-length
+    content: |
+      Defaults:gitlab-runner env_keep += "CI_COMMIT_REF_SLUG"
+      gitlab-runner ALL=(root) NOPASSWD: /usr/local/sbin/deploy-adblockplus-donate-server
+    # yamllint enable rule:line-length
+    validate:
+      "/usr/sbin/visudo --check --file=%s"
+
+# tasks/services.yml
+adblockplus_donate_server_services__to_merge:
+  adblockplus-donate-server:
+    enabled: true
+    state: "started"
+    service:
+      Unit:
+        Description: "Run AdBlockPlus Donate server"
+        After: "network.target"
+      Service:
+        Type: "simple"
+        User: "{{ adblockplus_donate_system_username }}"
+        EnvironmentFile: "{{ adblockplus_donate_server_dir }}/server.env"
+        # yamllint disable rule:line-length
+        ExecStart: "{{ adblockplus_donate_server_dir }}/bin/python3 \
+                    {{ adblockplus_donate_server_dir }}/adblockplusDonationServer.py"
+        # yamllint enable rule:line-length
+        Restart: "on-failure"
+      Install:
+        WantedBy: "multi-user.target"

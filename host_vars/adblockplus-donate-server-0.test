@@ -15,34 +15,10 @@
 
 ---
 
-# tasks/groups.yml
-# this tries to fix the chicken and egg problem between gitlab role
-# and custom system tasks
-adblockplus_donate_server_test_custom_groups__to_merge:
-  gitlab-runner:
-    gid: 998
-    state: "present"
-adblockplus_donate_server_test_custom_users__to_merge:
-  gitlab-runner:
-    uid: 998
-    group: "gitlab-runner"
-    state: "present"
-
-# provision-adblockplus-donate-servers.yml
-adblockplus_donate_system_username:
-  "gitlab-runner"
-adblockplus_donate_server_dir:
-  "/srv/adblockplus-donate-server"
-
 # tasks/paths.yml
-# TODO: ideally we'd just reference adblockplus_donate_server_dir here,
-# but it doesn't work
 adblockplus_donate_server_test_custom_paths__to_merge:
-  "/srv/adblockplus-donate-server/etc":
-    state: "directory"
-    mode: "0755"
-    owner: "gitlab-runner"
-  "/srv/adblockplus-donate-server/etc/stripe.secret":
+  "{{ adblockplus_donate_server_dir }}/etc/stripe.secret":
+    path: "{{ adblockplus_donate_server_dir }}/etc/stripe.secret"
     state: "copy"
     content: |
       changeme
@@ -54,17 +30,6 @@ adblockplus_donate_server_test_custom_paths__to_merge:
     state: "copy"
     src: "/dev/null"
     mode: "0644"
-# roles/apache2/tasks/main.yml
-# provision-apache2-servers.yml
-adblockplus_donate_server_test_apache2_modules__to_merge:
-  vhost_alias: &apache2_standard_module
-    package: false
-  proxy_http:
-    *apache2_standard_module
-  rewrite:
-    *apache2_standard_module
-  ssl:
-    *apache2_standard_module
 
 # roles/apache2/tasks/main.yml
 # provision-apache2-servers.yml
@@ -91,10 +56,7 @@ adblockplus_donate_server_test_apache2_sites__to_merge:
           Require all granted
         </Directory>
 
-        ProxyPass /server-status !
-        ProxyPreserveHost On
-        ProxyPass / "http://localhost:5000/"
-        ProxyPassReverse / "http://localhost:5000/"
+        {{ adblockplus_donate_server_app_proxy_custom_apache_config | indent(2) }}
 
       </VirtualHost>
     # yamllint enable rule:line-length

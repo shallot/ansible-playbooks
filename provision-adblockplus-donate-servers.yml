@@ -35,6 +35,33 @@
     - import_role:
         name: "gitlab/runner"
 
+    # NB: note ordering issue in group_vars/telemetry-pingv1-servers.yml
+    # that requires gitlab/runner to be run before
+    # adblockplus_donate_server_prerequisite_paths and
+    # adblockplus_donate_server_services
+
+    # https://docs.ansible.com/ansible/latest/import_tasks_module.html
+    - import_tasks:
+        "tasks/paths.yml"
+      vars:
+        custom_paths_suffix:
+          "adblockplus_donate_server_prerequisite_paths__to_merge"
+
     # https://docs.ansible.com/ansible/latest/import_tasks_module.html
     - import_tasks:
         "tasks/adblockplus-donate-server.yml"
+
+    # https://docs.ansible.com/ansible/latest/import_tasks_module.html
+    - import_tasks:
+        "tasks/services.yml"
+      vars:
+        custom_services_suffix:
+          "adblockplus_donate_server_services__to_merge"
+
+    # https://docs.ansible.com/ansible/latest/import_tasks_module.html
+    - import_tasks:
+        "tasks/paths.yml"
+
+    # https://docs.ansible.com/ansible/latest/import_tasks_module.html
+    - import_tasks:
+        "tasks/packages.yml"
