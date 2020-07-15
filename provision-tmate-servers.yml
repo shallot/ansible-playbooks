@@ -25,4 +25,4 @@
 
     # https://gitlab.com/eyeo/devops/ansible-playbooks/tree/master/roles/tmate
     - import_role:
-        name: "tmate/slave"
+        name: "tmate/ssh-server"

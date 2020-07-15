@@ -15,8 +15,8 @@
 
 ---
 
-tmate_slave_repository:
+tmate_ssh_server_repository:
   "https://gitlab.com/eyeo/devops/dependencies/tmate-ssh-server"
 
-tmate_slave_version:
+tmate_ssh_server_version:
   "master"

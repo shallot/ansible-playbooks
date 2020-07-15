@@ -16,7 +16,7 @@
 ---
 
 # Make `tmate show-messages` display the IP instead of the *.test hostname
-tmate_slave_hostname: &tmate_slave_ip
+tmate_ssh_server_hostname: &tmate_ssh_server_ip
   "10.8.100.200"
 
 # https://www.vagrantup.com/docs/vagrantfile/machine_settings.html
@@ -30,7 +30,7 @@ vagrant_groups:
 # https://www.vagrantup.com/intro/getting-started/networking.html
 vagrant_networks:
   - private_network:
-      ip: *tmate_slave_ip
+      ip: *tmate_ssh_server_ip
 
 # https://www.vagrantup.com/docs/provisioning/ansible.html
 vagrant_playbooks:
