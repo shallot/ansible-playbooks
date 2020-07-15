@@ -25,7 +25,7 @@ custom_ansible_authorized_keys:
 
 # A list of hosts/IP addresses that can be used to access
 # ansible@localhost:inventory on the Ansible host. In production,
-# this should include the addresses of any slave/backup Ansible hosts.
+# this should include the addresses of any backup Ansible hosts.
 custom_ansible_authorized_from_hosts:
   - "127.0.0.1"
   - "::1"
