@@ -28,7 +28,7 @@
 - name:
     "file : ssh_keys"
   file:
-    path: "{{ ssh_key.key | dirname }}"
+    path: "{{ ssh_key.value.path | default(ssh_key.key) | dirname }}"
     state: "directory"
   loop: "{{ ssh_keys | dict2items }}"
   loop_control:
@@ -41,7 +41,7 @@
     "openssh_keypair : ssh_keys"
   openssh_keypair:
     state: "present"
-    path: "{{ ssh_key.key | mandatory }}"
+    path: "{{ ssh_key.value.path | default(ssh_key.key) }}"
     type: "{{ ssh_key.value.type | default(omit) }}"
     size: "{{ ssh_key.value.size | default(omit) }}"
     owner: "{{ ssh_key.value.owner | default(omit) }}"
