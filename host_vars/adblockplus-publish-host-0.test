@@ -15,6 +15,10 @@
 
 ---
 
+# group_vars/nodejs-hosts.yml
+custom_nodejs_major_version:
+  "10.x"
+
 # https://www.vagrantup.com/docs/vagrantfile/machine_settings.html
 vagrant_box:
   "debian/buster64"
