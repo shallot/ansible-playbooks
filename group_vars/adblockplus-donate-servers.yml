@@ -95,18 +95,18 @@ adblockplus_donate_server_deploy_custom_paths__to_merge:
     mode: "0744"
     content: |
       #!/bin/sh -ex
-      user="{{ adblockplus_donate_system_username }}"
+      user='{{ adblockplus_donate_system_username }}'
       id "$user" || exit 1
-      dest_dir="{{ adblockplus_donate_server_dir }}"
+      dest_dir='{{ adblockplus_donate_server_dir }}'
       test -d "$dest_dir" || exit 2
       SOURCE_DIR=$1
       test -d "$SOURCE_DIR" || exit 3
-      sudo install -d -o $user $dest_dir
-      sudo -u $user rsync -aHAX --del \
+      sudo install -d -o "$user" "$dest_dir"
+      sudo -u "$user" rsync -aHAX --del \
                           --exclude=etc/stripe.secret \
                           -vP --stats \
-                            $SOURCE_DIR/ \
-                            $dest_dir/
+                            "$SOURCE_DIR/" \
+                            "$dest_dir/"
       sudo systemctl status adblockplus-donate-server || true
       sudo systemctl restart adblockplus-donate-server
       sudo systemctl status adblockplus-donate-server

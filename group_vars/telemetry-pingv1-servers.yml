@@ -72,17 +72,17 @@ deploy-telemetry-pingv1_custom_paths__to_merge:
     mode: "0744"
     content: |
       #!/bin/sh -ex
-      user="{{ telemetry_pingv1_system_username }}"
+      user='{{ telemetry_pingv1_system_username }}'
       id "$user" || exit 1
-      dest_dir="{{ telemetry_pingv1_server_dir }}"
+      dest_dir='{{ telemetry_pingv1_server_dir }}'
       test -d "$dest_dir" || exit 2
       SOURCE_DIR=$1
       test -d "$SOURCE_DIR" || exit 3
-      sudo install -d -o $user $dest_dir
-      sudo -u $user rsync -aHAX --del \
+      sudo install -d -o "$user" "$dest_dir"
+      sudo -u "$user" rsync -aHAX --del \
                           -vP --stats \
-                            $SOURCE_DIR/ \
-                            $dest_dir/
+                            "$SOURCE_DIR/" \
+                            "$dest_dir/"
       sudo systemctl status telemetry-pingv1-server || true
       sudo systemctl restart telemetry-pingv1-server
       sudo systemctl status telemetry-pingv1-server
