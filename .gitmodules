@@ -40,3 +40,6 @@
 [submodule "roles/libvirt"]
 	path = roles/libvirt
 	url = https://gitlab.com/eyeo/devops/ansible-role-libvirt.git
+[submodule "roles/gluster.infra"]
+	path = roles/gluster.infra
+	url = https://github.com/gluster/gluster-ansible-infra

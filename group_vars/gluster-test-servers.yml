@@ -1,0 +1,103 @@
+# Copyright (c) 2018-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+# hostname resolution between hosts
+# tasks/os/packages.yml
+dns_gluster_custom_packages__to_merge:
+  avahi-daemon: "present"
+  libnss-mdns: "present"
+
+# https://github.com/gluster/gluster-ansible-infra#backend_setup
+gluster_infra_stripe_unit_size: 128
+
+# https://github.com/gluster/gluster-ansible-infra#backend_setup
+gluster_infra_lvm:
+  autoexpand_threshold: 70
+  autoexpand_percentage: 15
+
+# https://github.com/gluster/gluster-ansible-infra#backend_setup
+gluster_infra_volume_groups:
+  - vgname: "vg0"
+    pvname: "/dev/vdb"
+  - vgname: "vg1"
+    pvname: "/dev/vdc"
+
+# https://github.com/gluster/gluster-ansible-infra#backend_setup
+gluster_infra_thinpools:
+  - vgname: "vg0"
+    thinpoolname: "thinpool"
+    thinpoolsize: "4G"
+    poolmetadatasize: "1G"
+  - vgname: "vg1"
+    thinpoolname: "thinpool"
+    thinpoolsize: "4G"
+    poolmetadatasize: "1G"
+
+# four LVs for four bricks
+# https://github.com/gluster/gluster-ansible-infra#backend_setup
+gluster_infra_lv_logicalvols:
+  - vgname: "vg0"
+    thinpool: "thinpool"
+    lvname: "brick0"
+    lvsize: "2G"
+  - vgname: "vg0"
+    thinpool: "thinpool"
+    lvname: "brick1"
+    lvsize: "2G"
+  - vgname: "vg1"
+    thinpool: "thinpool"
+    lvname: "brick2"
+    lvsize: "2G"
+  - vgname: "vg1"
+    thinpool: "thinpool"
+    lvname: "brick3"
+    lvsize: "2G"
+
+# four LVs for four bricks
+# https://github.com/gluster/gluster-ansible-infra#backend_setup
+gluster_infra_mount_devices:
+  - path: "/data/brick0"
+    vgname: "vg0"
+    lvname: "brick0"
+  - path: "/data/brick1"
+    vgname: "vg0"
+    lvname: "brick1"
+  - path: "/data/brick2"
+    vgname: "vg1"
+    lvname: "brick2"
+  - path: "/data/brick3"
+    vgname: "vg1"
+    lvname: "brick3"
+
+# tasks/gluster.yml
+gluster_cluster_hosts: "{{ ansible_play_batch \
+  | map('regex_replace', '\\.\\S+$', '') | list }}"
+
+# two bricks and two servers per volume
+# tasks/gluster.yml
+gluster_volumes:
+  - volume: "vol0"
+    bricks: "/data/brick0/store,/data/brick2/store"
+  - volume: "vol1"
+    bricks: "/data/brick1/store,/data/brick3/store"
+
+# tasks/gluster.yml
+gluster_cluster_replica_count: 2
+
+# tasks/gluster.yml
+gluster_cluster_options:
+  performance.cache-size: "256MB"
