@@ -21,7 +21,8 @@
   merge_variable:
     default: {}
     name: "ssh_keys"
-    suffix: "ssh_keys__to_merge"
+    suffix: "{{ ssh_keys_suffix
+              | default('ssh_keys__to_merge') }}"
 
 # create missing directories first
 # https://docs.ansible.com/ansible/latest/modules/file_module.html
