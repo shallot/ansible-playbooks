@@ -24,19 +24,6 @@
     suffix: "{{ ssh_keys_suffix
               | default('ssh_keys__to_merge') }}"
 
-# create missing directories first
-# https://docs.ansible.com/ansible/latest/modules/file_module.html
-- name:
-    "file : ssh_keys"
-  file:
-    path: "{{ ssh_key.value.path | default(ssh_key.key) | dirname }}"
-    state: "directory"
-  loop: "{{ ssh_keys | dict2items }}"
-  loop_control:
-    loop_var: "ssh_key"
-  become:
-    true
-
 # https://docs.ansible.com/ansible/latest/modules/openssh_keypair_module.html
 - name:
     "openssh_keypair : ssh_keys"
