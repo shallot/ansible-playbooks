@@ -1,0 +1,43 @@
+# Copyright (c) 2020-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+# make sure service is UP before issuing gluster commands further below
+# https://docs.ansible.com/ansible/latest/modules/service_module.html
+- name:
+    "glusterfs : service"
+  service:
+    name: "glusterd"
+    state: "started"
+    enabled: "yes"
+
+# https://docs.ansible.com/ansible/latest/modules/gluster_volume_module.html
+- name:
+    "glusterfs : volume"
+  gluster_volume:
+    state: "{{ gluster_cluster_state | default('present') }}"
+    volume: "{{ item.volume | mandatory }}"
+    bricks: "{{ item.bricks | mandatory }}"
+    cluster: "{{ gluster_cluster_hosts }}"
+    transport: "{{ gluster_cluster_transport | default('tcp') }}"
+    replicas: "{{ gluster_cluster_replica_count | default(0) }}"
+    arbiters: "{{ gluster_cluster_arbiter_count | default(0)}}"
+    disperses: "{{ gluster_cluster_disperse_count | default(0) }}"
+    redundancies: "{{ gluster_cluster_redundancy_count | default(0) }}"
+    force: "{{ gluster_cluster_force | default('no') }}"
+    options: "{{ gluster_cluster_options | default({}) }}"
+  run_once: true
+  loop: "{{ gluster_volumes }}"
