@@ -100,6 +100,11 @@ Vagrant.configure('2') do |vagrant|
       config.vm.provider('libvirt') do |libvirt|
         libvirt.cpus = hostvars.fetch('vagrant_cpus', 1)
         libvirt.memory = hostvars.fetch('vagrant_memory', 384)
+
+        hostvars.fetch('vagrant_extra_disks', []).each do |disk|
+          # https://github.com/vagrant-libvirt/vagrant-libvirt#additional-disks
+          libvirt.storage :file, disk
+        end
       end
 
       # https://www.vagrantup.com/intro/getting-started/networking.html
