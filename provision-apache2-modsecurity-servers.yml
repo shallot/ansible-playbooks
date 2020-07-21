@@ -31,5 +31,5 @@
     - import_tasks:
         "tasks/paths.yml"
       vars:
-        custom_paths:
-          "{{ custom_modsecurity_paths }}"
+        custom_paths_suffix:
+          "modsecurity_paths__to_merge"

@@ -41,7 +41,7 @@ apache2_logrotate_count:
 
 # provision-apache2-modsecurity-servers.yml
 # tasks/paths.yml
-custom_modsecurity_paths:
+host_specific_custom_modsecurity_paths__to_merge:
   /etc/modsecurity/modsecurity.conf:
     mode: "0644"
     state: "link"
