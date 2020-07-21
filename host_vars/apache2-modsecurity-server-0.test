@@ -15,7 +15,7 @@
 
 ---
 
-modsecurity_apache2_modules__to_merge:
+host_specific_modsecurity_apache2_modules__to_merge:
   proxy_http: &apache2_standard_module
     package: false
   ssl:
