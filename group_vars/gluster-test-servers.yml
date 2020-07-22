@@ -83,10 +83,6 @@ gluster_infra_mount_devices:
     vgname: "vg1"
     lvname: "brick3"
 
-# tasks/gluster.yml
-gluster_cluster_hosts: "{{ ansible_play_batch \
-  | map('regex_replace', '\\.\\S+$', '') | list }}"
-
 # two bricks and two servers per volume
 # tasks/gluster.yml
 gluster_volumes:
