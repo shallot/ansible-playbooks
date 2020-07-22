@@ -79,6 +79,11 @@ vagrant_box:
 vagrant_groups:
   - "examples.test"
 
+# https://www.vagrantup.com/intro/getting-started/networking.html
+vagrant_networks:
+  - private_network:
+      ip: "10.8.10.12"
+
 # https://www.vagrantup.com/docs/provisioning/ansible.html
 vagrant_playbooks:
   - "provision-custom-systems.yml"
