@@ -18,25 +18,36 @@
 # https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
 vagrant_groups:
   - "gluster-hosts"
-  - "gluster-servers"
-  - "gluster-test-servers"
+  - "gluster-clients"
 
 # https://www.vagrantup.com/intro/getting-started/networking.html
 vagrant_networks:
   - private_network:
-      ip: "10.8.111.10"
-
-# https://github.com/vagrant-libvirt/vagrant-libvirt#additional-disks
-vagrant_extra_disks:
-  - size: "5G"
-    device: "vdb"
-  - size: "5G"
-    device: "vdc"
+      ip: "10.8.111.20"
 
 # https://www.vagrantup.com/docs/provisioning/ansible.html
 vagrant_playbooks:
   - "provision-custom-systems.yml"
-  - "provision-gluster-servers.yml"
+  - "provision-gluster-clients.yml"
 
-vagrant_playbooks_limit:
-  - "gluster-servers"
+# create required directories
+# tasks/paths.yml
+gluster_mount_path_custom_paths__to_merge:
+  vol1:
+    path: "/data/vol0"
+    state: "directory"
+  vol2:
+    path: "/data/vol1"
+    state: "directory"
+
+gluster_mounts:
+  - path: "/data/vol0"
+    volume: "vol0"
+  - path: "/data/vol1"
+    volume: "vol1"
+
+# hostname resolution between hosts
+# tasks/os/packages.yml
+dns_gluster_custom_packages__to_merge:
+  avahi-daemon: "present"
+  libnss-mdns: "present"
