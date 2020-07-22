@@ -1,0 +1,60 @@
+# Copyright (c) 2020-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+- name:
+    "provision-filter-list-origin-hosts"
+
+  hosts:
+    "filter-list-origin-hosts"
+
+  tasks:
+
+    # https://docs.ansible.com/ansible/latest/import_tasks_module.html
+    - import_tasks:
+        "tasks/filter-list-origin-host-config.yml"
+
+    # https://docs.ansible.com/ansible/latest/import_tasks_module.html
+    - import_tasks:
+        "tasks/paths.yml"
+
+    # https://docs.ansible.com/ansible/latest/include_tasks_module.html
+    - include_tasks:
+        "tasks/sitescripts.yml"
+      vars:
+        sitescripts_git_version:
+          "{{ filter_list_origin_sitescripts_git_version
+            | default('master') }}"
+
+    # https://docs.ansible.com/ansible/latest/include_tasks_module.html
+    - include_tasks:
+        "tasks/filter-list-origin-host-hg.yml"
+      when:
+        "filter_list_origin_remote_hg is defined"
+
+    # https://docs.ansible.com/ansible/latest/include_tasks_module.html
+    - include_tasks:
+        "tasks/git.yml"
+      when:
+        "filter_list_origin_remote_git is defined"
+
+    # https://docs.ansible.com/ansible/latest/import_tasks_module.html
+    - import_tasks:
+        "tasks/cron-jobs.yml"
+
+    # https://docs.ansible.com/ansible/latest/import_tasks_module.html
+    - import_tasks:
+        "tasks/authorized-keys.yml"

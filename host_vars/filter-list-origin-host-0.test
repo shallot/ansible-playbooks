@@ -1,0 +1,155 @@
+# Copyright (c) 2020-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+# roles/openssh/server/tasks/main.yml
+# increased from the default of 10, for more capacity
+filter_list_origin_sshd_configuration__to_merge:
+  MaxSessions: 100
+  MaxStartups: 100
+
+# "{{ lookup('file',
+#             filter_list_origin_mirror_server_key_location + '.pub' )
+#  }}"
+filter_list_origin_mirror_ssh_key:
+  "ssh-rsa Example-filter_list_origin_mirror_ssh_key"
+
+filter_list_origin_mirror_user:
+  "rsync"
+
+filter_list_origin_base_dir:
+  "/home/{{ filter_list_origin_mirror_user }}"
+
+sitescripts_system_username:
+  "sitescripts"
+
+filter_list_origin_sitescripts_git_version:
+  "master"
+
+# disabled until all mirrors exist there
+# filter_list_origin_remote_git:
+#   "https://gitlab.com/eyeo/filterlists"
+# shallow clone on test, to save bandwidth and time
+# filter_list_origin_git_depth:
+#   1
+
+filter_list_origin_remote_hg:
+  "https://hg.adblockplus.org"
+
+filter_list_origin_repos:
+  easylist:
+    clone: true
+    sitescripts: true
+  easylistgermany:
+    clone: true
+    sitescripts: true
+  easylistitaly:
+    clone: true
+    sitescripts: true
+  easylistchina:
+    clone: true
+    sitescripts: true
+  easylistcombinations:
+    clone: true
+    sitescripts: true
+  easylistspanish:
+    clone: true
+    sitescripts: true
+  ruadlist:
+    clone: true
+    sitescripts: true
+  listefr:
+    clone: true
+    sitescripts: true
+  easylistdutch:
+    clone: true
+    sitescripts: true
+  antiadblockfilters:
+    clone: true
+    sitescripts: true
+  listear:
+    clone: true
+    sitescripts: true
+  customfilterlists:
+    clone: true
+    sitescripts: true
+  abpvn:
+    clone: true
+    sitescripts: true
+  exceptionrules:
+    clone: true
+    sitescripts: true
+  contentblockerlists:
+    clone: true
+    sitescripts: false
+    compress_all: true
+  crumbsfilterlist:
+    clone: true
+    sitescripts: true
+  filterlist-splitting:
+    gitlab_artifacts: true
+    gitlab_project: "eyeo/monetization/filterlist-splitting"
+    gitlab_ref: "main"
+
+# cron job timings correlated with filter_server_mirror_cron_job_minute
+# this one takes ~0.2s
+filter_list_origin_output_final_cron_job_time:
+  "8-58/10"
+
+# this one takes 4+ minutes
+filter_list_origin_update_subscription_cron_job_time:
+  "4-54/10"
+
+# this one takes a couple of minutes as well, but less without hgrc 7za calls
+filter_list_origin_update_repos_cron_job_time:
+  "9-59/10"
+
+# this one can run in parallel with update_repos as it's orthogonal to it
+filter_list_origins_gitlab_artifacts_cron_job_time:
+  "9-59/10"
+
+# this one takes ~30s
+filter_list_origin_compress_files_cron_job_time:
+  "*/10"
+
+# this is based on the /10 modifiers in *_cron_job_time above
+# 6 per hour per day per 1 month
+filter_list_origin_save_logs:
+  "{{ ( (60 / 10) * 24 * 30 ) | int }}"
+
+# https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
+vagrant_groups:
+  - "filter-list-origin-hosts"
+
+# https://www.vagrantup.com/docs/vagrantfile/machine_settings.html
+vagrant_box:
+  "debian/stretch64"
+
+# https://www.vagrantup.com/docs/providers/configuration
+vagrant_memory:
+  896
+
+# https://www.vagrantup.com/intro/getting-started/networking.html
+vagrant_networks:
+  - private_network:
+      ip: "10.8.111.33"
+
+# https://www.vagrantup.com/docs/provisioning/ansible.html
+vagrant_playbooks:
+  - "provision-custom-systems.yml"
+  - "provision-filter-list-origin-hosts.yml"
+  - "provision-ssh-keys.yml"
+  - "provision-custom-shells.yml"

@@ -1,0 +1,111 @@
+# Copyright (c) 2021-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+# https://docs.ansible.com/ansible/latest/modules/set_fact_module.html
+- name:
+    "set_fact : filter_list_origin_repos_sitescripts_ini_settings__to_merge"
+  set_fact:
+    filter_list_origin_repos_sitescripts_ini_settings__to_merge:
+      "{{ filter_list_origin_repos_sitescripts_ini_settings__to_merge
+        | default([])
+        + [{
+            'section': 'subscriptionDownloads',
+            'key': ini_key,
+            'value': '%(root)s/' + repo.key
+          }]
+        }}"
+  loop_control:
+    loop_var: "repo"
+    label: "{{ [repo.key, ini_key] | to_json }}"
+  loop:
+    "{{ filter_list_origin_repos | dict2items }}"
+  vars:
+    ini_key: "{{ repo.key +
+                 (filter_list_origin_remote_git is defined)
+                 | ternary('_directory', '_repository')
+               }}"
+  when:
+    - "repo.value and 'sitescripts' in repo.value"
+    - "repo.value.sitescripts"
+
+# https://docs.ansible.com/ansible/latest/modules/set_fact_module.html
+- name:
+    "set_fact : filter_list_origin_repos_git_checkouts__to_merge"
+  set_fact:
+    filter_list_origin_repos_git_checkouts__to_merge:
+      "{{ filter_list_origin_repos_git_checkouts__to_merge
+        | default({})
+        | combine({
+            repo.key: {
+              'repo': repo_remote,
+              'dest': repo_local,
+              'user': filter_list_origin_mirror_user,
+              'depth': filter_list_origin_git_depth
+            }
+          })
+        }}"
+  loop_control:
+    loop_var: "repo"
+    label: "{{ [repo.key, repo_remote, repo_local ] | to_json }}"
+  loop:
+    "{{ filter_list_origin_repos | dict2items }}"
+  vars:
+    filter_list_origin_repos_git_checkouts__to_merge: {}
+    repo_remote: "{{ filter_list_origin_remote_git
+                     | default('') +
+                     '/' + repo.key }}"
+    repo_local: "{{ filter_list_origin_inputs +
+                    '/' + repo.key }}"
+  when:
+    - "repo.value and 'clone' in repo.value"
+    - "repo.value.clone"
+    - "filter_list_origin_remote_git is defined"
+
+# https://docs.ansible.com/ansible/latest/modules/set_fact_module.html
+- name:
+    "set_fact : filter_list_origin_gitlab_artifacts_custom_paths__to_merge"
+  set_fact:
+    filter_list_origin_gitlab_artifacts_custom_paths__to_merge:
+      "{{ filter_list_origin_gitlab_artifacts_custom_paths__to_merge
+        | default({})
+        | combine({
+            repo.key: {
+              'dest': filter_list_origin_inputs + '/' + repo.key,
+              'owner': filter_list_origin_mirror_user,
+              'state': 'directory',
+            }
+          })
+        | combine({
+            repo.key + '/' + repo.value.gitlab_project: {
+              'dest': filter_list_origin_inputs + '/' + repo.key + '/'
+                      + repo.value.gitlab_project
+                        | urlencode | replace('/', '%2F'),
+              'owner': filter_list_origin_mirror_user,
+              'state': 'copy',
+              'content': repo.value.gitlab_ref | default('master'),
+            }
+          })
+        }}"
+  loop_control:
+    loop_var: "repo"
+  loop:
+    "{{ filter_list_origin_repos | dict2items }}"
+  vars:
+    filter_list_origin_gitlab_artifacts_custom_paths__to_merge: {}
+  when:
+    "repo.value and 'gitlab_artifacts' in repo.value and
+     repo.value.gitlab_artifacts"
