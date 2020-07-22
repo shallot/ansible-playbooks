@@ -1,0 +1,33 @@
+# Copyright (c) 2020-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+- name:
+    "hg : clone : {{ filter_list_origin_remote_hg }}/{{ item.key }}"
+  hg:
+    repo: "{{ filter_list_origin_remote_hg }}/{{ item.key }}"
+    dest: "{{ filter_list_origin_inputs }}/{{ item.key }}"
+  become:
+    "yes"
+  become_user:
+    "{{ filter_list_origin_mirror_user }}"
+  loop:
+    "{{ filter_list_origin_repos | dict2items }}"
+  when:
+    "item.value.clone is not false"
+
+# TODO: implement the old incremental filter list updates code?
+# manifests/iflu.pp

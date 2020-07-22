@@ -1,0 +1,249 @@
+# Copyright (c) 2021-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+filter_list_origin_base_dir:
+  "/home/{{ filter_list_origin_mirror_user }}"
+filter_list_origin_logs:
+  "{{ filter_list_origin_base_dir }}/log"
+filter_list_origin_inputs_hg:
+  "{{ filter_list_origin_base_dir }}/subscription"
+filter_list_origin_inputs_git:
+  "{{ filter_list_origin_base_dir }}/subscription-git"
+filter_list_origin_inputs:
+  "{{ (filter_list_origin_remote_git is defined)
+    | ternary(filter_list_origin_inputs_git | default('fail'),
+              filter_list_origin_inputs_hg)
+    }}"
+filter_list_origin_outputs:
+  "{{ filter_list_origin_base_dir }}/generated"
+filter_list_origin_final_output:
+  "{{ filter_list_origin_base_dir }}/final_output"
+
+filter_list_origin_mirror_user:
+  "rsync"
+
+# tasks/users.yml
+filter_list_origin_custom_users__to_merge:
+  rsync:
+    name: "{{ filter_list_origin_mirror_user }}"
+    comment: "Filter list mirror user"
+    shell: "/bin/sh"
+
+# tasks/paths.yml
+filter_list_origin_ssh_keys_dirs_custom_paths__to_merge:
+  "{{ filter_list_origin_base_dir }}/.ssh":
+    dest: "{{ filter_list_origin_base_dir }}/.ssh"
+    state: "directory"
+    owner: "{{ filter_list_origin_mirror_user }}"
+    group: "{{ filter_list_origin_mirror_user }}"
+    mode: "0700"
+
+filter_list_origin_mirror_server_key_location:
+  "{{ filter_list_origin_base_dir }}/.ssh/id_rsa"
+
+# tasks/ssh-keys.yml
+filter_list_origin_mirror_custom_ssh_keys__to_merge:
+  id_rsa:
+    path: "{{ filter_list_origin_mirror_server_key_location }}"
+    type: "rsa"
+    size: 4096
+    owner: "{{ filter_list_origin_mirror_user }}"
+    group: "{{ filter_list_origin_mirror_user }}"
+
+# tasks/authorized-keys.yml
+filter_list_origin_custom_authorized_keys__to_merge:
+  rsync:
+    user: "{{ filter_list_origin_mirror_user }}"
+    key: "{{ filter_list_origin_mirror_ssh_key }}"
+    key_options:
+      - "no-agent-forwarding"
+      - "no-port-forwarding"
+      - "no-pty"
+      - "no-X11-forwarding"
+      # NB: this used to live in the equivalent of sshd_config__to_merge,
+      # but once the rsync user connects with this key, they can't override
+      # the command anyway
+      - >-
+        command=\"rsync --server --sender -vltprz --delete-excluded
+        {{ filter_list_origin_final_output }}"
+
+# tasks/paths.yml
+filter_list_origin_update_repos_custom_paths__to_merge:
+  "{{ filter_list_origin_base_dir }}/update_subscription_downloads.sh":
+    dest: "{{ filter_list_origin_base_dir }}/update_subscription_downloads.sh"
+    src: "files/filter-list-origin-host/update_subscription_downloads.sh"
+    state: "template"
+    owner: "{{ filter_list_origin_mirror_user }}"
+    group: "{{ filter_list_origin_mirror_user }}"
+    mode: "0755"
+  "{{ filter_list_origin_base_dir }}/update_repos.sh":
+    dest: "{{ filter_list_origin_base_dir }}/update_repos.sh"
+    src: "files/filter-list-origin-host/update_repos.sh"
+    state: "template"
+    owner: "{{ filter_list_origin_mirror_user }}"
+    group: "{{ filter_list_origin_mirror_user }}"
+    mode: "0755"
+  "{{ filter_list_origin_base_dir }}/compose_final_output.sh":
+    dest: "{{ filter_list_origin_base_dir }}/compose_final_output.sh"
+    src: "files/filter-list-origin-host/compose_final_output.sh"
+    state: "template"
+    owner: "{{ filter_list_origin_mirror_user }}"
+    group: "{{ filter_list_origin_mirror_user }}"
+    mode: "0755"
+  "{{ filter_list_origin_base_dir }}/compress_files.sh":
+    dest: "{{ filter_list_origin_base_dir }}/compress_files.sh"
+    src: "files/filter-list-origin-host/compress_files.sh"
+    state: "template"
+    owner: "{{ filter_list_origin_mirror_user }}"
+    group: "{{ filter_list_origin_mirror_user }}"
+    mode: "0755"
+  "{{ filter_list_origin_base_dir }}/fetch_gitlab_artifacts.sh":
+    dest: "{{ filter_list_origin_base_dir }}/fetch_gitlab_artifacts.sh"
+    src: "files/filter-list-origin-host/fetch_gitlab_artifacts.sh"
+    state: "template"
+    owner: "{{ filter_list_origin_mirror_user }}"
+    group: "{{ filter_list_origin_mirror_user }}"
+    mode: "0755"
+  "{{ filter_list_origin_logs }}":
+    dest: "{{ filter_list_origin_logs }}"
+    state: "directory"
+    owner: "{{ filter_list_origin_mirror_user }}"
+    group: "{{ filter_list_origin_mirror_user }}"
+  "{{ filter_list_origin_inputs }}":
+    dest: "{{ filter_list_origin_inputs }}"
+    state: "directory"
+    owner: "{{ filter_list_origin_mirror_user }}"
+    group: "{{ filter_list_origin_mirror_user }}"
+  "{{ filter_list_origin_outputs }}":
+    dest: "{{ filter_list_origin_outputs }}"
+    state: "directory"
+    owner: "{{ filter_list_origin_mirror_user }}"
+    group: "{{ filter_list_origin_mirror_user }}"
+  "{{ filter_list_origin_outputs }}/gzip":
+    dest: "{{ filter_list_origin_outputs }}/gzip"
+    state: "directory"
+    owner: "{{ filter_list_origin_mirror_user }}"
+    group: "{{ filter_list_origin_mirror_user }}"
+  "{{ filter_list_origin_outputs }}/gitlab_artifacts":
+    dest: "{{ filter_list_origin_outputs }}/gitlab_artifacts"
+    state: "directory"
+    owner: "{{ filter_list_origin_mirror_user }}"
+    group: "{{ filter_list_origin_mirror_user }}"
+
+# roles/eyeo/sitescripts/tasks/main.yml
+filter_list_origin_preamble_sitescripts_ini_settings__to_merge:
+  - section: "DEFAULT"
+    key: "root"
+    value: "{{ filter_list_origin_inputs }}"
+  - section: "subscriptionDownloads"
+    key: "outdir"
+    value: "{{ filter_list_origin_outputs }}"
+
+# tasks/packages.yml
+filter_list_origin_custom_packages__to_merge:
+  p7zip-full: "present"
+  mercurial: "present"
+  curl: "present"
+  jq: "present"
+
+filter_list_origin_compress_subscriptions: >-
+  {%- for key, value in filter_list_origin_repos | dictsort -%}
+  {%-   if value and 'compress_all' in value -%}
+  {{ key }}
+  {%-   endif -%}
+  {%- endfor -%}
+
+filter_list_origin_gitlab_artifacts_subscriptions: >-
+  {%- for key, value in filter_list_origin_repos | dictsort -%}
+  {%-   if value and 'gitlab_artifacts' in value -%}
+  {{ key }}
+  {%-   endif -%}
+  {%- endfor -%}
+
+filter_list_origin_update_subscription_command: >-
+  {{ filter_list_origin_base_dir }}/update_subscription_downloads.sh >
+  {{ filter_list_origin_logs }}/update_subscription_downloads.log
+
+filter_list_origin_update_repos_command: >-
+  {{ filter_list_origin_base_dir }}/update_repos.sh >
+  {{ filter_list_origin_logs }}/update_repos.log
+
+filter_list_origin_gitlab_artifacts_command: >-
+  for sub in {{ filter_list_origin_gitlab_artifacts_subscriptions }}; do
+  {{ filter_list_origin_base_dir }}/fetch_gitlab_artifacts.sh
+  {{ filter_list_origin_inputs }}/$sub
+  {{ filter_list_origin_outputs }}/gitlab_artifacts
+  ; done >
+  {{ filter_list_origin_logs }}/fetch_gitlab_artifacts.log
+
+filter_list_origin_compress_files_command: >-
+  for sub in {{ filter_list_origin_compress_subscriptions }}; do
+  {{ filter_list_origin_base_dir }}/compress_files.sh
+  {{ filter_list_origin_inputs }}/$sub
+  {{ filter_list_origin_outputs }}/gzip
+  ; done >
+  {{ filter_list_origin_logs }}/compress_files.log
+
+filter_list_origin_output_final_command: >-
+  {{ filter_list_origin_base_dir }}/compose_final_output.sh >
+  {{ filter_list_origin_logs }}/compose_final_output.log
+
+# tasks/cron-jobs.yml
+filter_list_origin_custom_cron_jobs__to_merge:
+  update_subscription:
+    name: "update_subscription"
+    minute: "{{ filter_list_origin_update_subscription_cron_job_time }}"
+    user: "{{ filter_list_origin_mirror_user }}"
+    job: "{{ filter_list_origin_update_subscription_command }}"
+  update_repos:
+    name: "update_repos"
+    minute: "{{ filter_list_origin_update_repos_cron_job_time }}"
+    user: "{{ filter_list_origin_mirror_user }}"
+    job: "{{ filter_list_origin_update_repos_command }}"
+  compress_files:
+    name: "compress_files"
+    minute: "{{ filter_list_origin_compress_files_cron_job_time }}"
+    user: "{{ filter_list_origin_mirror_user }}"
+    job: "{{ filter_list_origin_compress_files_command }}"
+  gitlab_artifacts:
+    name: "gitlab_artifacts"
+    minute: "{{ filter_list_origins_gitlab_artifacts_cron_job_time }}"
+    user: "{{ filter_list_origin_mirror_user }}"
+    job: "{{ filter_list_origin_gitlab_artifacts_command }}"
+  output_final:
+    name: "output_final"
+    minutes: "{{ filter_list_origin_output_final_cron_job_time }}"
+    user: "{{ filter_list_origin_mirror_user }}"
+    job: "{{ filter_list_origin_output_final_command }}"
+
+# tasks/shells.yml
+filter_list_origin_cron_custom_shells__to_merge:
+  filter_list_origin_1_first_update_subscription:
+    cmd: "{{ filter_list_origin_update_subscription_command }}"
+    become_user: "{{ filter_list_origin_mirror_user }}"
+  filter_list_origin_2_first_update_repos:
+    cmd: "{{ filter_list_origin_update_repos_command }}"
+    become_user: "{{ filter_list_origin_mirror_user }}"
+  filter_list_origin_2_first_gitlab_artifacts:
+    cmd: "{{ filter_list_origin_gitlab_artifacts_command }}"
+    become_user: "{{ filter_list_origin_mirror_user }}"
+  filter_list_origin_3_first_compress_files:
+    cmd: "{{ filter_list_origin_compress_files_command }}"
+    become_user: "{{ filter_list_origin_mirror_user }}"
+  filter_list_origin_4_first_output_final:
+    cmd: "{{ filter_list_origin_output_final_command }}"
+    become_user: "{{ filter_list_origin_mirror_user }}"

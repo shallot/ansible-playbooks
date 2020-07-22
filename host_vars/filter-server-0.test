@@ -19,11 +19,14 @@
 filter_server_mirror_user:
   "rsync"
 
+# group_vars/filter-list-origin-hosts.yml filter_list_origin_final_output
 filter_origin_server_spec:
-  "rsync@filtermaster.adblockplus.org"
+  "rsync@filtermaster.adblockplus.org:/home/rsync/output/"
 
+# cron job timing here correlated with
+# filter_list_origin_output_final_cron_job_time
 filter_server_mirror_cron_job_minute:
-  0
+  "2-52/10"
 
 filter_origin_max_delete:
   100

@@ -154,6 +154,11 @@ eyeo-cms-web-server-0:
   variables:
     TEST_HOST: "eyeo-cms-web-server-0.test"
 
+filter-list-origin-host-0:
+  extends: ".vagrantjob"
+  variables:
+    TEST_HOST: "filter-list-origin-host-0.test"
+
 filter-server-0:
   extends: ".vagrantjob"
   variables:
