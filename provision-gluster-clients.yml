@@ -1,4 +1,4 @@
-# Copyright (c) 2020-present eyeo GmbH
+# Copyright (c) 2018-present eyeo GmbH
 #
 # This module is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,11 +15,15 @@
 
 ---
 
-# tasks/packages.yml
-gluster_custom_packages__to_merge:
-  lvm2: "present"
-  xfsprogs: "present"
-  glusterfs-server: "latest"
+- name:
+    "provision-gluster-clients"
 
-# tasks/gluster.yml
-gluster_cluster_hosts: "{{ groups['gluster-servers'] }}"
+  hosts:
+    "gluster-clients"
+
+  tasks:
+
+    # https://docs.ansible.com/ansible/latest/import_tasks_module.html
+    - import_tasks:
+        "tasks/gluster-mount.yml"
+      become: true

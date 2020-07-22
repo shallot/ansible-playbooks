@@ -15,11 +15,15 @@
 
 ---
 
-# tasks/packages.yml
-gluster_custom_packages__to_merge:
-  lvm2: "present"
-  xfsprogs: "present"
-  glusterfs-server: "latest"
-
-# tasks/gluster.yml
-gluster_cluster_hosts: "{{ groups['gluster-servers'] }}"
+# https://docs.ansible.com/ansible/latest/modules/mount_module.html
+- name:
+    "glusterfs : mount"
+  mount:
+    fstype: "glusterfs"
+    state: "mounted"
+    src: "{{ groups['gluster-servers'].0 | mandatory }}\
+      :/{{ item.volume | mandatory }}"
+    opts:
+      "backupvolfile-server={{ groups['gluster-servers'].1 | default(omit) }}"
+    path: "{{ item.path | mandatory }}"
+  loop: "{{ gluster_mounts | mandatory }}"
