@@ -20,10 +20,6 @@ vagrant_groups:
   - "gluster-servers"
   - "gluster-test-servers"
 
-# https://www.vagrantup.com/docs/vagrantfile/machine_settings.html
-vagrant_box:
-  "debian/buster64"
-
 # https://www.vagrantup.com/intro/getting-started/networking.html
 vagrant_networks:
   - private_network:
