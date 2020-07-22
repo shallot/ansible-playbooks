@@ -19,10 +19,6 @@
 tmate_ssh_server_hostname: &tmate_ssh_server_ip
   "10.8.100.200"
 
-# https://www.vagrantup.com/docs/vagrantfile/machine_settings.html
-vagrant_box:
-  "debian/buster64"
-
 # https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
 vagrant_groups:
   - "tmate-servers"

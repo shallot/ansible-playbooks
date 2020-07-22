@@ -50,10 +50,6 @@ libvirt_guests:
     ram: "16G"
     os_variant: "debian10"
 
-# https://www.vagrantup.com/docs/vagrantfile/machine_settings.html
-vagrant_box:
-  "debian/buster64"
-
 # https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
 vagrant_groups:
   - "libvirt-hosts"

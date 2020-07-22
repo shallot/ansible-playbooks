@@ -42,10 +42,6 @@ eramba_apache2_sites__to_merge:
 
       </VirtualHost>
 
-# https://www.vagrantup.com/docs/vagrantfile/machine_settings.html
-vagrant_box:
-  "debian/buster64"
-
 # https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
 vagrant_groups:
   - "apache2-servers"

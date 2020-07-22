@@ -38,10 +38,6 @@ apk_signing_custom_users__to_merge:
   NonSigningUser:
     comment: "Arbitrary user NOT allowed so sign packages"
 
-# https://www.vagrantup.com/docs/vagrantfile/machine_settings.html
-vagrant_box:
-  "debian/buster64"
-
 # https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
 vagrant_groups:
   - "apk-signing-hosts"

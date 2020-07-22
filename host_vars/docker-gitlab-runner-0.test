@@ -23,10 +23,6 @@ host_specific_docker_host_images__to_merge:
 host_specific_docker_host_group_members__to_merge:
   vagrant: null
 
-# https://www.vagrantup.com/docs/vagrantfile/machine_settings.html
-vagrant_box:
-  "debian/buster64"
-
 # https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
 vagrant_groups:
   - "docker-gitlab-runners"
