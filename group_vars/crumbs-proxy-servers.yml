@@ -1,0 +1,94 @@
+# Copyright (c) 2020-present eyeo GmbH
+#
+# This is CONFIDENTIAL content: you shall neither copy nor distribute the
+# content herein without prior permission! Matze will kill you otherwise.
+
+---
+
+
+# tasks/paths.yml
+crumbsproxy_custom_paths__to_merge:
+  /etc/security/limits.d/crumbsproxy.conf:
+    state: "copy"
+    owner: "root"
+    group: "root"
+    mode: "0444"
+    content: |
+      * soft nofile 51200
+      * hard nofile 51200
+
+crumbsproxy_systemd_custom_paths__to_merge:
+  /etc/sysctl.d/crumbsproxy.conf:
+    state: "copy"
+    owner: "root"
+    group: "root"
+    mode: "0444"
+    content: |
+      fs.file-max = 51200
+
+      net.core.rmem_max = 67108864
+      net.core.wmem_max = 67108864
+      net.core.netdev_max_backlog = 250000
+      net.core.somaxconn = 4096
+
+      net.ipv4.tcp_syncookies = 1
+      net.ipv4.tcp_tw_reuse = 1
+      net.ipv4.tcp_tw_recycle = 0
+      net.ipv4.tcp_fin_timeout = 30
+      net.ipv4.tcp_keepalive_time = 1000
+      net.ipv4.ip_local_port_range = 10000 65000
+      net.ipv4.tcp_max_syn_backlog = 8192
+      net.ipv4.tcp_max_tw_buckets = 5000
+      net.ipv4.tcp_fastopen = 3
+      net.ipv4.tcp_mem = 25600 51200 102400
+      net.ipv4.tcp_rmem = 4096 87380 67108864
+      net.ipv4.tcp_wmem = 4096 65536 67108864
+      net.ipv4.tcp_mtu_probing = 1
+      net.ipv4.tcp_congestion_control = hybla
+    notify: "procps : reload"
+
+crumbsproxy_danted_custom_paths__to_merge:
+  /etc/danted.conf:
+    state: "copy"
+    owner: "root"
+    group: "root"
+    mode: "0444"
+    content: |
+      internal: eth0 port = 1080
+      external: 51.75.89.125
+      clientmethod: none
+      socksmethod: none
+      
+      # default client pass
+      client pass {
+                            from: 0.0.0.0/0 to: 0.0.0.0/0
+               log: error
+      }
+      
+      # filter where they are allowed to go
+      socks pass {
+              from: 0.0.0.0/0 to: tools.flattr.net
+              log: connect error disconnect
+      }
+      socks pass {
+              from: 0.0.0.0/0 to: .crumbs.org
+              log: connect error disconnect
+      }
+      
+      # block non matching above
+      socks block {
+                           from: 0.0.0.0/0 to: 0.0.0.0/0
+              log: error
+      }
+    notify: "service : state"
+      
+# tasks/packages.yml
+crumbsproxy_custom_packages__to_merge:
+  ca-certificates: "present"
+  curl: "present"
+  dante-server: "present"
+  wget: "present"
+
+crumbsproxy_custom_handlers__to_merge:
+  danted: "restarted"
+

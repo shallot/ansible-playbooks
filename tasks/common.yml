@@ -24,3 +24,14 @@
       skip: true
   loop_control:
     loop_var: "custom_common_tasks"
+
+# need to merge custom_handlers here due to the full handlers include not being run by handlers:
+# action_plugins/merge_variable.py
+- name:
+    "merge_variable : custom_handlers"
+  merge_variable:
+    default: {}
+    name: "custom_handlers"
+    suffix: "{{ custom_handlers_suffix
+              | default('custom_handlers__to_merge') }}"
+
