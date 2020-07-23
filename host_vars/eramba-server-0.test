@@ -14,6 +14,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 ---
+# tasks/eramba.yml
+# The application code archive is a proprietary blob.
+# It needs to be manually downloaded using a license key
+# and then temporarily be placed somewhere in the inventory.
+eramba_archive_source:
+  "files/eramba_latest.tgz"
 
 # tasks/mysql-server.yml
 # https://gitlab.com/eyeo/devops/ansible-role-mysql

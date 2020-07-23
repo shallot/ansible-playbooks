@@ -23,11 +23,6 @@ eramba_directory:
   "/var/www/eramba"
 eramba_parent_directory:
   "/var/www"
-# The application code archive is a proprietary blob.
-# It needs to be manually downloaded using a license key
-# and then temporarily be placed somewhere in the inventory.
-eramba_archive_source:
-  "files/eramba_latest.tgz"
 eramba_version:
   "e2.16.0"
 # as of 9.7.2020 eramba docs require PHP 7.3
