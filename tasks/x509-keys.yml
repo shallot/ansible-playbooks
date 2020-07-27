@@ -1,0 +1,54 @@
+# Copyright (c) 2020-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+# action_plugins/merge_variable.py
+- name:
+    "merge_variable : x509_keys"
+  merge_variable:
+    default: {}
+    name: "x509_keys"
+    suffix: "{{ x509_keys_suffix
+              | default('x509_keys__to_merge') }}"
+
+# https://docs.ansible.com/ansible/latest/modules/openssl_privatekey_module.html
+- name:
+    "openssl_privatekey : x509_keys"
+  openssl_privatekey:
+    attributes: "{{ key.value.attributes | default(omit) }}"
+    backup: "{{ key.value.backup | default(omit) }}"
+    cipher: "{{ key.value.cipher | default(omit) }}"
+    curve: "{{ key.value.curve | default(omit) }}"
+    force: "{{ key.value.force | default(omit) }}"
+    group: "{{ key.value.group | default(omit) }}"
+    mode: "{{ key.value.mode | default(omit) }}"
+    owner: "{{ key.value.owner | default(omit) }}"
+    passphrase: "{{ key.value.passphrase | default(omit) }}"
+    path: "{{ key.value.path | mandatory }}"
+    select_crypto_backend:
+      "{{ key.value.select_crypto_backend | default(omit) }}"
+    selevel: "{{ key.value.selevel | default(omit) }}"
+    serole: "{{ key.value.serole | default(omit) }}"
+    setype: "{{ key.value.setype | default(omit) }}"
+    seuser: "{{ key.value.seuser | default(omit) }}"
+    size: "{{ key.value.size | default(omit) }}"
+    state: "{{ key.value.state | default(omit) }}"
+    type: "{{ key.value.type | default(omit) }}"
+    unsafe_writes: "{{ key.value.unsafe_writes | default(omit) }}"
+  loop: "{{ x509_keys | dict2items }}"
+  loop_control:
+    loop_var: "key"
+  become: true

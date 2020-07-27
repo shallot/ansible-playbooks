@@ -1,0 +1,117 @@
+# Copyright (c) 2020-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+# action_plugins/merge_variable.py
+- name:
+    "merge_variable : x509_certs"
+  merge_variable:
+    default: {}
+    name: "x509_certs"
+    suffix: "{{ x509_certs_suffix
+              | default('x509_certs__to_merge') }}"
+
+# https://docs.ansible.com/ansible/latest/modules/openssl_certificate_module.html
+- name:
+    "openssl_certificate : x509_certs"
+  openssl_certificate:
+    acme_accountkey_path:
+      "{{ cert.value.acme_accountkey_path | default(omit) }}"
+    acme_chain: "{{ cert.value.acme_chain | default(omit) }}"
+    acme_challenge_path: "{{ cert.value.acme_challenge_path | default(omit) }}"
+    attributes: "{{ cert.value.attributes | default(omit) }}"
+    backup: "{{ cert.value.backup | default(omit) }}"
+    csr_path: "{{ cert.value.csr_path | default(omit) }}"
+    entrust_api_client_cert_key_path:
+      "{{ cert.value.entrust_api_client_cert_key_path | default(omit) }}"
+    entrust_api_client_cert_path:
+      "{{ cert.value.entrust_api_client_cert_path | default(omit) }}"
+    entrust_api_key: "{{ cert.value.entrust_api_key | default(omit) }}"
+    entrust_api_specification_path:
+      "{{ cert.value.entrust_api_specification_path | default(omit) }}"
+    entrust_api_user: "{{ cert.value.entrust_api_user | default(omit) }}"
+    entrust_cert_type: "{{ cert.value.entrust_cert_type | default(omit) }}"
+    entrust_not_after: "{{ cert.value.entrust_not_after | default(omit) }}"
+    entrust_requester_email:
+      "{{ cert.value.entrust_requester_email | default(omit) }}"
+    entrust_requester_name:
+      "{{ cert.value.entrust_requester_name | default(omit) }}"
+    entrust_requester_phone:
+      "{{ cert.value.entrust_requester_phone | default(omit) }}"
+    extended_key_usage:
+      "{{ cert.value.extended_key_usage | default(omit) }}"
+    extended_key_usage_strict:
+      "{{ cert.value.extended_key_usage_strict | default(omit) }}"
+    force: "{{ cert.value.force | default(omit) }}"
+    group: "{{ cert.value.group | default(omit) }}"
+    has_expired: "{{ cert.value.has_expired | default(omit) }}"
+    invalid_at: "{{ cert.value.invalid_at | default(omit) }}"
+    issuer: "{{ cert.value.issuer | default(omit) }}"
+    issuer_strict: "{{ cert.value.issuer_strict | default(omit) }}"
+    key_usage: "{{ cert.value.key_usage | default(omit) }}"
+    key_usage_strict: "{{ cert.value.key_usage_strict | default(omit) }}"
+    mode: "{{ cert.value.mode | default(omit) }}"
+    not_after: "{{ cert.value.not_after | default(omit) }}"
+    not_before: "{{ cert.value.not_before | default(omit) }}"
+    ownca_create_authority_key_identifier:
+      "{{ cert.value.ownca_create_authority_key_identifier | default(omit) }}"
+    ownca_create_subject_key_identifier:
+      "{{ cert.value.ownca_create_subject_key_identifier | default(omit) }}"
+    ownca_digest: "{{ cert.value.ownca_digest | default(omit) }}"
+    ownca_not_after: "{{ cert.value.ownca_not_after | default(omit) }}"
+    ownca_not_before: "{{ cert.value.ownca_not_before | default(omit) }}"
+    ownca_path: "{{ cert.value.ownca_path | default(omit) }}"
+    ownca_privatekey_passphrase:
+      "{{ cert.value.ownca_privatekey_passphrase | default(omit) }}"
+    ownca_privatekey_path:
+      "{{ cert.value.ownca_privatekey_path | default(omit) }}"
+    ownca_version: "{{ cert.value.ownca_version | default(omit) }}"
+    owner: "{{ cert.value.owner | default(omit) }}"
+    path: "{{ cert.value.path | mandatory }}"
+    privatekey_passphrase:
+      "{{ cert.value.privatekey_passphrase | default(omit) }}"
+    privatekey_path: "{{ cert.value.privatekey_path | default(omit) }}"
+    provider: "{{ cert.value.provider | default(omit) }}"
+    select_crypto_backend:
+      "{{ cert.value.select_crypto_backend | default(omit) }}"
+    selevel: "{{ cert.value.selevel | default(omit) }}"
+    selfsigned_create_subject_key_identifier: "{{ cert.value.\
+      selfsigned_create_subject_key_identifier | default(omit) }}"
+    selfsigned_digest: "{{ cert.value.selfsigned_digest | default(omit) }}"
+    selfsigned_not_after:
+      "{{ cert.value.selfsigned_not_after | default(omit) }}"
+    selfsigned_not_before:
+      "{{ cert.value.selfsigned_not_before | default(omit) }}"
+    selfsigned_version:
+      "{{ cert.value.selfsigned_version | default(omit) }}"
+    serole: "{{ cert.value.serole | default(omit) }}"
+    setype: "{{ cert.value.setype | default(omit) }}"
+    seuser: "{{ cert.value.seuser | default(omit) }}"
+    signature_algorithms:
+      "{{ cert.value.signature_algorithms | default(omit) }}"
+    state: "{{ cert.value.state | default(omit) }}"
+    subject: "{{ cert.value.subject | default(omit) }}"
+    subject_alt_name: "{{ cert.value.subject_alt_name | default(omit) }}"
+    subject_alt_name_strict:
+      "{{ cert.value.subject_alt_name_strict | default(omit) }}"
+    subject_strict: "{{ cert.value.subject_strict | default(omit) }}"
+    unsafe_writes: "{{ cert.value.unsafe_writes | default(omit) }}"
+    valid_at: "{{ cert.value.valid_at | default(omit) }}"
+    valid_in: "{{ cert.value.valid_in | default(omit) }}"
+    version: "{{ cert.value.version | default(omit) }}"
+  loop: "{{ x509_certs | dict2items }}"
+  loop_control:
+    loop_var: "cert"
+  become: true
