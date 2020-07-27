@@ -1,0 +1,83 @@
+# Copyright (c) 2018-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+# https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
+vagrant_groups:
+  - "ca-servers"
+
+# https://www.vagrantup.com/intro/getting-started/networking.html
+vagrant_networks:
+  - private_network:
+      ip: "10.8.123.10"
+
+# https://www.vagrantup.com/docs/provisioning/ansible.html
+vagrant_playbooks:
+  - "provision-custom-systems.yml"
+  - "provision-ca-servers.yml"
+
+# tasks/paths.yml
+test_ca_custom_paths__to_merge:
+  testca:
+    path: "/opt/ca/test-ca"
+    state: "directory"
+
+# tasks/x509-keys.yml
+test_x509_keys__to_merge:
+  testca:
+    path: "/opt/ca/test-ca/test-ca.key"
+    passphrase: "test"
+    cipher: "auto"
+  testcert:
+    path: "/opt/ca/test-ca/test-cert.key"
+    passphrase: "test2"
+    cipher: "auto"
+
+# tasks/x509-csrs.yml
+test_x509_csrs__to_merge:
+  testca:
+    privatekey_path: "/opt/ca/test-ca/test-ca.key"
+    privatekey_passphrase: "test"
+    path: "/opt/ca/test-ca/test-ca-csr.pem"
+    common_name: "Test CA"
+    key_usage_critical: "yes"
+    key_usage:
+      - "Certificate Sign"
+      - "CRL Sign"
+    basic_constraints_critical: "yes"
+    basic_constraints:
+      - "CA:TRUE"
+  testcert:
+    privatekey_path: "/opt/ca/test-ca/test-cert.key"
+    privatekey_passphrase: "test2"
+    path: "/opt/ca/test-ca/test-cert-csr.pem"
+    common_name: "Test Cert"
+
+# tasks/x509-certificates.yml
+test_x509_certs__to_merge:
+  testca:
+    privatekey_path: "/opt/ca/test-ca/test-ca.key"
+    privatekey_passphrase: "test"
+    csr_path: "/opt/ca/test-ca/test-ca-csr.pem"
+    path: "/opt/ca/test-ca/test-ca.pem"
+    provider: "selfsigned"
+  testcert:
+    csr_path: "/opt/ca/test-ca/test-cert-csr.pem"
+    path: "/opt/ca/test-ca/test-cert.pem"
+    provider: "ownca"
+    ownca_path: "/opt/ca/test-ca/test-ca.pem"
+    ownca_privatekey_path: "/opt/ca/test-ca/test-ca.key"
+    ownca_privatekey_passphrase: "test"

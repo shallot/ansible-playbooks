@@ -1,0 +1,90 @@
+# Copyright (c) 2020-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+# action_plugins/merge_variable.py
+- name:
+    "merge_variable : x509_csrs"
+  merge_variable:
+    default: {}
+    name: "x509_csrs"
+    suffix: "{{ x509_csrs_suffix
+              | default('x509_csrs__to_merge') }}"
+
+# https://docs.ansible.com/ansible/latest/modules/openssl_csr_module.html
+- name:
+    "openssl_csr : x509_csrs"
+  openssl_csr:
+    attributes: "{{ csr.value.attributes | default(omit) }}"
+    authority_cert_issuer:
+      "{{ csr.value.authority_cert_issuer | default(omit) }}"
+    authority_cert_serial_number:
+      "{{ csr.value.authority_cert_serial_number | default(omit) }}"
+    authority_key_identifier:
+      "{{ csr.value.authority_key_identifier | default(omit) }}"
+    backup: "{{ csr.value.backup | default(omit) }}"
+    basic_constraints: "{{ csr.value.basic_constraints | default(omit) }}"
+    basic_constraints_critical:
+      "{{ csr.value.basic_constraints_critical | default(omit) }}"
+    common_name: "{{ csr.value.common_name | default(omit) }}"
+    country_name: "{{ csr.value.country_name | default(omit) }}"
+    create_subject_key_identifier:
+      "{{ csr.value.create_subject_key_identifier | default(omit) }}"
+    digest: "{{ csr.value.digest | default(omit) }}"
+    email_address: "{{ csr.value.email_address | default(omit) }}"
+    extended_key_usage: "{{ csr.value.extended_key_usage | default(omit) }}"
+    extended_key_usage_critical:
+      "{{ csr.value.extended_key_usage_critical | default(omit) }}"
+    force: "{{ csr.value.force | default(omit) }}"
+    group: "{{ csr.value.group | default(omit) }}"
+    key_usage: "{{ csr.value.key_usage | default(omit) }}"
+    key_usage_critical: "{{ csr.value.key_usage_critical | default(omit) }}"
+    locality_name: "{{ csr.value.locality_name | default(omit) }}"
+    mode: "{{ csr.value.mode | default(omit) }}"
+    ocsp_must_staple: "{{ csr.value.ocsp_must_staple | default(omit) }}"
+    ocsp_must_staple_critical:
+      "{{ csr.value.ocsp_must_staple_critical | default(omit) }}"
+    organization_name: "{{ csr.value.organization_name | default(omit) }}"
+    organizational_unit_name:
+      "{{ csr.value.organizational_unit_name | default(omit) }}"
+    owner: "{{ csr.value.owner | default(omit) }}"
+    path: "{{ csr.value.path | mandatory }}"
+    privatekey_passphrase:
+      "{{ csr.value.privatekey_passphrase | default(omit) }}"
+    privatekey_path: "{{ csr.value.privatekey_path | default(omit) }}"
+    select_crypto_backend:
+      "{{ csr.value.select_crypto_backend | default(omit) }}"
+    selevel: "{{ csr.value.selevel | default(omit) }}"
+    serole: "{{ csr.value.serole | default(omit) }}"
+    setype: "{{ csr.value.setype | default(omit) }}"
+    seuser: "{{ csr.value.seuser | default(omit) }}"
+    state: "{{ csr.value.state | default(omit) }}"
+    state_or_province_name:
+      "{{ csr.value.state_or_province_name | default(omit) }}"
+    subject: "{{ csr.value.subject | default(omit) }}"
+    subject_alt_name: "{{ csr.value.subject_alt_name | default(omit) }}"
+    subject_alt_name_critical:
+      "{{ csr.value.subject_alt_name_critical | default(omit) }}"
+    subject_key_identifier:
+      "{{ csr.value.subject_key_identifier | default(omit) }}"
+    unsafe_writes: "{{ csr.value.unsafe_writes | default(omit) }}"
+    use_common_name_for_san:
+      "{{ csr.value.use_common_name_for_san | default(omit) }}"
+    version: "{{ csr.value.version | default(omit) }}"
+  loop: "{{ x509_csrs | dict2items }}"
+  loop_control:
+    loop_var: "csr"
+  become: true
