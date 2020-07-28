@@ -15,6 +15,24 @@
 
 ---
 
+# https://docs.ansible.com/ansible/latest/modules/file_module.html
+- name:
+    "file : tls-mgmt"
+  file:
+    state: "directory"
+    path: "/var/lib/glusterd"
+  when: "gluster_client_tls is defined"
+  become: true
+
+# https://docs.ansible.com/ansible/latest/modules/file_module.html
+- name:
+    "file : tls-client"
+  file:
+    state: "{{ gluster_client_tls | ternary('touch', 'absent') }}"
+    path: "/var/lib/glusterd/secure-access"
+  when: "gluster_client_tls is defined"
+  become: true
+
 # https://docs.ansible.com/ansible/latest/modules/mount_module.html
 - name:
     "glusterfs : mount"
@@ -27,3 +45,4 @@
       "backupvolfile-server={{ groups['gluster-servers'].1 | default(omit) }}"
     path: "{{ item.path | mandatory }}"
   loop: "{{ gluster_mounts | mandatory }}"
+  become: true

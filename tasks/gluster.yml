@@ -15,23 +15,34 @@
 
 ---
 
-# make sure service is UP before issuing gluster commands further below
+# https://docs.ansible.com/ansible/latest/modules/file_module.html
+- name:
+    "file : tls-mgmt"
+  file:
+    state: "{{ gluster_mgmt_tls | ternary('touch', 'absent') }}"
+    path: "/var/lib/glusterd/secure-access"
+  when: "gluster_mgmt_tls is defined"
+  register: "gluster_mgmt"
+  become: true
+
+# restart service after the encryption file was created
 # https://docs.ansible.com/ansible/latest/modules/service_module.html
 - name:
-    "glusterfs : service"
+    "service : glusterd"
   service:
     name: "glusterd"
-    state: "started"
+    state: "{{ gluster_mgmt.changed | ternary('restarted', 'started') }}"
     enabled: "yes"
+  become: true
 
 # https://docs.ansible.com/ansible/latest/modules/gluster_volume_module.html
 - name:
-    "glusterfs : volume"
+    "gluster_volume : create"
   gluster_volume:
-    state: "{{ gluster_cluster_state | default('present') }}"
-    volume: "{{ item.volume | mandatory }}"
+    state: "{{ item.state | default('present') }}"
+    volume: "{{ item.name | mandatory }}"
     bricks: "{{ item.bricks | mandatory }}"
-    cluster: "{{ gluster_cluster_hosts }}"
+    cluster: "{{ gluster_cluster_hosts | mandatory }}"
     transport: "{{ gluster_cluster_transport | default('tcp') }}"
     replicas: "{{ gluster_cluster_replica_count | default(0) }}"
     arbiters: "{{ gluster_cluster_arbiter_count | default(0)}}"
@@ -39,5 +50,61 @@
     redundancies: "{{ gluster_cluster_redundancy_count | default(0) }}"
     force: "{{ gluster_cluster_force | default('no') }}"
     options: "{{ gluster_cluster_options | default({}) }}"
+    start_on_create: false
   run_once: true
-  loop: "{{ gluster_volumes }}"
+  loop: "{{ gluster_volumes | mandatory }}"
+  become: true
+
+# https://docs.ansible.com/ansible/latest/modules/command_module.html
+- name:
+    "command : tls-server"
+  command:
+    cmd: "gluster volume set {{ item.name | mandatory }} \
+      server.ssl {{ item.tls | ternary('on', 'off') }}"
+  run_once: true
+  when: "item.tls is defined"
+  loop: "{{ gluster_volumes | mandatory }}"
+  become: true
+
+# https://docs.ansible.com/ansible/latest/modules/command_module.html
+- name:
+    "command : tls-client"
+  command:
+    cmd: "gluster volume set {{ item.name | mandatory }} \
+      client.ssl {{ item.tls | ternary('on', 'off') }}"
+  run_once: true
+  when: "item.tls is defined"
+  loop: "{{ gluster_volumes | mandatory }}"
+  become: true
+
+# https://docs.ansible.com/ansible/latest/modules/command_module.html
+- name:
+    "command : allow"
+  command:
+    cmd: "gluster volume set {{ item.name | mandatory }} \
+      auth.ssl-allow {{ item.allow | join(',') }}"
+  run_once: true
+  when: "item.allow is defined"
+  loop: "{{ gluster_volumes | mandatory }}"
+  become: true
+
+# https://docs.ansible.com/ansible/latest/modules/command_module.html
+- name:
+    "command : reject"
+  command:
+    cmd: "gluster volume set {{ item.name | mandatory }} \
+      auth.ssl-reject {{ item.reject | join(',') }}"
+  run_once: true
+  when: "item.reject is defined"
+  loop: "{{ gluster_volumes | mandatory }}"
+  become: true
+
+# https://docs.ansible.com/ansible/latest/modules/gluster_volume_module.html
+- name:
+    "gluster_volume : start"
+  gluster_volume:
+    state: "started"
+    volume: "{{ item.name | mandatory }}"
+  run_once: true
+  loop: "{{ gluster_volumes | mandatory }}"
+  become: true

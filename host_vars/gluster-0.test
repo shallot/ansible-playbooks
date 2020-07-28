@@ -18,6 +18,7 @@
 # https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
 vagrant_groups:
   - "gluster-hosts"
+  - "gluster-test-hosts"
   - "gluster-servers"
   - "gluster-test-servers"
 

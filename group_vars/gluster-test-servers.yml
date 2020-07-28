@@ -15,12 +15,6 @@
 
 ---
 
-# hostname resolution between hosts
-# tasks/os/packages.yml
-dns_gluster_custom_packages__to_merge:
-  avahi-daemon: "present"
-  libnss-mdns: "present"
-
 # https://github.com/gluster/gluster-ansible-infra#backend_setup
 gluster_infra_stripe_unit_size: 128
 
@@ -86,10 +80,16 @@ gluster_infra_mount_devices:
 # two bricks and two servers per volume
 # tasks/gluster.yml
 gluster_volumes:
-  - volume: "vol0"
+  - name: "vol0"
     bricks: "/data/brick0/store,/data/brick2/store"
-  - volume: "vol1"
+    tls: true
+    allow:
+      - "gluster-client-0.test"
+  - name: "vol1"
     bricks: "/data/brick1/store,/data/brick3/store"
+    tls: true
+    allow:
+      - "gluster-client-0.test"
 
 # tasks/gluster.yml
 gluster_cluster_replica_count: 2
@@ -97,3 +97,6 @@ gluster_cluster_replica_count: 2
 # tasks/gluster.yml
 gluster_cluster_options:
   performance.cache-size: "256MB"
+
+# tasks/gluster.yml
+gluster_mgmt_tls: true

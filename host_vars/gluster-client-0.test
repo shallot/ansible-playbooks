@@ -18,6 +18,7 @@
 # https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
 vagrant_groups:
   - "gluster-hosts"
+  - "gluster-test-hosts"
   - "gluster-clients"
 
 # https://www.vagrantup.com/intro/getting-started/networking.html
@@ -46,8 +47,5 @@ gluster_mounts:
   - path: "/data/vol1"
     volume: "vol1"
 
-# hostname resolution between hosts
-# tasks/os/packages.yml
-dns_gluster_custom_packages__to_merge:
-  avahi-daemon: "present"
-  libnss-mdns: "present"
+# tasks/gluster-mount.yml
+gluster_client_tls: true
