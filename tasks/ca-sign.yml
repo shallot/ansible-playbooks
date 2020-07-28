@@ -1,0 +1,92 @@
+# Copyright (c) 2020-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+# https://docs.ansible.com/ansible/latest/import_tasks_module.html
+- import_tasks:
+    "tasks/x509-keys.yml"
+
+# https://docs.ansible.com/ansible/latest/import_tasks_module.html
+- import_tasks:
+    "tasks/x509-csrs.yml"
+
+# https://docs.ansible.com/ansible/latest/modules/fetch_module.html
+- name:
+    "fetch : csr"
+  fetch:
+    src: "{{ item.value.path | mandatory }}"
+    dest: "/tmp/{{ inventory_hostname }}/"
+    flat: "yes"
+  loop: "{{ x509_csrs | dict2items }}"
+  become: true
+
+# https://docs.ansible.com/ansible/latest/modules/copy_module.html
+- name:
+    "copy : csr"
+  copy:
+    src: "/tmp/{{ inventory_hostname }}/{{ item.value.path | basename }}"
+    dest: "{{ item.value.remote_path | mandatory }}"
+  loop: "{{ x509_csrs | dict2items }}"
+  delegate_to: "{{ groups['ca-servers'].0 }}"
+  become: true
+
+# https://docs.ansible.com/ansible/latest/import_tasks_module.html
+- import_tasks:
+    "tasks/x509-certs.yml"
+  delegate_to: "{{ groups['ca-servers'].0 }}"
+
+# https://docs.ansible.com/ansible/latest/modules/fetch_module.html
+- name:
+    "fetch : cert"
+  fetch:
+    src: "{{ item.value.path | mandatory }}"
+    dest: "/tmp/{{ inventory_hostname }}/"
+    flat: "yes"
+  loop: "{{ x509_certs | dict2items }}"
+  delegate_to: "{{ groups['ca-servers'].0 }}"
+  become: true
+
+# https://docs.ansible.com/ansible/latest/modules/copy_module.html
+- name:
+    "copy : cert"
+  copy:
+    src: "/tmp/{{ inventory_hostname }}/{{ item.value.path | basename }}"
+    dest: "{{ item.value.remote_path | mandatory }}"
+  loop: "{{ x509_certs | dict2items }}"
+  become: true
+
+# https://docs.ansible.com/ansible/latest/modules/fetch_module.html
+- name:
+    "fetch : cacert"
+  fetch:
+    src: "{{ item.value.ownca_path | mandatory }}"
+    dest: "/tmp/{{ inventory_hostname }}/"
+    flat: "yes"
+  when: "item.value.remote_ca_path is defined"
+  loop: "{{ x509_certs | dict2items }}"
+  delegate_to: "{{ groups['ca-servers'].0 }}"
+  become: true
+
+# https://docs.ansible.com/ansible/latest/modules/copy_module.html
+- name:
+    "copy : cacert"
+  copy:
+    src: "/tmp/{{ inventory_hostname }}/{{ item.value.ownca_path | basename }}"
+    dest: "{{ item.value.remote_ca_path | mandatory }}"
+  when: "item.value.remote_ca_path is defined"
+  loop: "{{ x509_certs | dict2items }}"
+  become: true
+
