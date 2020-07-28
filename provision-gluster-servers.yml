@@ -23,6 +23,10 @@
 
   tasks:
 
+    # https://docs.ansible.com/ansible/latest/import_tasks_module.html
+    - import_tasks:
+        "tasks/ca-sign.yml"
+
     # https://github.com/gluster/gluster-ansible-infra
     # https://docs.ansible.com/ansible/latest/import_tasks_module.html
     - import_role:
@@ -32,4 +36,3 @@
     # https://docs.ansible.com/ansible/latest/import_tasks_module.html
     - import_tasks:
         "tasks/gluster.yml"
-      become: true

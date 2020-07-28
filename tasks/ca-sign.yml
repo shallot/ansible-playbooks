@@ -89,4 +89,3 @@
   when: "item.value.remote_ca_path is defined"
   loop: "{{ x509_certs | dict2items }}"
   become: true
-

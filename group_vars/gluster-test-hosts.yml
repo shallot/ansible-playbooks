@@ -1,0 +1,52 @@
+# Copyright (c) 2020-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+# hostname resolution between hosts
+# tasks/os/packages.yml
+dns_gluster_custom_packages__to_merge:
+  avahi-daemon: "present"
+  libnss-mdns: "present"
+
+# tasks/packages.yml
+gluster_x509_custom_packages__to_merge:
+  openssl: "present"
+  python-cryptography: "present"
+
+# tasks/ca-sign.yml
+gluster_x509_keys__to_merge:
+  gluster:
+    path: "/etc/ssl/glusterfs.key"
+
+# tasks/ca-sign.yml
+gluster_x509_csrs__to_merge:
+  gluster:
+    privatekey_path: "/etc/ssl/glusterfs.key"
+    path: "/etc/ssl/glusterfs-csr.pem"
+    remote_path: "/opt/ca/test-ca/glusterfs-{{ inventory_hostname }}-csr.pem"
+    common_name: "{{ inventory_hostname }}"
+
+# tasks/ca-sign.yml
+gluster_x509_certs__to_merge:
+  gluster:
+    csr_path: "/opt/ca/test-ca/glusterfs-{{ inventory_hostname }}-csr.pem"
+    path: "/opt/ca/test-ca/glusterfs-{{ inventory_hostname }}.pem"
+    remote_path: "/etc/ssl/glusterfs.pem"
+    remote_ca_path: "/etc/ssl/glusterfs.ca"
+    provider: "ownca"
+    ownca_path: "/opt/ca/test-ca/test-ca.pem"
+    ownca_privatekey_path: "/opt/ca/test-ca/test-ca.key"
+    ownca_privatekey_passphrase: "test"
