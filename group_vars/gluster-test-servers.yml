@@ -77,17 +77,25 @@ gluster_infra_mount_devices:
     vgname: "vg1"
     lvname: "brick3"
 
+gluster_cipher_list:
+  - "ECDHE-ECDSA-AES256-GCM-SHA384"
+  - "ECDHE-RSA-AES256-GCM-SHA384"
+  - "ECDHE-ECDSA-CHACHA20-POLY1305"
+  - "ECDHE-RSA-CHACHA20-POLY1305"
+
 # two bricks and two servers per volume
 # tasks/gluster.yml
 gluster_volumes:
   - name: "vol0"
     bricks: "/data/brick0/store,/data/brick2/store"
     tls: true
+    cipher_list: "{{ gluster_cipher_list | join(':') }}"
     allow:
       - "gluster-client-0.test"
   - name: "vol1"
     bricks: "/data/brick1/store,/data/brick3/store"
     tls: true
+    cipher_list: "{{ gluster_cipher_list | join(':') }}"
     allow:
       - "gluster-client-0.test"
 

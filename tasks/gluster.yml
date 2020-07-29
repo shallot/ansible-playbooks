@@ -99,6 +99,18 @@
   loop: "{{ gluster_volumes | mandatory }}"
   become: true
 
+
+# https://docs.ansible.com/ansible/latest/modules/command_module.html
+- name:
+    "command : gluster : cipher-list"
+  command:
+    cmd: "gluster volume set {{ item.name | mandatory }} \
+      ssl.cipher-list {{ item.cipher_list }}"
+  run_once: true
+  when: "item.cipher_list is defined"
+  loop: "{{ gluster_volumes | mandatory }}"
+  become: true
+
 # https://docs.ansible.com/ansible/latest/modules/gluster_volume_module.html
 - name:
     "gluster_volume : start"
