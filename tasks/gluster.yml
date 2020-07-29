@@ -15,23 +15,24 @@
 
 ---
 
-# https://docs.ansible.com/ansible/latest/modules/file_module.html
+# https://docs.ansible.com/ansible/latest/modules/copy_module.html
 - name:
     "file : tls-mgmt"
   file:
     state: "{{ gluster_mgmt_tls | ternary('touch', 'absent') }}"
     path: "/var/lib/glusterd/secure-access"
   when: "gluster_mgmt_tls is defined"
-  register: "gluster_mgmt"
+  notify:
+    "service : gluster"
   become: true
 
-# restart service after the encryption file was created
+# make sure service is started before issuing gluster commands
 # https://docs.ansible.com/ansible/latest/modules/service_module.html
 - name:
     "service : glusterd"
   service:
     name: "glusterd"
-    state: "{{ gluster_mgmt.changed | ternary('restarted', 'started') }}"
+    state: "started"
     enabled: "yes"
   become: true
 
@@ -98,7 +99,6 @@
   when: "item.reject is defined"
   loop: "{{ gluster_volumes | mandatory }}"
   become: true
-
 
 # https://docs.ansible.com/ansible/latest/modules/command_module.html
 - name:
