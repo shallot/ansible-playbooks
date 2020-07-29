@@ -57,7 +57,7 @@
 
 # https://docs.ansible.com/ansible/latest/modules/command_module.html
 - name:
-    "command : tls-server"
+    "command : gluster : tls-server"
   command:
     cmd: "gluster volume set {{ item.name | mandatory }} \
       server.ssl {{ item.tls | ternary('on', 'off') }}"
@@ -68,7 +68,7 @@
 
 # https://docs.ansible.com/ansible/latest/modules/command_module.html
 - name:
-    "command : tls-client"
+    "command : gluster : tls-client"
   command:
     cmd: "gluster volume set {{ item.name | mandatory }} \
       client.ssl {{ item.tls | ternary('on', 'off') }}"
@@ -79,7 +79,7 @@
 
 # https://docs.ansible.com/ansible/latest/modules/command_module.html
 - name:
-    "command : allow"
+    "command : gluster : allow"
   command:
     cmd: "gluster volume set {{ item.name | mandatory }} \
       auth.ssl-allow {{ item.allow | join(',') }}"
@@ -90,7 +90,7 @@
 
 # https://docs.ansible.com/ansible/latest/modules/command_module.html
 - name:
-    "command : reject"
+    "command : gluster : reject"
   command:
     cmd: "gluster volume set {{ item.name | mandatory }} \
       auth.ssl-reject {{ item.reject | join(',') }}"
