@@ -17,7 +17,7 @@
 
 # https://docs.ansible.com/ansible/latest/modules/file_module.html
 - name:
-    "file : tls-mgmt"
+    "file : /var/lib/glusterd"
   file:
     state: "directory"
     path: "/var/lib/glusterd"
