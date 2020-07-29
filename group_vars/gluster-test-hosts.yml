@@ -27,6 +27,9 @@ gluster_x509_custom_packages__to_merge:
   python-cryptography: "present"
 
 # tasks/ca-sign.yml
+ca_delegate: "{{ groups['ca-servers'].0 }}"
+
+# tasks/ca-sign.yml
 gluster_x509_keys__to_merge:
   gluster:
     path: "/etc/ssl/glusterfs.key"
