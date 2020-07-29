@@ -20,6 +20,7 @@ gluster_custom_packages__to_merge:
   lvm2: "present"
   xfsprogs: "present"
   glusterfs-server: "latest"
+  chrony: "present"
 
 # tasks/gluster.yml
 gluster_cluster_hosts: "{{ groups['gluster-servers'] }}"
