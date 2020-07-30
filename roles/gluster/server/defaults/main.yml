@@ -19,21 +19,9 @@
 gluster_service_strategy:
   "restart"
 
-# The name of the Gluster server package
-gluster_server_package_name:
-  "{{ gluster_server_default_package_name }}"
-
-# The name of the XFSprogs package
-xfsprogs_package_name:
-  "{{ xfsprogs_default_package_name }}"
-
-# The name of the Chrony server package
-chrony_package_name:
-  "{{ chrony_default_package_name }}"
-
-# The name of the LVM2 server package
-lvm2_package_name:
-  "{{ lvm2_default_package_name }}"
+# The list of the required Gluster server packages
+gluster_server_packages:
+  "{{ gluster_server_default_packages }}"
 
 # Whether to enable the service to start during system boot
 gluster_service_enabled:
