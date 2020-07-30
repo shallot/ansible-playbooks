@@ -94,6 +94,8 @@ Vagrant.configure('2') do |vagrant|
         virtualbox.cpus = hostvars.fetch('vagrant_cpus', 1)
         virtualbox.gui = hostvars.fetch('vagrant_gui', false)
         virtualbox.memory = hostvars.fetch('vagrant_memory', 256)
+
+        # vagrant_extra_disks is not implemented for the VirtualBox provider yet
       end
 
       # https://github.com/vagrant-libvirt/vagrant-libvirt#domain-specific-options
