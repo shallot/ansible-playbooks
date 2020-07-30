@@ -1,0 +1,160 @@
+# Copyright (c) 2020-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+# https://docs.ansible.com/ansible/latest/import_role_module.html
+- import_role:
+    name: "gluster/common"
+
+# https://docs.ansible.com/ansible/latest/modules/include_vars_module.html
+- include_vars:
+    "{{ gluster_vars }}"
+  with_first_found:
+    - "vars/{{ ansible_os_family | lower }}.yml"
+    - "vars/generic.yml"
+  loop_control:
+    loop_var: "gluster_vars"
+
+# https://docs.ansible.com/ansible/latest/modules/include_tasks_module.html
+- include_tasks:
+    "{{ gluster_server_tasks }}"
+  with_first_found:
+    - "os/{{ ansible_os_family | lower }}/main.yml"
+    - "os/generic/main.yml"
+  loop_control:
+    loop_var: "gluster_server_tasks"
+
+# https://docs.ansible.com/ansible/latest/import_role_module.html
+# https://github.com/gluster/gluster-ansible-infra
+- import_role:
+    name: "gluster.infra"
+  become: true
+
+# https://docs.ansible.com/ansible/latest/modules/file_module.html
+- name:
+    "file : tls-mgmt"
+  file:
+    state: "{{ gluster_mgmt_tls | ternary('touch', 'absent') }}"
+    path: "/var/lib/glusterd/secure-access"
+  when: "gluster_mgmt_tls is defined"
+  notify:
+    "service : gluster"
+  become: true
+
+# https://docs.ansible.com/ansible/latest/modules/service_module.html
+- service:
+    enabled: "{{ gluster_service_enabled }}"
+    name: "{{ gluster_service_name }}"
+    state: "{{ gluster_service_state }}"
+  become:
+    true
+
+# https://docs.ansible.com/ansible/latest/modules/gluster_volume_module.html
+- name:
+    "gluster_volume : create"
+  gluster_volume:
+    state: "{{ item.state | default('present') }}"
+    volume: "{{ item.name | mandatory }}"
+    bricks: "{{ item.bricks | mandatory }}"
+    cluster: "{{ gluster_cluster_hosts | mandatory }}"
+    transport: "{{ gluster_cluster_transport | default('tcp') }}"
+    replicas: "{{ gluster_cluster_replica_count | default(0) }}"
+    arbiters: "{{ gluster_cluster_arbiter_count | default(0)}}"
+    disperses: "{{ gluster_cluster_disperse_count | default(0) }}"
+    redundancies: "{{ gluster_cluster_redundancy_count | default(0) }}"
+    force: "{{ gluster_cluster_force | default('no') }}"
+    options: "{{ gluster_cluster_options | default({}) }}"
+    start_on_create: false
+  run_once: true
+  loop: "{{ gluster_volumes | mandatory }}"
+  when: "gluster_service_state != 'stopped'"
+  become: true
+
+# https://docs.ansible.com/ansible/latest/modules/command_module.html
+- name:
+    "command : gluster : tls-server"
+  command:
+    cmd: "gluster volume set {{ item.name | mandatory }} \
+      server.ssl {{ item.tls | ternary('on', 'off') }}"
+  run_once: true
+  when:
+    - "gluster_service_state != 'stopped'"
+    - "item.tls is defined"
+  loop: "{{ gluster_volumes | mandatory }}"
+  become: true
+
+# https://docs.ansible.com/ansible/latest/modules/command_module.html
+- name:
+    "command : gluster : tls-client"
+  command:
+    cmd: "gluster volume set {{ item.name | mandatory }} \
+      client.ssl {{ item.tls | ternary('on', 'off') }}"
+  run_once: true
+  when:
+    - "gluster_service_state != 'stopped'"
+    - "item.tls is defined"
+  loop: "{{ gluster_volumes | mandatory }}"
+  become: true
+
+# https://docs.ansible.com/ansible/latest/modules/command_module.html
+- name:
+    "command : gluster : allow"
+  command:
+    cmd: "gluster volume set {{ item.name | mandatory }} \
+      auth.ssl-allow {{ item.allow | join(',') }}"
+  run_once: true
+  when:
+    - "gluster_service_state != 'stopped'"
+    - "item.allow is defined"
+  loop: "{{ gluster_volumes | mandatory }}"
+  become: true
+
+# https://docs.ansible.com/ansible/latest/modules/command_module.html
+- name:
+    "command : gluster : reject"
+  command:
+    cmd: "gluster volume set {{ item.name | mandatory }} \
+      auth.ssl-reject {{ item.reject | join(',') }}"
+  run_once: true
+  when:
+    - "gluster_service_state != 'stopped'"
+    - "item.reject is defined"
+  loop: "{{ gluster_volumes | mandatory }}"
+  become: true
+
+# https://docs.ansible.com/ansible/latest/modules/command_module.html
+- name:
+    "command : gluster : cipher-list"
+  command:
+    cmd: "gluster volume set {{ item.name | mandatory }} \
+      ssl.cipher-list {{ item.cipher_list }}"
+  run_once: true
+  when:
+    - "gluster_service_state != 'stopped'"
+    - "item.cipher_list is defined"
+  loop: "{{ gluster_volumes | mandatory }}"
+  become: true
+
+# https://docs.ansible.com/ansible/latest/modules/gluster_volume_module.html
+- name:
+    "gluster_volume : start"
+  gluster_volume:
+    state: "started"
+    volume: "{{ item.name | mandatory }}"
+  run_once: true
+  loop: "{{ gluster_volumes | mandatory }}"
+  when: "gluster_service_state != 'stopped'"
+  become: true

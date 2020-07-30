@@ -15,5 +15,6 @@
 
 ---
 
-# tasks/gluster.yml
-gluster_cluster_hosts: "{{ groups['gluster-servers'] }}"
+# Gluster client package name for Debian systems
+gluster_client_default_package_name:
+  "glusterfs-client"

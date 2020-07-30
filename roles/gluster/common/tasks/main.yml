@@ -15,5 +15,20 @@
 
 ---
 
-# tasks/gluster.yml
-gluster_cluster_hosts: "{{ groups['gluster-servers'] }}"
+# https://docs.ansible.com/ansible/latest/modules/include_vars_module.html
+- include_vars:
+    "{{ gluster_vars }}"
+  with_first_found:
+    - "vars/{{ ansible_os_family | lower }}.yml"
+    - "vars/generic.yml"
+  loop_control:
+    loop_var: "gluster_vars"
+
+# https://docs.ansible.com/ansible/latest/modules/include_tasks_module.html
+- include_tasks:
+    "{{ gluster_tasks }}"
+  with_first_found:
+    - "os/{{ ansible_os_family | lower }}/main.yml"
+    - "os/generic/main.yml"
+  loop_control:
+    loop_var: "gluster_tasks"

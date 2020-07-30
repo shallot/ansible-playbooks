@@ -1,0 +1,70 @@
+# Copyright (c) 2020-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+# https://docs.ansible.com/ansible/latest/import_role_module.html
+- import_role:
+    name: "gluster/common"
+
+# https://docs.ansible.com/ansible/latest/modules/include_vars_module.html
+- include_vars:
+    "{{ gluster_vars }}"
+  with_first_found:
+    - "vars/{{ ansible_os_family | lower }}.yml"
+    - "vars/debian.yml"
+  loop_control:
+    loop_var: "gluster_vars"
+
+# https://docs.ansible.com/ansible/latest/modules/include_tasks_module.html
+- include_tasks:
+    "{{ gluster_client_tasks }}"
+  with_first_found:
+    - "os/{{ ansible_os_family | lower }}/main.yml"
+    - "os/generic/main.yml"
+  loop_control:
+    loop_var: "gluster_client_tasks"
+
+# https://docs.ansible.com/ansible/latest/modules/file_module.html
+- name:
+    "file : /var/lib/glusterd"
+  file:
+    state: "directory"
+    path: "/var/lib/glusterd"
+  when: "gluster_client_tls is defined"
+  become: true
+
+# https://docs.ansible.com/ansible/latest/modules/file_module.html
+- name:
+    "file : tls-client"
+  file:
+    state: "{{ gluster_client_tls | ternary('touch', 'absent') }}"
+    path: "/var/lib/glusterd/secure-access"
+  when: "gluster_client_tls is defined"
+  become: true
+
+# https://docs.ansible.com/ansible/latest/modules/mount_module.html
+- name:
+    "glusterfs : mount"
+  mount:
+    fstype: "glusterfs"
+    state: "{{ gluster_mount_state }}"
+    src: "{{ gluster_mount_servers.0 | mandatory }}\
+      :/{{ item.volume | mandatory }}"
+    opts:
+      "backupvolfile-server={{ gluster_mount_servers.1 | default(omit) }}"
+    path: "{{ item.path | mandatory }}"
+  loop: "{{ gluster_mounts | mandatory }}"
+  become: true

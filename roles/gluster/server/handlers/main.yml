@@ -11,9 +11,17 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# along with this program.  If not, see <http://www.gnu.org/license
 
 ---
 
-# tasks/gluster.yml
-gluster_cluster_hosts: "{{ groups['gluster-servers'] }}"
+# https://docs.ansible.com/ansible/latest/modules/service_module.html
+- name:
+    "service : gluster"
+  service:
+    name: "{{ gluster_service_name }}"
+    state: "{{ gluster_service_strategy }}ed"
+  when:
+    - "gluster_service_state != 'stopped'"
+  become:
+    true

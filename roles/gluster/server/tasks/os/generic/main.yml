@@ -15,6 +15,15 @@
 
 ---
 
-# tasks/packages.yml
-gluster_custom_packages__to_merge:
-  glusterfs-client: "latest"
+# https://docs.ansible.com/ansible/latest/modules/package_module.html
+- name:
+    "packages"
+  package:
+    name:
+      - "{{ gluster_server_package_name }}"
+      - "{{ xfsprogs_package_name }}"
+      - "{{ chrony_package_name }}"
+      - "{{ lvm2_package_name }}"
+    state: "present"
+  become:
+    true

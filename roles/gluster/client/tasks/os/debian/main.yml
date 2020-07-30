@@ -15,5 +15,14 @@
 
 ---
 
-# tasks/gluster.yml
-gluster_cluster_hosts: "{{ groups['gluster-servers'] }}"
+# https://docs.ansible.com/ansible/latest/modules/apt_module.html
+- name:
+    "apt : packages"
+  apt:
+    cache_valid_time: "{{ apt_cache_valid_time | default(omit) }}"
+    name:
+      - "{{ gluster_client_package_name }}"
+    state: "present"
+    update_cache: true
+  become:
+    true

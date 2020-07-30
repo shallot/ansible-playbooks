@@ -15,5 +15,25 @@
 
 ---
 
-# tasks/gluster.yml
-gluster_cluster_hosts: "{{ groups['gluster-servers'] }}"
+# https://docs.ansible.com/ansible/latest/modules/apt_key_module.html
+- name:
+    "apt_key : gluster"
+  apt_key:
+    data: "{{ item.value.data | mandatory }}"
+    state: "{{ item.value.state | default(omit) }}"
+  loop:
+    "{{ gluster_apt_keys | dict2items }}"
+  loop_control:
+    label: "{{ [item.key, item.value.state | default('present')] | to_json }}"
+  become:
+    true
+
+# https://docs.ansible.com/ansible/latest/modules/apt_repository_module.html
+- name:
+    "apt_repository : gluster"
+  apt_repository:
+    repo: "{{ gluster_apt_repository_record }}"
+    state: "present"
+    filename: "{{ gluster_apt_repository_file }}"
+  become:
+    true
