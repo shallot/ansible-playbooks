@@ -15,5 +15,18 @@
 
 ---
 
-# tasks/gluster.yml
-gluster_cluster_hosts: "{{ groups['gluster-servers'] }}"
+# The name of the Gluster server package
+gluster_client_package_name:
+  "{{ gluster_client_default_package_name }}"
+
+# Whether to mount the volumes on boot
+gluster_mount_enabled:
+  true
+
+# The fstab entry and mount state
+gluster_mount_state:
+  "{{ gluster_mount_enabled | ternary('mounted', 'absent') }}"
+
+# Glusterfs servers used to access the volfile
+gluster_mount_servers:
+  "{{ groups['gluster-servers'] }}"

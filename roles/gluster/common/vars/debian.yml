@@ -1,0 +1,43 @@
+# Copyright (c) 2020-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+# Glusterfs major version
+gluster_version_major:
+  "8"
+
+# Glusterfs minor version
+gluster_version_minor:
+  "0"
+
+# The public part of the key the packages are signed with
+gluster_apt_keys:
+  https://download.gluster.org/pub/gluster/glusterfs/8/rsa.pub:
+    data: "{{ lookup('file', 'gluster-debian.asc') }}"
+    state: "present"
+
+# The path to the Gluster source list file on Debian systems.
+gluster_apt_repository_file:
+  "gluster"
+
+# The content of the Gluster source list file on Debian systems.
+# amd64 and arm64 are the only archs available currently, so we use amd64
+gluster_apt_repository_record:
+  "deb https://download.gluster.org/pub/gluster/glusterfs/\
+  {{ gluster_version_major }}/{{ gluster_version_major }}.\
+  {{ gluster_version_minor }}/{{ ansible_distribution }}/\
+  {{ ansible_distribution_version}}/amd64/apt \
+  {{ ansible_distribution_release }} main"

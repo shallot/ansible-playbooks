@@ -15,5 +15,12 @@
 
 ---
 
-# tasks/gluster.yml
-gluster_cluster_hosts: "{{ groups['gluster-servers'] }}"
+# https://docs.ansible.com/ansible/latest/modules/package_module.html
+- name:
+    "packages"
+  package:
+    name:
+      - "{{ gluster_client_package_name }}"
+    state: "present"
+  become:
+    true

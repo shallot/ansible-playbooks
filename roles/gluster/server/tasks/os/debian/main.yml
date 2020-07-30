@@ -15,5 +15,17 @@
 
 ---
 
-# tasks/gluster.yml
-gluster_cluster_hosts: "{{ groups['gluster-servers'] }}"
+# https://docs.ansible.com/ansible/latest/modules/apt_module.html
+- name:
+    "apt : packages"
+  apt:
+    cache_valid_time: "{{ apt_cache_valid_time | default(omit) }}"
+    name:
+      - "{{ gluster_server_package_name }}"
+      - "{{ xfsprogs_package_name }}"
+      - "{{ chrony_package_name }}"
+      - "{{ lvm2_package_name }}"
+    state: "present"
+    update_cache: true
+  become:
+    true

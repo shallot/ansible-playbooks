@@ -27,23 +27,6 @@
     - import_tasks:
         "tasks/ca-sign.yml"
 
-    # https://github.com/gluster/gluster-ansible-infra
-    # https://docs.ansible.com/ansible/latest/import_tasks_module.html
-    - import_role:
-        name: "gluster.infra"
-      become: true
-
     # https://docs.ansible.com/ansible/latest/import_tasks_module.html
     - import_tasks:
         "tasks/gluster.yml"
-
-  handlers:
-
-    # https://docs.ansible.com/ansible/latest/modules/service_module.html
-    - name:
-        "service : gluster"
-      service:
-        name: "glusterd"
-        state: "restarted"
-      become:
-        true

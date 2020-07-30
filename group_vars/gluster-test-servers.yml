@@ -1,4 +1,4 @@
-# Copyright (c) 2018-present eyeo GmbH
+# Copyright (c) 2020-present eyeo GmbH
 #
 # This module is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -76,12 +76,6 @@ gluster_infra_mount_devices:
   - path: "/data/brick3"
     vgname: "vg1"
     lvname: "brick3"
-
-gluster_cipher_list:
-  - "ECDHE-ECDSA-AES256-GCM-SHA384"
-  - "ECDHE-RSA-AES256-GCM-SHA384"
-  - "ECDHE-ECDSA-CHACHA20-POLY1305"
-  - "ECDHE-RSA-CHACHA20-POLY1305"
 
 # two bricks and two servers per volume
 # tasks/gluster.yml
