@@ -20,10 +20,7 @@
     "packages"
   package:
     name:
-      - "{{ gluster_server_package_name }}"
-      - "{{ xfsprogs_package_name }}"
-      - "{{ chrony_package_name }}"
-      - "{{ lvm2_package_name }}"
+      "{{ gluster_server_packages }}"
     state: "present"
   become:
     true

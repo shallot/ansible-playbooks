@@ -15,18 +15,9 @@
 
 ---
 
-# Gluster server package name
-gluster_server_default_package_name:
-  "glusterfs-server"
-
-# XFSprogs package name
-xfsprogs_default_package_name:
-  "xfsprogs"
-
-# Chrony server package name
-chrony_default_package_name:
-  "chrony"
-
-# LVM2 server package name
-lvm2_default_package_name:
-  "lvm2"
+# Gluster server packages
+gluster_server_default_packages:
+  - "glusterfs-server"
+  - "xfsprogs"
+  - "chrony"
+  - "lvm2"

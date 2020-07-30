@@ -21,10 +21,7 @@
   apt:
     cache_valid_time: "{{ apt_cache_valid_time | default(omit) }}"
     name:
-      - "{{ gluster_server_package_name }}"
-      - "{{ xfsprogs_package_name }}"
-      - "{{ chrony_package_name }}"
-      - "{{ lvm2_package_name }}"
+      "{{ gluster_server_packages }}"
     state: "present"
     update_cache: true
   become:
