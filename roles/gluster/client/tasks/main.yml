@@ -17,7 +17,7 @@
 
 # https://docs.ansible.com/ansible/latest/import_role_module.html
 - import_role:
-    name: "gluster/common"
+    name: "{{ role_name | dirname | basename }}/common"
 
 # https://docs.ansible.com/ansible/latest/modules/include_vars_module.html
 - include_vars:
