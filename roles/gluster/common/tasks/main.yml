@@ -20,7 +20,7 @@
     "{{ gluster_vars }}"
   with_first_found:
     - "vars/{{ ansible_os_family | lower }}.yml"
-    - "vars/generic.yml"
+    - "vars/debian.yml"
   loop_control:
     loop_var: "gluster_vars"
 
