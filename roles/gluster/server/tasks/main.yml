@@ -43,9 +43,10 @@
     name: "gluster.infra"
   become: true
 
+# https://docs.gluster.org/en/latest/Administrator%20Guide/SSL/
 # https://docs.ansible.com/ansible/latest/modules/file_module.html
 - name:
-    "file : tls-mgmt"
+    "file : /var/lib/glusterd/secure-access"
   file:
     state: "{{ gluster_mgmt_tls | ternary('touch', 'absent') }}"
     path: "/var/lib/glusterd/secure-access"
