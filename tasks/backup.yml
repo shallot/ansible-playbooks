@@ -1,0 +1,198 @@
+# Copyright (c) 2020-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+# action_plugins/merge_variable.py
+- name:
+    "merge_variable : backups"
+  merge_variable:
+    default: {}
+    name: "backups"
+    suffix: "{{ backups_suffix
+              | default('backups__to_merge') }}"
+
+# https://docs.ansible.com/ansible/latest/modules/file_module.html
+- name:
+    "file : dest"
+  file:
+    state: "directory"
+    path: "{{ item.value.dest | dirname }}"
+  loop:
+    "{{ backups | dict2items }}"
+  loop_control:
+    label: "{{ item.key | to_json }}"
+  delegate_to:
+    "{{ item.value.server | mandatory }}"
+  become:
+    true
+  become_user:
+    "{{ item.value.user | mandatory }}"
+
+# https://docs.ansible.com/ansible/latest/modules/fetch_module.html
+- name:
+    "fetch : server_pubkey"
+  fetch:
+    src: "{{ item.value.server_pubkey_path | mandatory }}"
+    dest: "/tmp/{{ item.value.server }}"
+  loop:
+    "{{ backups | dict2items }}"
+  loop_control:
+    label: "{{ item.key | to_json }}"
+  delegate_to:
+    "{{ item.value.server | mandatory }}"
+  become:
+    true
+  # Make sure the backup user can actually read its keys
+  become_user:
+    "{{ item.value.user | mandatory }}"
+
+# https://docs.ansible.com/ansible/latest/modules/authorized_key_module.html
+- name:
+    "authorized_key : server_pubkey"
+  authorized_key:
+    user: "{{ item.value.user | mandatory }}"
+    key: "{{ lookup('file', '/tmp/' + (item.value.server | mandatory) + '/' + \
+      inventory_hostname + '/' + item.value.server_pubkey_path) }}"
+    manage_dir: "yes"
+  loop:
+    "{{ backups | dict2items }}"
+  loop_control:
+    label: "{{ item.key | to_json }}"
+  become:
+    true
+
+# https://docs.ansible.com/ansible/latest/modules/command_module.html
+- name:
+    "command : local_pubkey"
+  command:
+    cmd: "ssh-keyscan -H {{ inventory_hostname }}"
+  register: "backup_local_pubkey"
+
+# https://docs.ansible.com/ansible/latest/modules/fail_module.html
+- name:
+    "fail: local_pubkey"
+  fail:
+    msg: "Could not get local pubkey"
+  when: "not backup_local_pubkey.stdout"
+
+# fetch home directory
+# https://docs.ansible.com/ansible/latest/modules/user_module.html
+- user:
+    name: "{{ item.value.user | mandatory }}"
+    state: "present"
+  loop:
+    "{{ backups | dict2items }}"
+  loop_control:
+    label: "{{ item.key | to_json }}"
+  become:
+    true
+  register: "backup_users"
+
+# https://docs.ansible.com/ansible/latest/modules/fail_module.html
+- name:
+    "fail: backup_users"
+  fail:
+    msg: "Could not get user info"
+  when: "not backup_users.results"
+
+# https://docs.ansible.com/ansible/latest/modules/file_module.html
+- name:
+    "file : $HOME/.ssh"
+  file:
+    state: "directory"
+    path: "{{ backup_users.results[index].home }}/.ssh"
+    mode: "0700"
+  loop:
+    "{{ backups | dict2items }}"
+  loop_control:
+    label: "{{ item.key | to_json }}"
+    index_var: "index"
+  delegate_to:
+    "{{ item.value.server | mandatory }}"
+  become:
+    true
+
+# https://docs.ansible.com/ansible/latest/modules/known_hosts_module.html
+- name:
+    "known_hosts : local_pubkey"
+  known_hosts:
+    name: "{{ inventory_hostname }}"
+    key: "{{ backup_local_pubkey.stdout }}"
+  loop:
+    "{{ backups | dict2items }}"
+  loop_control:
+    label: "{{ item.key | to_json }}"
+  delegate_to:
+    "{{ item.value.server | mandatory }}"
+  become:
+    true
+  become_user:
+    "{{ item.value.user | mandatory }}"
+
+# https://docs.ansible.com/ansible/latest/acl_module.html
+- name:
+    "acl : src"
+  acl:
+    path: "{{ item.value.src | mandatory }}"
+    entity: "{{ item.value.user | mandatory }}"
+    default: "{{ item.value.acl.default | default('yes') }}"
+    permissions: "{{ item.value.acl.permissions | default('rx') }}"
+    recursive: "{{ item.value.acl.recursive | default(true) }}"
+    etype: "{{ item.value.acl.etype | default('user') }}"
+    follow: "{{ item.value.acl.follow | default(omit) }}"
+    recalculate_mask: "{{ item.value.acl.recalculate_mask | default(omit) }}"
+    use_nfsv4_acls: "{{ item.value.acl.use_nfsv4_acls | default(omit) }}"
+    state: "{{ item.value.acl.enabled | ternary('present', 'absent') }}"
+  when: "item.value.acl is defined"
+  loop:
+    "{{ backups | dict2items }}"
+  loop_control:
+    label: "{{ item.key | to_json }}"
+  become:
+    true
+
+# https://docs.ansible.com/ansible/latest/cron_module.html
+- name:
+    "cron"
+  cron:
+    backup: "{{ item.value.cron.backup | default(omit) }}"
+    cron_file: "{{ item.value.cron.cron_file | default(omit) }}"
+    day: "{{ item.value.cron.day | default(omit) }}"
+    disabled: "{{ item.value.cron.disabled | default(omit) }}"
+    env: "{{ item.value.cron.env | default(omit) }}"
+    hour: "{{ item.value.cron.hour | default(omit) }}"
+    insertafter: "{{ item.value.cron.insertafter | default(omit) }}"
+    insertbefore: "{{ item.value.cron.insertbefore | default(omit) }}"
+    job: "{{ (item.value.type == 'tar') | ternary(\
+        lookup('template', 'files/backup_tar_cmd.j2'),\
+        lookup('template', 'files/backup_rsync_cmd.j2')\
+      ) }}"
+    minute: "{{ item.value.cron.minute | default(omit) }}"
+    month: "{{ item.value.cron.month | default(omit) }}"
+    name: "{{ inventory_hostname }},{{ item.value.name | default(item.key) }}"
+    reboot: "{{ item.value.cron.reboot | default(omit) }}"
+    special_time: "{{ item.value.cron.special_time | default(omit) }}"
+    state: "{{ item.value.cron.state | default(omit) }}"
+    user: "{{ item.value.cron.user | default(item.value.user | mandatory) }}"
+    weekday: "{{ item.value.cron.weekday | default(omit) }}"
+  delegate_to:
+    "{{ item.value.server | mandatory }}"
+  loop:
+    "{{ backups | dict2items }}"
+  loop_control:
+    label: "{{ item.key | to_json }}"
+  become:
+    true

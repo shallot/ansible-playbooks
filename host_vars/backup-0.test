@@ -29,18 +29,29 @@ vagrant_playbooks:
   - "provision-custom-systems.yml"
   - "provision-backup-servers.yml"
 
+# hostname resolution between hosts
+# tasks/os/packages.yml
+dns_backup_custom_packages__to_merge:
+  avahi-daemon: "present"
+  libnss-mdns: "present"
+
+# tasks/paths.yml
+ssh_keys_dirs_custom_paths__to_merge:
+  /opt/backup/keys:
+    path: "/opt/backup/keys"
+    state: "directory"
+  /var/backups:
+    path: "/var/backups"
+    state: "directory"
+    owner: "backup"
+    group: "backup"
+    mode: "0750"
+
 # tasks/ssh-keys.yml
-# parameters used as in
-# https://docs.ansible.com/ansible/latest/modules/openssh_keypair_module.html
 default_ssh_keys__to_merge:
   default:
     path: "/opt/backup/keys/id_ed25519"
     type: "ed25519"
     size: 521
-
-# create required directories
-# tasks/paths.yml
-ssh_keys_dirs_custom_paths__to_merge:
-  default:
-    path: "/opt/backup/keys"
-    state: "directory"
+    owner: "backup"
+    group: "backup"
