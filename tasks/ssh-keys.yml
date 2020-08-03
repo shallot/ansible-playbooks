@@ -47,3 +47,18 @@
     loop_var: "ssh_key"
   become:
     true
+    # https://docs.ansible.com/ansible/latest/modules/file_module.html
+
+- name:
+    "file : pub_ssh_keys"
+  file:
+    group: "{{ ssh_key.value.group | default(omit) }}"
+    mode: "{{ ssh_key.value.mode | default(omit) }}"
+    owner: "{{ ssh_key.value.owner | default(omit) }}"
+    path: "{{ ssh_key.value.path | default(ssh_key.key) }}.pub"
+  when: "ansible_version.full is version('2.9.0', '<')"
+  loop: "{{ ssh_keys | dict2items }}"
+  loop_control:
+    loop_var: "ssh_key"
+  become:
+    true
