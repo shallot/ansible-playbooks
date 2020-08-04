@@ -1,1 +1,1 @@
-rsync -zae "ssh -i '{{ item.value.server_pubkey_path | regex_replace('.pub$', '') }}'" '{{ inventory_hostname }}':"{{ item.value.src | mandatory }}" "{{ item.value.dest | mandatory }}" >/dev/null
+rsync -zae "ssh -i '{{ item.value.server_pubkey_path | regex_replace('\\.pub$', '') }}'" '{{ inventory_hostname }}':"{{ item.value.src | mandatory }}" "{{ item.value.dest | mandatory }}" >/dev/null

@@ -1,1 +1,1 @@
-ssh -i '{{ item.value.server_pubkey_path | regex_replace('.pub$', '') }}' '{{ inventory_hostname }}' tar czf - "{{ item.value.src | mandatory }}" > "{{ item.value.dest | mandatory }}"
+ssh -i '{{ item.value.server_pubkey_path | regex_replace('\\.pub$', '') }}' '{{ inventory_hostname }}' tar czf - "{{ item.value.src | mandatory }}" > "{{ item.value.dest | mandatory }}"
