@@ -16,7 +16,7 @@
 ---
 
 # hostname resolution between hosts
-# tasks/os/packages.yml
+# tasks/packages.yml
 dns_gluster_custom_packages__to_merge:
   avahi-daemon: "present"
   libnss-mdns: "present"
