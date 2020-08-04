@@ -58,19 +58,20 @@
   # Make sure the backup user can actually read its keys
   become_user:
     "{{ item.value.user | mandatory }}"
+  register: "fetch_server_pubkey"
 
 # https://docs.ansible.com/ansible/latest/modules/authorized_key_module.html
 - name:
     "authorized_key : server_pubkey"
   authorized_key:
     user: "{{ item.value.user | mandatory }}"
-    key: "{{ lookup('file', '/tmp/' + (item.value.server | mandatory) + '/' + \
-      inventory_hostname + '/' + item.value.server_pubkey_path) }}"
+    key: "{{ lookup('file', fetch_server_pubkey.results[index].dest) }}"
     manage_dir: "yes"
   loop:
     "{{ backups | dict2items }}"
   loop_control:
     label: "{{ item.key | to_json }}"
+    index_var: "index"
   become:
     true
 
