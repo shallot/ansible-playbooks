@@ -75,6 +75,18 @@
   become:
     true
 
+# https://docs.ansible.com/ansible/latest/modules/file_module.html
+- name:
+    "file : server_pubkey"
+  file:
+    path: "/tmp/{{ item.value.server}}"
+    state: "absent"
+  loop:
+    "{{ backups | dict2items }}"
+  loop_control:
+    label: "{{ item.key | to_json }}"
+    index_var: "index"
+
 # https://docs.ansible.com/ansible/latest/modules/command_module.html
 - name:
     "command : local_pubkey"
