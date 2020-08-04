@@ -192,8 +192,8 @@
     insertafter: "{{ item.value.cron.insertafter | default(omit) }}"
     insertbefore: "{{ item.value.cron.insertbefore | default(omit) }}"
     job: "{{ (item.value.type == 'tar') | ternary(\
-        lookup('template', 'files/backup_tar_cmd.j2'),\
-        lookup('template', 'files/backup_rsync_cmd.j2')\
+        lookup('template', 'backup_tar_cmd.j2'),\
+        lookup('template', 'backup_rsync_cmd.j2')\
       ) }}"
     minute: "{{ item.value.cron.minute | default(omit) }}"
     month: "{{ item.value.cron.month | default(omit) }}"
