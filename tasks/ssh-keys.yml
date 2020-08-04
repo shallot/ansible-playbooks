@@ -47,8 +47,8 @@
     loop_var: "ssh_key"
   become:
     true
-    # https://docs.ansible.com/ansible/latest/modules/file_module.html
 
+# https://docs.ansible.com/ansible/latest/modules/file_module.html
 - name:
     "file : pub_ssh_keys"
   file:
