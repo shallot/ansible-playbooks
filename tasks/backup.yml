@@ -114,6 +114,8 @@
   file:
     state: "directory"
     path: "{{ backup_users.results[index].home }}/.ssh"
+    owner: "{{ item.value.user | mandatory }}"
+    group: "{{ item.value.user | mandatory }}"
     mode: "0700"
   loop:
     "{{ backups | dict2items }}"
