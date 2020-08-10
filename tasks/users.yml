@@ -62,7 +62,7 @@
                   'home_mode': item.item.value.home_mode
                     | default(custom_users_default_home_mode
                     | default('0755')),
-                  'name': item['name'] | default(omit)
+                  'name': item['name'] | default(item.item['key'])
                 })
               }}"
   with_items:
