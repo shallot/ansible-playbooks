@@ -58,13 +58,13 @@ crumbsproxy_danted_custom_paths__to_merge:
       external: 51.75.89.125
       clientmethod: none
       socksmethod: none
-      
+
       # default client pass
       client pass {
                             from: 0.0.0.0/0 to: 0.0.0.0/0
                log: error
       }
-      
+
       # filter where they are allowed to go
       socks pass {
               from: 0.0.0.0/0 to: tools.flattr.net
@@ -74,14 +74,14 @@ crumbsproxy_danted_custom_paths__to_merge:
               from: 0.0.0.0/0 to: .crumbs.org
               log: connect error disconnect
       }
-      
+
       # block non matching above
       socks block {
                            from: 0.0.0.0/0 to: 0.0.0.0/0
               log: error
       }
     notify: "service : state"
-      
+
 # tasks/packages.yml
 crumbsproxy_custom_packages__to_merge:
   ca-certificates: "present"
@@ -91,4 +91,3 @@ crumbsproxy_custom_packages__to_merge:
 
 crumbsproxy_custom_handlers__to_merge:
   danted: "restarted"
-

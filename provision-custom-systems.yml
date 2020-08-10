@@ -50,4 +50,3 @@
     # https://docs.ansible.com/ansible/latest/import_tasks_module.html
     - import_tasks:
         "handlers/common.yml"
-
