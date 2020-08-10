@@ -5,7 +5,6 @@
 
 ---
 
-
 # tasks/paths.yml
 crumbsproxy_custom_paths__to_merge:
   /etc/security/limits.d/crumbsproxy.conf:
