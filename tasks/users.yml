@@ -72,7 +72,7 @@
     custom_user_home:
       "{{ item['home'] }}"
     custom_user_name:
-      "{{ item['name'] }}"
+      "{{ item['name'] | default(item.item['key']) }}"
   become:
     true
 
