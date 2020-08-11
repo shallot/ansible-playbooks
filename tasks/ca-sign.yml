@@ -43,6 +43,15 @@
   delegate_to: "{{ ca_delegate | default(omit) }}"
   become: true
 
+# https://docs.ansible.com/ansible/latest/modules/file_module.html
+- name:
+    "file : csr"
+  file:
+    path: "/tmp/{{ inventory_hostname }}/{{ item.value.path | basename }}"
+    state: "absent"
+  loop: "{{ x509_csrs | dict2items }}"
+  delegate_to: "localhost"
+
 # https://docs.ansible.com/ansible/latest/import_tasks_module.html
 - import_tasks:
     "tasks/x509-certs.yml"
@@ -68,6 +77,15 @@
   loop: "{{ x509_certs | dict2items }}"
   become: true
 
+# https://docs.ansible.com/ansible/latest/modules/file_module.html
+- name:
+    "file : cert"
+  file:
+    path: "/tmp/{{ inventory_hostname }}/{{ item.value.path | basename }}"
+    state: "absent"
+  loop: "{{ x509_certs | dict2items }}"
+  delegate_to: "localhost"
+
 # https://docs.ansible.com/ansible/latest/modules/fetch_module.html
 - name:
     "fetch : cacert"
@@ -89,3 +107,12 @@
   when: "item.value.remote_ca_path is defined"
   loop: "{{ x509_certs | dict2items }}"
   become: true
+
+# https://docs.ansible.com/ansible/latest/modules/file_module.html
+- name:
+    "file : cacert"
+  file:
+    path: "/tmp/{{ inventory_hostname }}"
+    state: "absent"
+  loop: "{{ x509_certs | dict2items }}"
+  delegate_to: "localhost"
