@@ -134,8 +134,6 @@
   vars:
     icinga_notification_handler:
       "service : icinga2"
-    icinga_server_name:
-      "icinga-0.test"
 
   handlers:
 

@@ -16,6 +16,8 @@
 ---
 
 # https://gitlab.com/eyeo/devops/ansible-role-icinga/-/tree/master/server
+icinga_server_name:
+  "{{ inventory_hostname }}"
 icinga_server_database_name:
   "icinga"
 icinga_server_database_password:
