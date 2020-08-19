@@ -21,7 +21,8 @@ icinga_web_httpd_handlers:
   - "service : apache2"
 
 # https://httpd.apache.org/docs/current/mod/
-icinga_apache2_modules__to_merge:
+# roles/apache2/tasks/main.yml
+icinga_web_apache2_modules__to_merge:
   # TODO: this one could be loaded by tasks/apache2-php-fpm.yml itself
   proxy_fcgi:
     state: "enabled"
@@ -29,3 +30,20 @@ icinga_apache2_modules__to_merge:
     state: "enabled"
   setenvif:
     state: "enabled"
+
+# roles/postgresql/tasks/main.yml
+icinga_web_postgresql_databases__to_merge:
+  "{{ icinga_web_database_name }}":
+    name: "{{ icinga_web_database_name }}"
+    owner: "{{ icinga_web_database_user }}"
+    encoding: "UTF8"
+icinga_web_postgresql_hba_entries__to_merge:
+  - type: "host"
+    database: "{{ icinga_server_database_name }}"
+    user: "{{ icinga_server_database_user }}"
+    address: "{{ icinga_web_server_ipv4_address }}/32"
+    auth_method: "md5"
+icinga_web_postgresql_users__to_merge:
+  "{{ icinga_web_database_user }}":
+    password: "{{ icinga_web_database_password }}"
+    role_attr_flags: "SUPERUSER"
