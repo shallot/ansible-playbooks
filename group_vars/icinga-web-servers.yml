@@ -37,12 +37,6 @@ icinga_web_postgresql_databases__to_merge:
     name: "{{ icinga_web_database_name }}"
     owner: "{{ icinga_web_database_user }}"
     encoding: "UTF8"
-icinga_web_postgresql_hba_entries__to_merge:
-  - type: "host"
-    database: "{{ icinga_server_database_name }}"
-    user: "{{ icinga_server_database_user }}"
-    address: "{{ icinga_web_server_ipv4_address }}/32"
-    auth_method: "md5"
 icinga_web_postgresql_users__to_merge:
   "{{ icinga_web_database_user }}":
     password: "{{ icinga_web_database_password }}"
