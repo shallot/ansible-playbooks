@@ -36,9 +36,6 @@
     # https://docs.ansible.com/ansible/latest/import_role_module.html
     - import_role:
         name: "icinga/ssh-agent"
-      vars:
-        icinga_server_base_dir:
-          "roles/icinga/server"
 
     # https://docs.ansible.com/ansible/latest/import_role_module.html
     - import_role:
@@ -72,6 +69,15 @@
             mode: "0775"
             src: "files/plugins/check_raid"
 
+    # https://docs.ansible.com/ansible/latest/modules/include_tasks_module.html
+    - name:
+        "generate_host_definitions"
+      include_tasks:
+        "roles/icinga/server/tasks/generate_host_definitions.yml"
+      vars:
+        icinga_server_base_dir: "roles/icinga/server"
+
+    # https://docs.ansible.com/ansible/latest/modules/include_tasks_module.html
     - name:
         "generate_service_definitions"
       include_tasks:
