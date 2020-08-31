@@ -69,6 +69,15 @@
             mode: "0775"
             src: "files/plugins/check_raid"
 
+    # https://docs.ansible.com/ansible/latest/modules/include_tasks_module.html
+    - name:
+        "generate_host_definitions"
+      include_tasks:
+        "roles/icinga/server/tasks/generate_host_definitions.yml"
+      vars:
+        icinga_ssh_agent_role_base_dir: "roles/icinga/ssh-agent"
+
+    # https://docs.ansible.com/ansible/latest/modules/include_tasks_module.html
     - name:
         "generate_service_definitions"
       include_tasks:
