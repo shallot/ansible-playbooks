@@ -130,9 +130,17 @@ telemetry-pingv1_apache2_modules__to_merge:
   ssl:
     *apache2_standard_module
 
+telemetry_pingv1_log_directory:
+  "/var/log/telemetry-pingv1-server"
+
+# from /etc/logrotate.d/rsyslog from Debian 10
+telemetry_pingv1_logrotate_action:
+  "/usr/lib/rsyslog/rsyslog-rotate"
+
 # tasks/paths.yml
 logrotate-telemetry-pingv1_custom_paths__to_merge:
-  /var/log/telemetry-pingv1-server:
+  "{{ telemetry_pingv1_log_directory }}":
+    path: "{{ telemetry_pingv1_log_directory }}"
     state: "directory"
     mode: "0750"
     group: "adm"
@@ -142,12 +150,63 @@ logrotate-telemetry-pingv1_custom_paths__to_merge:
     content: |
       # log messages from /srv/telemetry-pingv1-server/ separately and
       # then stop processing other rules, leaving the default log files clean
-      local0.*  -/var/log/telemetry-pingv1-server/trace.log
+      local0.*  -{{ telemetry_pingv1_log_directory }}/trace.log
       & stop
-      local4.*  -/var/log/telemetry-pingv1-server/user-error.log
+      local4.*  -{{ telemetry_pingv1_log_directory }}/user-error.log
       & stop
-      local5.*  -/var/log/telemetry-pingv1-server/error.log
+      local5.*  -{{ telemetry_pingv1_log_directory }}/error.log
       & stop
+  /etc/logrotate.d/local-telemetry-pingv1-server:
+    state: "copy"
+    mode: "0644"
+    # yamllint disable rule:line-length
+    content: |
+      {{ telemetry_pingv1_log_directory }}/trace.log
+      {{ telemetry_pingv1_log_directory }}/user-error.log
+      {{ telemetry_pingv1_log_directory }}/error.log
+      {
+        daily
+        missingok
+        rotate {{ telemetry_pingv1_logrotate_count }}
+        dateext
+        dateyesterday
+        dateformat .%Y-%m-%d
+        compress
+        delaycompress
+        notifempty
+        create 640 root adm
+        sharedscripts
+        postrotate
+          {{ telemetry_pingv1_logrotate_action }}
+        endscript
+      }
+    # yamllint enable rule:line-length
+  /etc/logrotate.d/local-telemetry-pingv1-apache:
+    state: "copy"
+    mode: "0644"
+    # basically /etc/logrotate.d/apache2 from Debian 10, but for our location
+    # yamllint disable rule:line-length
+    content: |
+      {{ telemetry_pingv1_extra_log_location }} {
+        daily
+        rotate {{ telemetry_pingv1_logrotate_count }}
+        compress
+        delaycompress
+        missingok
+        nodateext
+        sharedscripts
+        postrotate
+          if invoke-rc.d apache2 status > {{ telemetry_pingv1_log_directory }}/telemetry-pingv1-apache2-status.log 2>&1; then \
+            invoke-rc.d apache2 reload > {{ telemetry_pingv1_log_directory }}/telemetry-pingv1-apache2-reload.log 2>&1; \
+          fi;
+        endscript
+        prerotate
+          if [ -d /etc/logrotate.d/httpd-prerotate ]; then \
+            run-parts /etc/logrotate.d/httpd-prerotate; \
+          fi; \
+        endscript
+      }
+    # yamllint enable rule:line-length
 
 # provision-apache2-modsecurity-servers.yml
 # tasks/paths.yml

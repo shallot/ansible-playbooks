@@ -43,9 +43,17 @@ adblockplus_donate_server_prerequisite_paths__to_merge:
     mode: "0755"
     owner: "{{ adblockplus_donate_system_username }}"
 
+adblockplus_donate_server_log_directory:
+  "/var/log/adblockplus-donate-server"
+
+# from /etc/logrotate.d/rsyslog from Debian 10
+adblockplus_donate_server_logrotate_action:
+  "/usr/lib/rsyslog/rsyslog-rotate"
+
 # tasks/paths.yml
 adblockplus_donate_server_log_custom_paths__to_merge:
-  /var/log/adblockplus-donate-server:
+  "{{ adblockplus_donate_server_log_directory }}":
+    path: "{{ adblockplus_donate_server_log_directory }}"
     state: "directory"
     mode: "0750"
     group: "adm"
@@ -55,12 +63,37 @@ adblockplus_donate_server_log_custom_paths__to_merge:
     content: |
       # log messages from /srv/adblockplus-donate-server/ separately and
       # then stop processing other rules, leaving the default log files clean
-      local0.*  -/var/log/adblockplus-donate-server/trace.log
+      local0.*  -{{ adblockplus_donate_server_log_directory }}/trace.log
       & stop
-      local4.*  -/var/log/adblockplus-donate-server/user-error.log
+      local4.*  -{{ adblockplus_donate_server_log_directory }}/user-error.log
       & stop
-      local5.*  -/var/log/adblockplus-donate-server/error.log
+      local5.*  -{{ adblockplus_donate_server_log_directory }}/error.log
       & stop
+  /etc/logrotate.d/local-adblockplus-donate-server:
+    state: "copy"
+    mode: "0644"
+    # yamllint disable rule:line-length
+    content: |
+      {{ adblockplus_donate_server_log_directory }}/trace.log
+      {{ adblockplus_donate_server_log_directory }}/user-error.log
+      {{ adblockplus_donate_server_log_directory }}/error.log
+      {
+        daily
+        missingok
+        rotate {{ adblockplus_donate_server_logrotate_count }}
+        dateext
+        dateyesterday
+        dateformat .%Y-%m-%d
+        compress
+        delaycompress
+        notifempty
+        create 640 root adm
+        sharedscripts
+        postrotate
+          {{ adblockplus_donate_server_logrotate_action }}
+        endscript
+      }
+    # yamllint enable rule:line-length
 
 # TODO: fully parametrize port 5000, match it to server.env
 adblockplus_donate_server_app_port:

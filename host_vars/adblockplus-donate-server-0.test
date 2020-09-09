@@ -74,6 +74,9 @@ adblockplus_donate_server_test_apache2_sites__to_merge:
 adblockplus_donate_server_service_enabled: false
 adblockplus_donate_server_service_state: "stopped"
 
+adblockplus_donate_server_logrotate_count:
+  "{{ apache2_logrotate_count | default('14') }}"
+
 # https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
 vagrant_groups:
   - "adblockplus-donate-servers"
