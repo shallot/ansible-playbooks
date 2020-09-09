@@ -39,6 +39,13 @@ test-telemetry-pingv1-1_custom_paths__to_merge:
 telemetry_pingv1_extra_log_location:
   "/var/log/apache2/test-telemetry-pingv1-post.log"
 
+telemetry_pingv1_logrotate_count:
+  "{{ apache2_logrotate_count | default('14') }}"
+
+# FIXME use reload once the collector can be notified to simply reopen logs
+telemetry_pingv1_logrotate_action:
+  "restart"
+
 # roles/apache2/tasks/main.yml
 # provision-apache2-servers.yml
 test-telemetry-pingv1-1_apache2_sites__to_merge:
