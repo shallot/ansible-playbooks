@@ -115,9 +115,7 @@ telemetry_pingv1_extra_log_custom_apache_config: |
     SecDefaultAction "nolog,noauditlog,allow,phase:request"
     SecRequestBodyAccess On
     SecAuditLog {{ telemetry_pingv1_extra_log_location }}
-    # the change from default C->I makes sure we won't log any
-    # (large) uploaded files
-    SecAuditLogParts ABIFHZ
+    SecAuditLogParts ABCEFZ
     SecRule REQUEST_METHOD "^POST$" "chain,allow,phase:request,id:123"
     SecRule REQUEST_URI ".*" "auditlog"
   </Location>
