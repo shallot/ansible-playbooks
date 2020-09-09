@@ -142,11 +142,13 @@ logrotate-telemetry-pingv1_custom_paths__to_merge:
   /etc/rsyslog.d/local-telemetry-pingv1-server.conf:
     state: "copy"
     content: |
-      # messages from /srv/telemetry-pingv1-server/
+      # log messages from /srv/telemetry-pingv1-server/ separately and
+      # then stop processing other rules, leaving the default log files clean
       local0.*  -/var/log/telemetry-pingv1-server/trace.log
+      & stop
       local4.*  -/var/log/telemetry-pingv1-server/user-error.log
+      & stop
       local5.*  -/var/log/telemetry-pingv1-server/error.log
-      # stop processing other rules, leaving the default log files clean
       & stop
 
 # provision-apache2-modsecurity-servers.yml

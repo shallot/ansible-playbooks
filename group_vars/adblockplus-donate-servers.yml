@@ -53,11 +53,13 @@ adblockplus_donate_server_log_custom_paths__to_merge:
   /etc/rsyslog.d/local-adblockplus-donate-server.conf:
     state: "copy"
     content: |
-      # messages from /srv/adblockplus-donate-server/
+      # log messages from /srv/adblockplus-donate-server/ separately and
+      # then processing other rules, leaving the default log files clean
       local0.*  -/var/log/adblockplus-donate-server/trace.log
+      & stop
       local4.*  -/var/log/adblockplus-donate-server/user-error.log
+      & stop
       local5.*  -/var/log/adblockplus-donate-server/error.log
-      # stop processing other rules, leaving the default log files clean
       & stop
 
 # TODO: fully parametrize port 5000, match it to server.env
