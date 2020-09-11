@@ -62,7 +62,10 @@
                   'home_mode': item.item.value.home_mode
                     | default(custom_users_default_home_mode
                     | default('0755')),
-                  'name': item['name'] | default(item.item['key'])
+                  'name': item['name']
+                    | default(item.item['key']),
+                  'authorized_keys': item.item.value.authorized_keys
+                    | default(''),
                 })
               }}"
   with_items:
@@ -105,7 +108,7 @@
     exclusive: true
     key: |
       # Generated with Ansible
-      {{ item.authorized_keys | default('') }}
+      {{ item.authorized_keys }}
     manage_dir: true
     user: "{{ item.name }}"
   with_items:
