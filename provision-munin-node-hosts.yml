@@ -31,14 +31,14 @@
 
     # https://docs.ansible.com/ansible/latest/import_tasks_module.html
     - import_tasks:
+        "tasks/packages.yml"
+
+    # https://docs.ansible.com/ansible/latest/import_tasks_module.html
+    - import_tasks:
         "tasks/paths.yml"
       vars:
         custom_paths_suffix:
           "munin_node_paths__to_merge"
-
-    # https://docs.ansible.com/ansible/latest/import_tasks_module.html
-    - import_tasks:
-        "tasks/packages.yml"
 
     # https://docs.ansible.com/ansible/latest/import_tasks_module.html
     - import_tasks:
