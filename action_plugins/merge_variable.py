@@ -32,8 +32,8 @@ class ActionModule(ansible.plugins.action.ActionBase):
     The plugin is able to merge all variables with a given `suffix`
     into an Ansible fact variable with the given `name`.
     It requires either a `default` to be provided or the variable with
-    the given `name` to be defined beforehand, in which case its value
-    will serve as default.
+    the given `name` to be defined beforehand, in which case that
+    pre-defined variable value will override anything else to be merged.
     Note that any variables to merge must be of the same type as the
     default, either `list` or `dict`.
     """
