@@ -41,3 +41,9 @@
     "custom_group"
   become:
     true
+
+# https://docs.ansible.com/ansible/latest/modules/getent_module.html
+- name:
+    "getent : group"
+  getent:
+    database: "group"
