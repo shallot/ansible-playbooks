@@ -34,5 +34,5 @@ ansible_packages__to_merge:
 # member of the "ansible" group. Refer to the provision-ansible-admin-hosts.yml
 # playbook and the tasks/users.yml file for more information.
 custom_users_default_home_mode:
-  "{{ (custom_user_name in custom_ansible_group_members | default([]))
+  "{{ (item.name in custom_ansible_group_members | default([]))
     | ternary('0750', '0755') }}"
