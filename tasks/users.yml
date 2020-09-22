@@ -82,6 +82,9 @@
     label: "{{ item.item['key'] | to_json }}"
   vars:
     custom_user_info: []
+    # this variable can be used elsewhere to derive
+    # custom_users_default_home_mode
+    custom_user_name: "{{ item.name }}"
 
 # https://docs.ansible.com/ansible/latest/modules/file_module.html
 - name:
