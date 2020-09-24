@@ -36,6 +36,9 @@
     # https://docs.ansible.com/ansible/latest/import_role_module.html
     - import_role:
         name: "icinga/ssh-agent"
+      vars:
+        icinga_server_base_dir:
+          "roles/icinga/server"
 
     # https://docs.ansible.com/ansible/latest/import_role_module.html
     - import_role:
