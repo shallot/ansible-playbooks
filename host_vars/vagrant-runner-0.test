@@ -25,6 +25,10 @@ vagrant_runners_users__to_merge:
   gitlab-runner:
     groups: "libvirt"
 
+# tasks/packages.yml
+vagrant_runners_custom_packages__to_merge:
+  dnsmasq-base: "present"
+
 # https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
 vagrant_groups:
   - "vagrant-runners"
