@@ -41,3 +41,10 @@
     # https://docs.ansible.com/ansible/latest/import_role_module.html
     - import_role:
         name: "gitlab/runner"
+
+    # https://docs.ansible.com/ansible/latest/import_tasks_module.html
+    - import_tasks:
+        "tasks/users.yml"
+      vars:
+        custom_users_suffix:
+          "vagrant_runners_users__to_merge"

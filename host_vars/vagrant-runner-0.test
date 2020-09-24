@@ -1,0 +1,38 @@
+# Copyright (c) 2020-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+# NB: this doesn't actually make sense, as vagrant can't actually run nested
+# vagrant, but it shows an example of what needs to be done in a production
+# deployment
+
+# provision-vagrant-runners.yml
+# tasks/users.yml
+vagrant_runners_users__to_merge:
+  gitlab-runner:
+    groups: "libvirt"
+
+# https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
+vagrant_groups:
+  - "vagrant-runners"
+  - "gitlab-runners"
+  - "libvirt-hosts"
+
+# https://www.vagrantup.com/docs/provisioning/ansible.html
+vagrant_playbooks:
+  - "provision-custom-systems.yml"
+  - "provision-libvirt-hosts.yml"
+  - "provision-vagrant-runners.yml"
