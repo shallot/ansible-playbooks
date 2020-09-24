@@ -20,9 +20,14 @@
     GIT_STRATEGY: "clone"
     GIT_SUBMODULE_STRATEGY: "recursive"
     VAGRANT_PROVIDER: "libvirt"
+    # FIXME pre-fetch the actual box from Vagrant config for the
+    # specific test host, or default
+    VAGRANT_BOX: "debian/buster64"
   tags:
     - "eyeo-devops-ansible-playbooks-vagrant-1"
   before_script:
+    - "vagrant box list | grep -q $VAGRANT_BOX || \
+       vagrant box add --provider libvirt $VAGRANT_BOX"
     - "vagrant destroy $TEST_HOST -f || true"
   script:
     - "git checkout -b $CI_COMMIT_REF_NAME"
