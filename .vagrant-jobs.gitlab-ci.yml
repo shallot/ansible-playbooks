@@ -19,13 +19,14 @@
   variables:
     GIT_STRATEGY: "clone"
     GIT_SUBMODULE_STRATEGY: "recursive"
+    VAGRANT_PROVIDER: "libvirt"
   tags:
     - "eyeo-devops-ansible-playbooks-vagrant-1"
   before_script:
-    - "vagrant destroy $TEST_HOST -f"
+    - "vagrant destroy $TEST_HOST -f || true"
   script:
     - "git checkout -b $CI_COMMIT_REF_NAME"
-    - "vagrant up $TEST_HOST"
+    - "vagrant up --provider=$VAGRANT_PROVIDER $TEST_HOST"
   after_script:
     - "vagrant destroy $TEST_HOST -f"
   stage:
