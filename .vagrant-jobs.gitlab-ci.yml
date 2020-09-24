@@ -29,8 +29,12 @@
     - "vagrant box list | grep -q $VAGRANT_BOX || \
        vagrant box add --provider libvirt $VAGRANT_BOX"
     - "vagrant destroy $TEST_HOST -f || true"
+    - |
+      if [ -n "$VAGRANT_BOX_NEEDS_CHECKED_OUT_BRANCH" ]; then
+         echo "Box |$VAGRANT_BOX_NEEDS_CHECKED_OUT_BRANCH| needs a branch"
+         git checkout -b $CI_COMMIT_REF_NAME
+      fi
   script:
-    - "git checkout -b $CI_COMMIT_REF_NAME"
     - "vagrant up --provider=$VAGRANT_PROVIDER $TEST_HOST"
   after_script:
     - "vagrant destroy $TEST_HOST -f"
