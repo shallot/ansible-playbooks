@@ -87,7 +87,6 @@ vagrant_box:
 vagrant_groups:
   - "examples.test"
   - "unattended-upgrades"
-  - "icinga-ssh-agents"
 
 # https://www.vagrantup.com/intro/getting-started/networking.html
 vagrant_networks:
@@ -97,5 +96,4 @@ vagrant_networks:
 # https://www.vagrantup.com/docs/provisioning/ansible.html
 vagrant_playbooks:
   - "provision-custom-systems.yml"
-  - "provision-icinga-ssh-agents.yml"
   - "provision-unattended-upgrades.yml"

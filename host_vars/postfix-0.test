@@ -31,7 +31,6 @@ host_specific_postfix_aliases__to_merge:
 vagrant_groups:
   - "examples.test"
   - "postfix-agents"
-  - "icinga-ssh-agents"
 
 # https://www.vagrantup.com/intro/getting-started/networking.html
 vagrant_networks:
@@ -42,4 +41,3 @@ vagrant_networks:
 vagrant_playbooks:
   - "provision-custom-systems.yml"
   - "provision-postfix-agents.yml"
-  - "provision-icinga-ssh-agents.yml"

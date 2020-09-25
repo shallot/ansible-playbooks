@@ -22,7 +22,6 @@ tmate_ssh_server_hostname: &tmate_ssh_server_ip
 # https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
 vagrant_groups:
   - "tmate-servers"
-  - "icinga-ssh-agents"
 
 # https://www.vagrantup.com/intro/getting-started/networking.html
 vagrant_networks:
@@ -33,4 +32,3 @@ vagrant_networks:
 vagrant_playbooks:
   - "provision-custom-systems.yml"
   - "provision-tmate-servers.yml"
-  - "provision-icinga-ssh-agents.yml"

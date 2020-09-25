@@ -55,7 +55,6 @@ apache2_logrotate_count:
 # https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
 vagrant_groups:
   - "apache2-servers"
-  - "icinga-ssh-agents"
 
 # https://www.vagrantup.com/intro/getting-started/networking.html
 vagrant_networks:
@@ -66,4 +65,3 @@ vagrant_networks:
 vagrant_playbooks:
   - "provision-custom-systems.yml"
   - "provision-apache2-servers.yml"
-  - "provision-icinga-ssh-agents.yml"

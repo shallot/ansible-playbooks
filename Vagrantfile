@@ -39,17 +39,20 @@ Hash.send(:define_method, :symbolize_keys!) do
   end
 end
 
+# Poor man's detection of whether a Vagrant VM has already been provisioned
+# https://stackoverflow.com/questions/24855635/check-if-vagrant-provisioning-has-been-done
+def provisioned?(vm_name, provider = nil)
+  provider ||= ENV['VAGRANT_DEFAULT_PROVIDER']
+  provider ||= 'libvirt'
+  File.exist?(".vagrant/machines/#{vm_name}/#{provider}/action_provision")
+end
+
+# This machine's existence is a prerequisite for successful Icinga SSH agent
+# provisioning
+ICINGA_SERVER_VM = 'icinga-0.test'.freeze
+
 # https://www.vagrantup.com/docs/vagrantfile/version.html
 Vagrant.configure('2') do |vagrant|
-
-  # https://docs.ansible.com/ansible/latest/user_guide/playbooks_variables.html
-  ansible_extra_vars = {
-    'icinga_ssh_agent_server_associations' => [{
-      'name' => 'icinga-0.test',
-      'user' => 'nagios',
-      'service' => 'icinga2',
-    }],
-  }
 
   # https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
   ansible_host_groups = {
@@ -116,15 +119,27 @@ Vagrant.configure('2') do |vagrant|
         end
       end
 
-      if hostvars['vagrant_groups'].include?('icinga-ssh-agents')
+      # https://docs.ansible.com/ansible/latest/user_guide/playbooks_variables.html
+      ansible_extra_vars = {}
+
+      # provision-icinga-ssh-agents.yml
+      if provisioned?(ICINGA_SERVER_VM) || hostname == ICINGA_SERVER_VM
         ansible_extra_vars = ansible_extra_vars.merge(
+          'icinga_ssh_agent_server_associations' => [{
+            'name' => ICINGA_SERVER_VM,
+            'user' => 'nagios',
+            'service' => 'icinga2'
+          }],
           'icinga_ssh_agent_ipv4_address' =>
             hostvars['vagrant_networks'][0]['private_network'][:ip],
         )
+        ansible_host_groups['icinga-ssh-agents'] << hostname
       end
 
       # https://docs.ansible.com/ansible/latest/user_guide/playbooks.html
       playbooks = hostvars.fetch('vagrant_playbooks', [])
+      playbooks << 'provision-icinga-ssh-agents.yml' if
+        provisioned?(ICINGA_SERVER_VM) || hostname == ICINGA_SERVER_VM
       playbooks.each do |playbook|
 
         # https://www.vagrantup.com/docs/provisioning/ansible.html

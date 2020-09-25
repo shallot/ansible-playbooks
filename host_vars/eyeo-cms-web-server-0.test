@@ -95,7 +95,6 @@ vagrant_groups:
   - "apache2-mimeo-servers"
   - "apache2-sitescripts-servers"
   - "gitlab-runners"
-  - "icinga-ssh-agents"
 
 # https://docs.ansible.com/ansible/latest/user_guide/playbooks_tags.html
 vagrant_tags:
@@ -110,4 +109,3 @@ vagrant_networks:
 vagrant_playbooks:
   - "provision-custom-systems.yml"
   - "provision-eyeo-cms-web-servers.yml"
-  - "provision-icinga-ssh-agents.yml"

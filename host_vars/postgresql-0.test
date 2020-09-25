@@ -18,7 +18,6 @@
 # https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
 vagrant_groups:
   - "postgresql-servers"
-  - "icinga-ssh-agents"
 
 # https://www.vagrantup.com/intro/getting-started/networking.html
 vagrant_networks:
@@ -29,7 +28,6 @@ vagrant_networks:
 vagrant_playbooks:
   - "provision-custom-systems.yml"
   - "provision-postgresql-servers.yml"
-  - "provision-icinga-ssh-agents.yml"
 
 # roles/postgresql/server/defaults/main.yml
 # this overrides the defaults as a whole; use ansible_merge_vars elsewhere
