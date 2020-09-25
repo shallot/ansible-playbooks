@@ -20,6 +20,8 @@ munin_server_ip:
   "127.0.0.1"
 custom_munin_node_configuration:
   cidr_allow: "{{ munin_server_ip }}/32"
+munin_node_service_enabled:
+  true
 
 # tasks/packages.yml
 # libwww-perl is required for web server status fetching, which is very common
