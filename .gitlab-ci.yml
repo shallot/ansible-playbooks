@@ -121,6 +121,8 @@ eramba-server-0:
   extends: ".vagrantjob"
   variables:
     TEST_HOST: "eramba-server-0.test"
+  # requires proprietary binary blob to complete
+  allow_failure: true
 
 eyeo-cms-web-server-0:
   extends: ".vagrantjob"
