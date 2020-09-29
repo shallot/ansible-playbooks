@@ -15,6 +15,10 @@
 
 ---
 
+# https://docs.ansible.com/ansible/latest/import_tasks_module.html
+- import_tasks:
+  "tasks/os/main.yml"
+
 # https://docs.ansible.com/ansible/latest/modules/include_tasks_module.html
 - include_tasks:
     "{{ custom_common_tasks }}"

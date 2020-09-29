@@ -20,7 +20,11 @@
     "{{ custom_ansible_tasks }}"
   with_first_found:
     - files:
-        - "os/{{ ansible_os_family | lower }}/ansible.yml"
+        # yamllint disable rule:line-length
+        - "os/{{ custom_os_family }}/{{ custom_os_distribution }}/{{ custom_os_codename }}/bootstrap.yml"
+        - "os/{{ custom_os_family }}/{{ custom_os_distribution }}/bootstrap.yml"
+        - "os/{{ custom_os_family }}/ansible.yml"
+        # yamllint enable rule:line-length
       skip: true
   loop_control:
     loop_var: "custom_ansible_tasks"
