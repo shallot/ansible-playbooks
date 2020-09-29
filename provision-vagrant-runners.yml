@@ -28,6 +28,10 @@
 
     # https://docs.ansible.com/ansible/latest/import_tasks_module.html
     - import_tasks:
+        "tasks/common.yml"
+
+    # https://docs.ansible.com/ansible/latest/import_tasks_module.html
+    - import_tasks:
         "tasks/development.yml"
 
     # https://gitlab.com/eyeo/devops/ansible-role-libvirt

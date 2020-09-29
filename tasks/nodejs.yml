@@ -16,8 +16,8 @@
 ---
 
 # https://docs.ansible.com/ansible/latest/import_tasks_module.html
-- import_tasks:
-    "tasks/common.yml"
+# TODO: figure out if we can just fold this into the caller, or
+# add custom suffixes?
 - import_tasks:
     "tasks/packages.yml"
 - import_tasks:

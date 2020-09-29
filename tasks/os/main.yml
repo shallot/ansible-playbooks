@@ -15,6 +15,16 @@
 
 ---
 
+# https://docs.ansible.com/ansible/latest/user_guide/playbooks_variables.html#variables-discovered-from-systems-facts
+# https://docs.ansible.com/ansible/latest/modules/set_fact_module.html
+- name:
+    "set_fact : custom_os_*"
+  set_fact:
+    custom_os_codename: "{{ ansible_distribution_release | lower }}"
+    custom_os_distribution: "{{ ansible_distribution | lower }}"
+    custom_os_family: "{{ ansible_os_family | lower }}"
+    custom_os_version: "{{ ansible_distribution_major_version }}"
+
 # https://docs.ansible.com/ansible/latest/user_guide/playbooks_blocks.html
 # https://docs.ansible.com/ansible/latest/modules/group_by_module.html
 - block:
@@ -33,6 +43,7 @@
       when:
         - "custom_os_family != custom_os_distribution"
 
+# yamllint disable rule:comments-indentation
   # - name:
   #     "group_by : os/distribution/codename"
   #   group_by:
@@ -52,11 +63,4 @@
   #     - "custom_os_family != 'debian'"
   #     - "custom_os_version != ''"
   #     - "custom_os_version != 'NA'"
-
-  vars:
-
-    # https://docs.ansible.com/ansible/latest/user_guide/playbooks_variables.html#variables-discovered-from-systems-facts
-    custom_os_codename: "{{ ansible_distribution_release | lower }}"
-    custom_os_distribution: "{{ ansible_distribution | lower }}"
-    custom_os_family: "{{ ansible_os_family | lower }}"
-    custom_os_version: "{{ ansible_distribution_major_version }}"
+# yamllint enable rule:comments-indentation

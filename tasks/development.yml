@@ -15,10 +15,6 @@
 
 ---
 
-# https://docs.ansible.com/ansible/latest/import_tasks_module.html
-- import_tasks:
-    "os/main.yml"
-
 # https://docs.ansible.com/ansible/latest/modules/include_tasks_module.html
 - include_tasks:
     "{{ bootstrap_tasks }}"
