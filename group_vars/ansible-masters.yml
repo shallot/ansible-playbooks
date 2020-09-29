@@ -19,10 +19,13 @@
 ansible_master_sshd_config__to_merge:
   AllowAgentForwarding: "yes"
 
-# tasks/os/packages.yml
-ansible_master_custom_packages__to_merge:
-  ca-certificates: "present"
-  git: "present"
+# tasks/ansible-master-pre.yml
+ansible_master_pre_packages__to_merge:
+  "{{ ansible_master_pre_default_packages }}"
+
+# tasks/ansible.yml
+ansible_packages__to_merge:
+  "{{ ansible_default_packages }}"
 
 # When users are able to access confidential files in the Ansible inventory
 # their home directory shall not be accessible to other users, in order to

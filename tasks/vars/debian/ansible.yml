@@ -1,4 +1,4 @@
-# Copyright (c) 2018-present eyeo GmbH
+# Copyright (c) 2021-present eyeo GmbH
 #
 # This module is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,21 +15,16 @@
 
 ---
 
-# https://docs.ansible.com/ansible/latest/modules/apt_module.html
-- name:
-    "packages : ansible"
-  apt:
-    cache_valid_time: "{{ apt_cache_valid_time | default(omit) }}"
-    default_release: "{{ apt_default_release | default(omit) }}"
-    name: "{{ custom_ansible_apt_packages }}"
-    state: "{{ apt_state | default(omit) }}"
-    update_cache: "{{ apt_update_cache | default(omit) }}"
-  vars:
-    custom_ansible_apt_packages:
-      - "libffi-dev"
-      - "libssl-dev"
-      - "python-dev"
-      - "python-pip"
-      - "python-setuptools"
-  become:
-    true
+# Default list of packages necessary for the initial part of the
+# Ansible master machine provision to work
+ansible_master_pre_default_packages:
+  ca-certificates: "present"
+  git: "present"
+
+# Default list of packages necessary for pip to compile Ansible
+ansible_default_packages:
+  libffi-dev: "present"
+  libssl-dev: "present"
+  python-dev: "present"
+  python-pip: "present"
+  python-setuptools: "present"

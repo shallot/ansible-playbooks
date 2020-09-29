@@ -15,6 +15,27 @@
 
 ---
 
+# https://docs.ansible.com/ansible/latest/modules/include_vars_module.html
+- include_vars:
+    file: "{{ custom_ansible_vars }}"
+  with_first_found:
+    - files:
+        # yamllint disable rule:line-length
+        - "vars/{{ custom_os_distribution }}/{{ custom_os_codename }}/ansible.yml"
+        # yamllint enable rule:line-length
+        - "vars/{{ custom_os_distribution }}/ansible.yml"
+        - "vars/{{ custom_os_family }}/ansible.yml"
+      skip: true
+  loop_control:
+    loop_var: "custom_ansible_vars"
+
+# https://docs.ansible.com/ansible/latest/import_tasks_module.html
+- import_tasks:
+    "tasks/packages.yml"
+  vars:
+    custom_packages_suffix:
+      "ansible_master_pre_packages__to_merge"
+
 # https://docs.ansible.com/ansible/latest/modules/group_module.html
 - name:
     "group : ansible"
