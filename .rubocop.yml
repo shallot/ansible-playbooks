@@ -20,10 +20,13 @@ Layout/EmptyLinesAroundBlockBody:
   Enabled: false
 
 Metrics/BlockLength:
-  Max: 80
+  Max: 100
 
 Metrics/LineLength:
   Max: 160
+
+Metrics/MethodLength:
+  Max: 25
 
 Style/HashSyntax:
   EnforcedStyle: "ruby19_no_mixed_keys"
