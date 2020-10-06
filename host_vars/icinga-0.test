@@ -131,7 +131,6 @@ vagrant_playbooks:
   - "provision-custom-systems.yml"
   - "provision-postgresql-servers.yml"
   - "provision-icinga-servers.yml"
-  - "provision-icinga-ssh-agents.yml"
   - "provision-icinga-web-servers.yml"
 
 # https://www.vagrantup.com/docs/synced-folders/rsync.html
