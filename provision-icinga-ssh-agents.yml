@@ -37,6 +37,16 @@
     - import_role:
         name: "icinga/ssh-agent"
 
+    # https://docs.ansible.com/ansible/latest/modules/include_tasks_module.html
+    - include_tasks:
+        "roles/icinga/server/tasks/generate_ssh_agent_known_hosts.yml"
+      vars:
+        icinga_server_ssh_agent_known_hosts:
+          "{{ icinga_ssh_agent_server_associations
+            | product(icinga_ssh_agent_public_keys)
+            | list
+            }}"
+
     # https://docs.ansible.com/ansible/latest/import_role_module.html
     - import_role:
         name: "roles/monitoring-plugins"
