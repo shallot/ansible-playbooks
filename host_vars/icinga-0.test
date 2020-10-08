@@ -110,6 +110,12 @@ icinga_host_definition_template: |
   }
 # yamllint enable rule:line-length
 
+# provision-icinga-servers.yml
+icinga_server_http_service_group:
+  ['apache2-servers']
+icinga_server_https_service_group:
+  ['apache2-servers']
+
 # https://www.vagrantup.com/docs/vagrantfile/machine_settings.html
 vagrant_box:
   "debian/buster64"
@@ -120,6 +126,7 @@ vagrant_groups:
   - "icinga-ssh-agents"
   - "icinga-web-servers"
   - "postgresql-servers"
+  - "apache2-servers"
 
 # https://www.vagrantup.com/intro/getting-started/networking.html
 vagrant_networks:
