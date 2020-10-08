@@ -70,6 +70,9 @@ Vagrant.configure('2') do |vagrant|
     # https://docs.ruby-lang.org/en/trunk/File.html#method-c-basename
     hostname = File.basename(file)
 
+    # host_vars/vagrant-runner-0.test
+    next if hostname == 'vagrant-runner-0.test'
+
     # https://docs.ruby-lang.org/en/trunk/YAML.html
     hostvars = YAML.load_file(file)
 
