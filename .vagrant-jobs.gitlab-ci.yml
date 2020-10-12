@@ -44,3 +44,5 @@
     max: 2
     when:
       - "always"
+  resource_group:
+    "eyeo-devops-ansible-playbooks-vagrant-1"
