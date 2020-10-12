@@ -40,6 +40,8 @@
     - "vagrant destroy $TEST_HOST -f"
   stage:
     "vagrant"
+  interruptible:
+    true
   retry:
     max: 2
     when:
