@@ -54,6 +54,21 @@ ICINGA_SERVER_VM = 'icinga-0.test'.freeze
 # https://www.vagrantup.com/docs/vagrantfile/version.html
 Vagrant.configure('2') do |vagrant|
 
+  required_plugins = [
+    'vagrant-hosts'
+  ]
+
+  plugins_to_install = required_plugins.reject \
+    { |plugin| Vagrant.has_plugin? plugin }
+  unless plugins_to_install.empty?
+    puts "Installing plugins: #{plugins_to_install.join(' ')}"
+    if system "vagrant plugin install #{plugins_to_install.join(' ')}"
+      exec "vagrant #{ARGV.join(' ')}"
+    else
+      abort 'Installation of one or more plugins has failed. Aborting.'
+    end
+  end
+
   # https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
   ansible_host_groups = {}
 
@@ -120,6 +135,10 @@ Vagrant.configure('2') do |vagrant|
           config.vm.network(type, **settings)
         end
       end
+
+      # https://github.com/oscar-stack/vagrant-hosts
+      config.vm.provision :hosts, sync_hosts: true \
+        if hostvars.fetch('vagrant_update_hosts', false)
 
       # provision-icinga-ssh-agents.yml
       if provisioned?(ICINGA_SERVER_VM) || hostname == ICINGA_SERVER_VM
