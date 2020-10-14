@@ -32,12 +32,6 @@ vagrant_playbooks:
   - "provision-postfix-agents.yml"
   - "provision-ssh-keys.yml"
 
-# hostname resolution between hosts
-# tasks/os/packages.yml
-only_test_dns_backup_custom_packages__to_merge:
-  avahi-daemon: "present"
-  libnss-mdns: "present"
-
 # tasks/paths.yml
 ssh_keys_dirs_custom_paths__to_merge:
   /opt/backup/keys:

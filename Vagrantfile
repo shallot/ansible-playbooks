@@ -54,6 +54,9 @@ ICINGA_SERVER_VM = 'icinga-0.test'.freeze
 # https://www.vagrantup.com/docs/vagrantfile/version.html
 Vagrant.configure('2') do |vagrant|
 
+  # https://www.vagrantup.com/docs/vagrantfile/vagrant_settings
+  vagrant.vagrant.plugins = "vagrant-dns"
+
   # https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
   ansible_host_groups = {}
 

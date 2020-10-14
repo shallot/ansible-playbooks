@@ -30,12 +30,6 @@ vagrant_playbooks:
   - "provision-custom-systems.yml"
   - "provision-backup-clients.yml"
 
-# hostname resolution between hosts
-# tasks/packages.yml
-only_test_dns_backup_custom_packages__to_merge:
-  avahi-daemon: "present"
-  libnss-mdns: "present"
-
 # tasks/users.yml
 test_backup_custom_users__to_merge:
   backup:
