@@ -58,8 +58,6 @@
         "generate_host_definitions"
       include_tasks:
         "roles/icinga/server/tasks/generate_host_definitions.yml"
-      vars:
-        icinga_server_base_dir: "roles/icinga/server"
 
     # https://docs.ansible.com/ansible/latest/modules/include_tasks_module.html
     - name:
@@ -80,6 +78,8 @@
   vars:
     icinga_notification_handler:
       "server : service : icinga2"
+    icinga_server_base_dir:
+      "roles/icinga/server"
 
   handlers:
 
