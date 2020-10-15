@@ -57,6 +57,8 @@
   vars:
     icinga_notification_handler:
       "service : icinga2"
+    icinga_server_base_dir:
+      "roles/icinga/server"
 
   handlers:
 
