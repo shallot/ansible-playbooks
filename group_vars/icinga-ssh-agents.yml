@@ -1,0 +1,85 @@
+# Copyright (c) 2020-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+# provision-icinga-ssh-agents.yml
+# yamllint disable rule:line-length
+# yamllint disable rule:quoted-strings
+# https://icinga.com/docs/icinga2/latest/doc/04-configuration/#servicesconf
+# https://gitlab.com/eyeo/devops/utilities/monitoring-plugins/-/blob/master/templates/config/services/{{ item.key }}.conf
+# https://www.monitoring-plugins.org/doc/man/check_by_ssh.html
+icinga_ssh_agents_custom_icinga_services:
+  bandwidth:
+    name: "bandwidth"
+    service_definition: |
+      {{ lookup('file', 'roles/monitoring-plugins/files/icinga-services/bandwidth.conf') }}
+    assign:
+      - 'host.vars.ansible.os_family == "Debian"'
+  connections:
+    name: "connections"
+    service_definition: |
+      {{ lookup('file', 'roles/monitoring-plugins/files/icinga-services/connections.conf') }}
+    assign:
+      - 'host.vars.ansible.system == "Linux"'
+  memory:
+    name: "memory"
+    service_definition: |
+      {{ lookup('file', 'roles/monitoring-plugins/files/icinga-services/memory.conf') }}
+    assign:
+      - 'host.vars.ansible.system == "Linux"'
+  raid:
+    name: "raid"
+    service_definition: |
+      {{ lookup('file', 'roles/monitoring-plugins/files/icinga-services/raid.conf') }}
+    assign:
+      - 'host.vars.ansible.system == "Linux"'
+  zombie_procs:
+    name: "zombie-processes"
+    service_definition: |
+      {{ lookup('file', 'roles/monitoring-plugins/files/icinga-services/zombie_procs.conf') }}
+    assign:
+      - 'host.vars.ansible.system == "Linux"'
+# yamllint enable rule:line-length
+# yamllint enable rule:quoted-strings
+
+# provision-icinga-ssh-agents.yml
+icinga_ssh_agents_monitoring_plugins:
+  check_bandwidth:
+    dest: "{{ icinga_ssh_agent_plugin_directory }}"
+    group: "root"
+    owner: "root"
+    mode: "0775"
+    package: "tcpdump"
+    src: "files/plugins/check_bandwidth"
+    sudoers_src: "files/sudoers/check_bandwidth"
+  check_connections:
+    dest: "{{ icinga_ssh_agent_plugin_directory }}"
+    src: "files/plugins/check_connections"
+    group: "root"
+    owner: "root"
+    mode: "0775"
+  check_memory:
+    dest: "{{ icinga_ssh_agent_plugin_directory }}"
+    group: "root"
+    owner: "root"
+    mode: "0775"
+    src: "files/plugins/check_memory"
+  check_raid:
+    dest: "{{ icinga_ssh_agent_plugin_directory }}"
+    group: "root"
+    owner: "root"
+    mode: "0775"
+    src: "files/plugins/check_raid"
