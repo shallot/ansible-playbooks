@@ -116,155 +116,17 @@ icinga_server_http_service_group:
 icinga_server_https_service_group:
   ['apache2-servers']
 
-# yamllint disable rule:line-length
-# provision-icinga-servers.yml
-icinga_server_custom_icinga_services:
-  content:
-    name: "content"
-    service_definition: |
-      {{ lookup('file', 'roles/monitoring-plugins/files/icinga-services/content.conf') }}
-    assign:
-      - "intersection({{ icinga_server_https_service_group | to_json }}, host.vars.ansible.groups)"
-  http_response_time:
-    name: "http-response-time"
-    service_definition: |
-      {{ lookup('file', 'roles/monitoring-plugins/files/icinga-services/http_response_time.conf') }}
-    assign:
-      - "intersection({{ icinga_server_http_service_group | to_json }}, host.vars.ansible.groups)"
-  https_response_time:
-    name: "https_response_time"
-    service_definition: |
-      {{ lookup('file', 'roles/monitoring-plugins/files/icinga-services/https_response_time.conf') }}
-    assign:
-      - "intersection({{ icinga_server_https_service_group | to_json }}, host.vars.ansible.groups)"
-  http_port:
-    name: "http-port"
-    service_definition: |
-      {{ lookup('file', 'roles/monitoring-plugins/files/icinga-services/http_port.conf') }}
-    assign:
-      - "intersection({{ icinga_server_http_service_group | to_json }}, host.vars.ansible.groups)"
-  https_port:
-    name: "http-port"
-    service_definition: |
-      {{ lookup('file', 'roles/monitoring-plugins/files/icinga-services/https_port.conf') }}
-    assign:
-      - "intersection({{ icinga_server_https_service_group | to_json }}, host.vars.ansible.groups)"
-# ssl_cert:
-#  name: "ssl-cert"
-#  service_definition: |
-#    {{ common_service_header }}
-#    {{ lookup('file', 'roles/monitoring-plugins/files/icinga-services/ssl_cert.conf') }}
-#  assign:
-#    - "intersection({{ icinga_server_http_service_group | to_json }}, host.vars.ansible.groups)"
-# yamllint enable rule:line-length
-
-# provision-icinga-servers.yml
 icinga_server_monitoring_plugins:
-  check_content:
-    command: "check_content"
-    dest: "{{ icinga_server_plugin_directory }}"
-    group: "root"
-    owner: "root"
-    mode: "0755"
-    package: "curl"
-    src: "files/plugins/check_content"
-  check_http_response_time:
-    command: "check_http_response_time"
-    dest: "{{ icinga_server_plugin_directory }}"
-    group: "root"
-    owner: "root"
-    mode: "0775"
-    src: "files/plugins/check_http_response_time"
-  check_https_response_time:
-    command: "check_https_response_time"
-    dest: "{{ icinga_server_plugin_directory }}"
-    group: "root"
-    owner: "root"
-    mode: "0775"
-    src: "files/plugins/check_https_response_time"
-  check_port:
-    command: "check_port"
-    dest: "{{ icinga_server_plugin_directory }}"
-    group: "root"
-    owner: "root"
-    mode: "0775"
-    src: "files/plugins/check_port"
-  check_ssl_cert:
-    command: "check_ssl_cert"
-    dest: "{{ icinga_server_plugin_directory }}"
-    group: "root"
-    owner: "root"
-    mode: "0775"
-    src: "files/plugins/check_ssl_cert"
+  "{{ eyeo_icinga_server_monitoring_plugins }}"
 
-# provision-icinga-ssh-agents.yml
-# yamllint disable rule:line-length
-# yamllint disable rule:quoted-strings
-# https://icinga.com/docs/icinga2/latest/doc/04-configuration/#servicesconf
-# https://gitlab.com/eyeo/devops/utilities/monitoring-plugins/-/blob/master/templates/config/services/{{ item.key }}.conf
-# https://www.monitoring-plugins.org/doc/man/check_by_ssh.html
-icinga_ssh_agents_custom_icinga_services:
-  bandwidth:
-    name: "bandwidth"
-    service_definition: |
-      {{ lookup('file', 'roles/monitoring-plugins/files/icinga-services/bandwidth.conf') }}
-    assign:
-      - 'host.vars.ansible.os_family == "Debian"'
-  connections:
-    name: "connections"
-    service_definition: |
-      {{ lookup('file', 'roles/monitoring-plugins/files/icinga-services/connections.conf') }}
-    assign:
-      - 'host.vars.ansible.system == "Linux"'
-  memory:
-    name: "memory"
-    service_definition: |
-      {{ lookup('file', 'roles/monitoring-plugins/files/icinga-services/memory.conf') }}
-    assign:
-      - 'host.vars.ansible.system == "Linux"'
-  raid:
-    name: "raid"
-    service_definition: |
-      {{ lookup('file', 'roles/monitoring-plugins/files/icinga-services/raid.conf') }}
-    assign:
-      - 'host.vars.ansible.system == "Linux"'
-  zombie_procs:
-    name: "zombie-processes"
-    service_definition: |
-      {{ lookup('file', 'roles/monitoring-plugins/files/icinga-services/zombie_procs.conf') }}
-    assign:
-      - 'host.vars.ansible.system == "Linux"'
-# yamllint enable rule:line-length
-# yamllint enable rule:quoted-strings
+icinga_server_custom_icinga_services:
+  "{{ eyeo_icinga_server_custom_icinga_services }}"
 
-# provision-icinga-ssh-agents.yml
-icinga_ssh_agents_monitoring_plugins:
-  check_bandwidth:
-    dest: "{{ icinga_ssh_agent_plugin_directory }}"
-    group: "root"
-    owner: "root"
-    mode: "0775"
-    package: "tcpdump"
-    src: "files/plugins/check_bandwidth"
-    sudoers_src: "files/sudoers/check_bandwidth"
-  check_connections:
-    dest: "{{ icinga_ssh_agent_plugin_directory }}"
-    src: "files/plugins/check_connections"
-    group: "root"
-    owner: "root"
-    mode: "0775"
-  check_memory:
-    dest: "{{ icinga_ssh_agent_plugin_directory }}"
-    group: "root"
-    owner: "root"
-    mode: "0775"
-    src: "files/plugins/check_memory"
-  check_raid:
-    dest: "{{ icinga_ssh_agent_plugin_directory }}"
-    group: "root"
-    owner: "root"
-    mode: "0775"
-    src: "files/plugins/check_raid"
+icinga_ssh_agent_monitoring_plugins:
+  "{{ eyeo_icinga_ssh_agent_monitoring_plugins }}"
+
+icinga_ssh_agent_custom_icinga_services:
+  "{{ eyeo_icinga_ssh_agent_custom_icinga_services }}"
 
 # https://www.vagrantup.com/docs/vagrantfile/machine_settings.html
 vagrant_box:
