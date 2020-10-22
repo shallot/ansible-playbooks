@@ -87,7 +87,7 @@ eyeo_cms_shared_apache_config_specifics: |
   RewriteRule ^ - [E=preferredRegion:%1]
 
   RewriteCond %{QUERY_STRING} fb_locale=(\w\w)_(\w\w)
-  RewriteRule ^ - [E=preferredLang:%1,E=preferredRegion:%1]
+  RewriteRule ^ - [E=preferredLang:%1,E=preferredRegion:%2]
 
   # Redirect canonical URLs to language-specific versions
   RewriteCond %{DOCUMENT_ROOT}/%{ENV:preferredLang}_%{ENV:preferredRegion}%{REQUEST_URI} -f
