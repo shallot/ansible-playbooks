@@ -63,15 +63,18 @@
   become:
     true
 
-# https://docs.ansible.com/ansible/latest/modules/authorized_key_module.html
+# https://docs.ansible.com/ansible/latest/include_tasks_module.html
 - name:
-    "file : ~ansible/.ssh/authorized_keys"
-  authorized_key:
-    exclusive: true
-    key: "{{ custom_ansible_authorized_keys | join('\n') }}"
-    key_options: "{{ custom_ansible_authorized_key_options | join(',') }}"
-    user: "{{ custom_ansible_user.name }}"
+    "authorized_keys : {{ custom_ansible_user.name }}"
+  include_tasks:
+    "tasks/authorized-keys.yml"
   vars:
+    custom_authorized_keys:
+      "{{ custom_ansible_user.name }}":
+        key: "{{ custom_ansible_authorized_keys | join('\n') }}"
+        key_options: "{{ custom_ansible_authorized_key_options }}"
+        user: "{{ custom_ansible_user.name }}"
+        exclusive: true
     custom_ansible_authorized_key_options:
       - "command=\"git-shell -c \\\"$SSH_ORIGINAL_COMMAND\\\"\""
       - "from=\"{{ custom_ansible_authorized_from_hosts | join(',') }}\""
@@ -79,5 +82,3 @@
       - "no-port-forwarding"
       - "no-pty"
       - "no-X11-forwarding"
-  become:
-    true

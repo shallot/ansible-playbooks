@@ -51,22 +51,23 @@
   become:
     true
 
-# https://docs.ansible.com/ansible/latest/modules/authorized_key_module.html
+# https://docs.ansible.com/ansible/latest/include_tasks_module.html
 - name:
     "authorized_key"
-  authorized_key:
-    exclusive: "yes"
-    key: |
-      # Generated with Ansible
-      {{ item.value.owner_ssh_authorized_keys }}
-    manage_dir: "yes"
-    user: "{{ item.value.owner }}"
+  include_tasks:
+    "tasks/authorized-keys.yml"
+  vars:
+    custom_authorized_keys:
+      "{{ item.value.owner }}":
+        exclusive: "yes"
+        key: |
+          {{ item.value.owner_ssh_authorized_keys }}
+        manage_dir: "yes"
+        user: "{{ item.value.owner }}"
   when:
     "item.value.owner_ssh_authorized_keys is defined"
   with_dict:
     "{{ lamp_web_spaces }}"
-  become:
-    true
 
 # https://docs.ansible.com/ansible/latest/modules/user_module.html
 - name:
