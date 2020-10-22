@@ -101,21 +101,23 @@
   become:
     true
 
-# https://docs.ansible.com/ansible/latest/modules/authorized_key_module.html
+# https://docs.ansible.com/ansible/latest/include_tasks_module.html
 - name:
     "authorized_keys"
-  authorized_key:
-    exclusive: true
-    key: |
-      # Generated with Ansible
-      {{ item.authorized_keys }}
-    manage_dir: true
-    user: "{{ item.name }}"
+  include_tasks:
+    "tasks/authorized-keys.yml"
+  vars:
+    custom_authorized_keys:
+      "{{ item.name }}":
+        exclusive: true
+        key: |
+          # Generated with Ansible
+          {{ item.authorized_keys }}
+        manage_dir: true
+        user: "{{ item.name }}"
+  when:
+    "item.exists"
   with_items:
     "{{ custom_user_info }}"
   loop_control:
     label: "{{ item.name }}"
-  when:
-    "item.exists"
-  become:
-    true
