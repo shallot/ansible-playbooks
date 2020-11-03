@@ -79,6 +79,8 @@ host_specific_custom_backups__to_merge:
     cron:
       minute: "*"
       hour: "*"
+    exclude_patterns:
+      - "rmt"
   # single file rsync
   rsync_logrotate.conf:
     server: "{{ backup_server }}"
