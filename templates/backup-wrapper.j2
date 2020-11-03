@@ -28,7 +28,14 @@ case "$SSH_ORIGINAL_COMMAND" in
               the rest are default rsync server flags.
               Obtained by observing the command on the rsync destination host using ps
     #}
-    {%-       set cmd='rsync --server --sender -logDtprze.iLsfxC . "' + backup.src + '"' %}
+    {%-       if 'exclude_patterns' in item.value %}
+    {%-         for exclude_pattern in item.value.exclude_patterns.items() %}
+    {%-           set excludes = '--exclude ' + exclude_pattern + ' ' + excludes
+    {%-         endfor %}
+    {%-       else %}
+    {%-         set excludes = ''
+    {%-       endif %}
+    {%-       set cmd='rsync --server --sender ' + excludes + '-logDtprze.iLsfxC . "' + backup.src + '"' %}
     {%-     endif %}
 
     '{{ cmd }}')
