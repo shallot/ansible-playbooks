@@ -1,0 +1,64 @@
+# Copyright (c) 2020-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+- name:
+    "provision-crumbs-web-servers"
+
+  hosts:
+    "crumbs-web-servers"
+
+  tasks:
+    # https://docs.ansible.com/ansible/latest/modules/command_module.html
+    # https://docs.python.org/3/library/venv.html
+    - name:
+        "command : python3"
+      command: >
+        python3 -m venv {{ crumbs_web_servers_venv  }}
+      args:
+        creates: "{{ crumbs_web_servers_venv }}"
+      become_user: "{{ crumbs_web_servers_venv_user }}"
+      become: yes
+
+    # TODO, clone crumbs ASGI to it's deploy dir
+    # https://docs.ansible.com/ansible/latest/modules/get_url_module.html
+    # - name:
+    #     "get_url : crumbs requirements"
+    #   git:
+    #     repo: git://crumbs.example.org/path/to/repo.git
+    #     dest: "{{ crumbs_web_base_path}}"
+    #     version: release-0.22
+    #   become_user: "{{ crumbs_web_servers_venv_user }}"
+    #   vars:
+    #     ansible_ssh_pipelining: true
+
+    # TODO: run when we have the requirements file on the box
+    # https://docs.ansible.com/ansible/latest/modules/pip_module.html
+    # - name:
+    #     "pip : crumbs requirements"
+    #   pip:
+    #     requirements: "{{ crumbs_web_base_path }}/requirements.txt"
+    #     virtualenv: "{{ crumbs_web_servers_venv }}"
+    #   become_user: "{{ crumbs_web_servers_venv_user }}"
+    #   become: yes
+    #   vars:
+    #     ansible_ssh_pipelining: true
+
+    # https://docs.ansible.com/ansible/latest/import_tasks_module.html
+    - import_tasks:
+        "tasks/paths.yml"
+    - import_tasks:
+        "tasks/services.yml"
