@@ -1,0 +1,50 @@
+# Copyright (c) 2020-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+- name:
+    "provision-jirafeau-servers"
+
+  hosts:
+    "jirafeau-servers"
+
+  tasks:
+
+    # https://docs.ansible.com/ansible/latest/import_tasks_module.html
+    - import_tasks:
+        "tasks/lamp.yml"
+      vars:
+        custom_lamp_web_spaces_suffix: "jirafeau_web_spaces__to_merge"
+
+    # https://docs.ansible.com/ansible/latest/import_tasks_module.html
+    - import_tasks:
+        "tasks/apache2-php-fpm.yml"
+
+    # https://docs.ansible.com/ansible/latest/import_tasks_module.html
+    - import_tasks:
+        "tasks/paths.yml"
+      vars:
+        jirafeau_custom_paths__to_merge: "{{ jirafeau_custom_paths }}"
+
+    # https://docs.ansible.com/ansible/latest/import_tasks_module.html
+    - import_tasks:
+        "tasks/cron-jobs.yml"
+
+  vars:
+
+    # https://gitlab.com/eyeo/devops/ansible-playbooks/tree/master/roles/apt
+    apt_cache_valid_time: 600
+    apt_update_cache: true

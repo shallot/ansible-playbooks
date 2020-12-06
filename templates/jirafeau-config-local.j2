@@ -1,0 +1,74 @@
+#jinja2: trim_blocks:False
+<?php
+/* {{ ansible_managed }} */
+$cfg = array (
+  'web_root' => '{{ jirafeau_web_root | mandatory }}',
+  'var_root' => '{{ jirafeau_var_root | mandatory }}/',
+  'lang' => '{{ jirafeau_lang | default("auto") }}',
+  'style' => '{{ jirafeau_style | default("courgette") }}',
+  'organisation' => '{{ jirafeau_organisation | default("ACME") }}',
+  'contactperson' => '{{ jirafeau_conractperson | default("") }}',
+  'title' => '{{ jirafeau_title | default("") }}',
+  'preview' => {{ jirafeau_preview | default("true") }},
+  'enable_crypt' => {{ jirafeau_enable_crypt| default("false") }},
+  'link_name_length' => {{ jirafeau_link_name_length | default("8") }},
+  'upload_password' => 
+  array (
+    {%- if jirafeau_upload_password is defined %}
+    {%- for key, value in jirafeau_upload_password.items() %}
+    '{{ key }}' => {{ value }},
+    {%- endfor %}
+    {%- endif %}
+  ),
+  'upload_ip' => 
+  array (
+    {%- if jirafeau_upload_ip is defined %}
+    {%- for key, value in jirafeau_upload_ip.items() %}
+    '{{ key }}' => {{ value }},
+    {%- endfor %}
+    {%- endif %}
+  ),
+  'upload_ip_nopassword' => 
+  array (
+    {%- if jirafeau_upload_ip_nopassword is defined %}
+    {%- for key, value in jirafeau_upload_ip_nopassword.items() %}
+    '{{ key }}' => {{ value }},
+    {%- endfor %}
+    {%- endif %}
+  ),
+  'admin_password' => '{{ jirafeau_admin_password | mandatory }}',
+  'admin_http_auth_user' => '{{ jirafeau_http_admin_user | default("") }}',
+  'availabilities' => 
+  array (
+    {%- if jirafeau_availabilities is defined %}
+    {%- for key, value in jirafeau_availabilities.items() %}
+    '{{ key }}' => {{ value }},
+    {%- endfor %}
+    {%- else %}
+    'minute' => true,
+    'hour' => true,
+    'day' => true,
+    'week' => true,
+    'month' => true,
+    'quarter' => false,
+    'year' => false,
+    'none' => false,
+    {%- endif %}
+  ),
+  'availability_default' => '{{ jirafeau_availability_default | default("month") }}',
+  'one_time_download' => {{ jirafeau_one_time_download | default("true") }},
+  'maximal_upload_size' => {{ jirafeau_max_upload_size | default('0') }},
+  'proxy_ip' =>
+  array (
+    {%- if jirafeau_proxy_ip is defined %}
+    {%- for key, value in jirafeau_proxy_ip.items() %}
+    '{{ key }}' => {{ value }},
+    {%- endfor %}
+    {%- endif %}
+  ),
+  'file_hash' => '{{ jirafeau_file_hash | default("md5") }}',
+  'litespeed_workaround' => {{ jirafeau_litespeed_workaround | default("false") }},
+  'installation_done' => {{ jirafeau_installation_done | default("true") }},
+  'debug' => {{ jirafeau_debug | default("false") }},
+  'store_uploader_ip' => {{ jirafeau_store_uploader_ip | default("true") }},
+);

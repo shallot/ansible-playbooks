@@ -21,7 +21,8 @@
   merge_variable:
     default: {}
     name: "lamp_web_spaces"
-    suffix: "lamp_web_spaces__to_merge"
+    suffix: "{{ custom_lamp_web_spaces_suffix
+              | default('lamp_web_spaces__to_merge') }}"
 
 # https://docs.ansible.com/ansible/latest/modules/group_module.html
 - name:

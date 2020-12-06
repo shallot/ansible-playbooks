@@ -1,0 +1,79 @@
+# Copyright (c) 2020-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+# tasks/jirafeau.yml
+jirafeau_owner:
+  "jirafeau"
+
+# roles/apache2/tasks/main.yml
+# provision-lamp-servers.yml
+jirafeau_apache2_modules__to_merge:
+  headers: &apache2_standard_module
+    package: false
+  proxy_fcgi:
+    *apache2_standard_module
+  rewrite:
+    *apache2_standard_module
+  setenvif:
+    *apache2_standard_module
+
+# tasks/cron-jobs.yml
+jirafeau_custom_cron_jobs__to_merge:
+  jirafeau_clean_expired:
+    name: "Remove Jirafeau expired files"
+    job: "php {{ jirafeau_document_root }}/admin.php clean_expired"
+    user: "{{ jirafeau_web_server_user }}"
+    state: "present"
+    minute: "{{ jirafeau_cron_expired_minute }}"
+    hour: "{{ jirafeau_cron_expired_hour }}"
+    weekday: "{{ jirafeau_cron_expired_weekday }}"
+  jirafeau_clean_async:
+    name: "Remove Jirafeau async files"
+    job: "php {{ jirafeau_document_root }}/admin.php clean_async"
+    user: "{{ jirafeau_web_server_user }}"
+    state: "present"
+    minute: "{{ jirafeau_cron_async_minute }}"
+    hour: "{{ jirafeau_cron_async_hour }}"
+    weekday: "{{ jirafeau_cron_async_weekday }}"
+
+# tasks/paths.yml
+jirafeau_custom_paths:
+  async:
+    path: "{{ jirafeau_var_root }}/async"
+    state: "directory"
+    mode: "0755"
+    owner: "{{ jirafeau_web_server_user }}"
+    group: "{{ jirafeau_web_server_user }}"
+  config:
+    dest: "{{ jirafeau_document_root }}/lib/config.local.php"
+    state: "template"
+    mode: "0644"
+    owner: "{{ jirafeau_web_server_user }}"
+    group: "{{ jirafeau_web_server_user }}"
+    src: "jirafeau-config-local.j2"
+  files:
+    path: "{{ jirafeau_var_root }}/files"
+    state: "directory"
+    mode: "0755"
+    owner: "{{ jirafeau_web_server_user }}"
+    group: "{{ jirafeau_web_server_user }}"
+  links:
+    path: "{{ jirafeau_var_root }}/links"
+    state: "directory"
+    mode: "0755"
+    owner: "{{ jirafeau_web_server_user }}"
+    group: "{{ jirafeau_web_server_user }}"

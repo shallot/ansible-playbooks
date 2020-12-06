@@ -1,0 +1,91 @@
+# Copyright (c) 2020-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+# https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
+vagrant_groups:
+  - "apache2-servers"
+  - "jirafeau-servers"
+  - "lamp-servers"
+
+# provision-lamp-servers.yml
+# NB: directory needs to match jirafeau_web_spaces__to_merge
+jirafeau_document_root:
+  "/var/www/jirafeau"
+# NB: key needs to match "jirafeau" in order for jirafeau_document_root
+# to work
+jirafeau_web_spaces__to_merge:
+  jirafeau:
+    repo: "https://gitlab.com/eyeo/devops/dependencies/Jirafeau.git"
+    version: "4.2.0"
+    owner: "{{ jirafeau_owner }}"
+
+# roles/apache2/tasks/main.yml
+# provision-lamp-servers.yml
+jirafeau_apache2_sites__to_merge:
+  jirafeau-server-0.test:
+    configuration: |
+      <VirtualHost *:80>
+
+        {{ lamp_shared_apache_config
+         | replace("_SITE_NAME_", "jirafeau")
+         | indent(2)
+        }}
+
+        ServerAlias jirafeau-server-0.test
+
+      </VirtualHost>
+
+# jirafeau configuration
+# templates/jirafeau-config-local.j2
+jirafeau_web_server_user:
+  "www-data"
+jirafeau_web_root:
+  "10.8.190.10"
+jirafeau_var_root:
+  "/var/www/jirafeau-vars"
+jirafeau_admin_password: # changeme
+  "057ba03d6c44104863dc7361fe4578965d1887360f90a0895882e58a6248fc86"
+jirafeau_organisation:
+  "eyeo"
+jirafeau_contactperson:
+  "ops"
+jirafeau_store_uploader_ip:
+  "false"
+
+# tasks/cron-jobs.yml
+jirafeau_cron_expired_hour:
+  "00"
+jirafeau_cron_expired_minute:
+  "00"
+jirafeau_cron_expired_weekday:
+  "Sun"
+jirafeau_cron_async_hour:
+  "00"
+jirafeau_cron_async_minute:
+  "00"
+jirafeau_cron_async_weekday:
+  "Sun"
+
+# https://www.vagrantup.com/intro/getting-started/networking.html
+vagrant_networks:
+  - private_network:
+      ip: "10.8.190.10"
+
+# https://www.vagrantup.com/docs/provisioning/ansible.html
+vagrant_playbooks:
+  - "provision-custom-systems.yml"
+  - "provision-jirafeau-servers.yml"
