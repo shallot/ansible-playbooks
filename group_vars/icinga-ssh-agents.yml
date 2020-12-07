@@ -40,6 +40,12 @@ eyeo_icinga_ssh_agent_custom_icinga_services:
       {{ lookup('file', 'roles/monitoring-plugins/files/icinga-services/memory.conf') }}
     assign:
       - 'host.vars.ansible.system == "Linux"'
+  needrestart:
+    name: "needrestart"
+    service_definition: |
+      {{ lookup('file', 'roles/monitoring-plugins/files/icinga-services/needrestart.conf') }}
+    assign:
+      - 'host.vars.ansible.os_family == "Debian"'
   raid:
     name: "raid"
     service_definition: |
@@ -83,3 +89,6 @@ eyeo_icinga_ssh_agent_monitoring_plugins:
     owner: "root"
     mode: "0775"
     src: "files/plugins/check_raid"
+  needrestart:
+    package: "needrestart"
+    sudoers_src: "files/sudoers/needrestart"
