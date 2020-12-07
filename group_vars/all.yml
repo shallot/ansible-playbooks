@@ -17,6 +17,9 @@
 
 aa_default_custom_packages__to_merge:
   bash: "present"
+  fail2ban: "present"
+  needrestart: "present"
+  ntp: "present"
   sudo: "present"
   vim: "present"
 
