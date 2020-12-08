@@ -114,7 +114,7 @@ icinga_host_content_generator: |
 icinga_server_http_service_group:
   ['apache2-servers']
 icinga_server_https_service_group:
-  ['apache2-servers']
+  ['apache2-servers-https']
 
 icinga_server_monitoring_plugins:
   "{{ eyeo_icinga_server_monitoring_plugins }}"
@@ -139,6 +139,7 @@ vagrant_groups:
   - "icinga-web-servers"
   - "postgresql-servers"
   - "apache2-servers"
+  - "apache2-servers-https"
 
 # https://www.vagrantup.com/intro/getting-started/networking.html
 vagrant_networks:
