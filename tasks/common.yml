@@ -24,3 +24,10 @@
       skip: true
   loop_control:
     loop_var: "custom_common_tasks"
+
+# https://docs.ansible.com/ansible/latest/modules/fail_module.html
+- fail:
+    msg: >-
+      Ansible FQDN {{ ansible_fqdn }} does not match inventory hostname
+      {{ inventory_hostname }}. Fix /etc/hosts and try again.
+  when: "ansible_fqdn != inventory_hostname"
