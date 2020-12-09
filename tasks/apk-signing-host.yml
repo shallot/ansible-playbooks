@@ -36,7 +36,7 @@
     dest: "/etc/sudoers.d/{{ item.key }}"
     mode: "0440"
     content: |
-      {{ item.key }} ALL=(ALL) NOPASSWD:/usr/bin/jarsigner
+      {{ item.key }} ALL=(ALL) NOPASSWD:/usr/bin/apksigner
     validate:
       "/usr/sbin/visudo --check --file=%s"
   become:

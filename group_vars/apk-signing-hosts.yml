@@ -16,7 +16,7 @@
 ---
 
 apk_signing_hosts_custom_packages__to_merge:
-  default-jdk: "present"
+  apksigner: "present"
 
 apk_signing_hosts_groups__to_merge:
   "{{ apk_signing_group_name }}":
