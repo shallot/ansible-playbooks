@@ -17,6 +17,9 @@
 
 aa_debian_custom_packages__to_merge:
   dnsutils: "present"
+  fail2ban: "present"
+  needrestart: "present"
+  ntp: "present"
 
 # https://docs.ansible.com/ansible/latest/modules/apt_module.html
 apt_cache_valid_time:
