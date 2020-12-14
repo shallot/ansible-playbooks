@@ -62,3 +62,7 @@ vagrant_playbooks:
 # https://www.vagrantup.com/docs/synced-folders/rsync.html
 vagrant_rsync:
   true
+
+# https://www.vagrantup.com/docs/providers/configuration
+vagrant_memory:
+  512
