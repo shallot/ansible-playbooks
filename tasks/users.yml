@@ -65,7 +65,7 @@
                   'name': item['name']
                     | default(item.item['key']),
                   'authorized_keys': item.item.value.authorized_keys
-                    | default(''),
+                    | default(None),
                 })
               }}"
   with_items:
@@ -115,7 +115,7 @@
         manage_dir: true
         user: "{{ item.name }}"
   when:
-    "item.exists"
+    "item.exists and item.authorized_keys != None"
   with_items:
     "{{ custom_user_info }}"
   loop_control:
