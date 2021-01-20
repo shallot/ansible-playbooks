@@ -114,7 +114,7 @@ mattermost_paths__to_merge:
     owner: "{{ mattermost_system_user_name }}"
     state: "directory"
 mattermost_version:
-  "5.27.0"
+  "5.31.0"
 mattermost_service_enabled:
   false
 mattermost_service_state:
