@@ -27,7 +27,7 @@
     - "eyeo-devops-ansible-playbooks-vagrant-1"
   before_script:
     - "vagrant box list | grep -q $VAGRANT_BOX || \
-       vagrant box add --provider libvirt $VAGRANT_BOX"
+       vagrant box add --provider $VAGRANT_PROVIDER $VAGRANT_BOX"
     - "vagrant destroy $TEST_HOST -f || true"
     - |
       if [ -n "$VAGRANT_BOX_NEEDS_CHECKED_OUT_BRANCH" ]; then
