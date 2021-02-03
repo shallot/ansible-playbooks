@@ -156,6 +156,11 @@ eyeo-cms-web-server-0:
   variables:
     TEST_HOST: "eyeo-cms-web-server-0.test"
 
+filter-server-0:
+  extends: ".vagrantjob"
+  variables:
+    TEST_HOST: "filter-server-0.test"
+
 gitlab-runner-0:
   extends: ".vagrantjob"
   variables:

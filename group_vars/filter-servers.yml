@@ -1,0 +1,159 @@
+# Copyright (c) 2021-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+filter_server_custom_packages__to_merge:
+  wget: "present"
+
+filter_server_custom_users__to_merge:
+  rsync:
+    name: "{{ filter_server_mirror_user }}"
+    comment: "Filter lists mirror user"
+
+filter_server_document_root_path:
+  "/var/www/easylist"
+
+filter_server_custom_paths__to_merge:
+  /var/www:
+    state: "directory"
+    mode: "0755"
+  /var/www/easylist:
+    path: "{{ filter_server_document_root_path }}"
+    state: "directory"
+    mode: "0755"
+    owner: "{{ filter_server_mirror_user }}"
+
+filter_server_custom_cron_jobs__to_merge:
+  mirror:
+    name: "mirror_filter_lists"
+    minute: "{{ filter_server_mirror_cron_job_minute }}"
+    user: "{{ filter_server_mirror_user }}"
+    # yamllint disable rule:line-length
+    job: >-
+      rsync -e "ssh -o CheckHostIP=no" -ltprz --delete {{ filter_origin_server_spec }}:. {{ filter_server_document_root_path }}/
+    # yamllint enable rule:line-length
+
+# roles/apache2/tasks/main.yml
+# provision-apache2-servers.yml
+filter_server_apache2_modules__to_merge:
+  rewrite: &apache2_standard_module
+    package: false
+  geoip: &apache2_nonstandard_module
+    package: true
+
+# yamllint disable rule:line-length
+# This replicates legacy/infrastructure's modules/filterserver/files/site.conf
+filter_server_custom_apache_config: |
+  RewriteEngine on
+
+  {{ filter_server_abuse_custom_apache_config
+   | default(default_filter_server_abuse_custom_apache_config) }}
+
+  {{ filter_server_keepalive_custom_apache_config
+   | default(default_filter_server_keepalive_custom_apache_config) }}
+
+  {{ filter_server_prerequisite_custom_apache_config
+   | default(default_filter_server_prerequisite_custom_apache_config) }}
+
+  {{ filter_server_elem_hide_custom_apache_config
+   | default(default_filter_server_elem_hide_custom_apache_config) }}
+
+  {{ filter_server_minimize_custom_apache_config
+   | default(default_filter_server_minimize_custom_apache_config) }}
+
+  {{ filter_server_compliance_custom_apache_config
+   | default(default_filter_server_compliance_custom_apache_config) }}
+
+default_filter_server_abuse_custom_apache_config: |
+  <Location "/easylistchina+easylist.txt">
+    RewriteCond %{HTTP_USER_AGENT} "^(-)?$" [NC]
+    RewriteRule "^/(.*)" "-" [R=400,L]
+  </Location>
+
+default_filter_server_keepalive_custom_apache_config: |
+  KeepAlive On
+  KeepAliveTimeout 0
+
+default_filter_server_prerequisite_custom_apache_config: |
+  DocumentRoot {{ filter_server_document_root_path }}
+  AddDefaultCharset UTF-8
+
+  RewriteCond %{HTTP_HOST} "^(.+)\.$" [NC]
+  RewriteRule "^(.*)" %{REQUEST_SCHEME}://%1$1 [R,L]
+
+  GeoIPEnable On
+  GeoIPDBFile {{ custom_geoip_data_path }}/{{ custom_geoip_data_country_ipv4 }} CheckCache
+  GeoIPDBFile {{ custom_geoip_data_path }}/{{ custom_geoip_data_country_ipv6 }} CheckCache
+
+default_filter_server_elem_hide_custom_apache_config: |
+  #  http://httpd.apache.org/docs/current/env.html
+  RewriteCond %{ENV:GEOIP_COUNTRY_CODE} ^DE$ [OR]
+  RewriteCond %{ENV:GEOIP_COUNTRY_CODE_V6} ^DE$
+  RewriteCond %{QUERY_STRING} (?:^|&)addonName=(?:maxthon|adblockplusie) [OR,NC]
+  RewriteCond %{QUERY_STRING} (?:^|&)application=(?:yowser|adblockbrowser) [NC]
+  # Store environment variable.
+  RewriteRule ^ - [E=NO_ELEM_HIDE:true]
+
+  RewriteCond %{ENV:NO_ELEM_HIDE} =true
+  RewriteRule "^/easylist(germany)?\.(.+)" /easylist$1_noelemhide.$2 [R=302,L]
+  # couldn't make it simpler
+  #RewriteRule ^ - [E=REDIRECT:ELEM_HIDE]
+  RewriteCond %{ENV:NO_ELEM_HIDE} =true
+  RewriteRule "^/easylistgermany\+easylist\.(.+)" /easylistgermany_noelemhide+easylist_noelemhide.$1 [R=302,L]
+
+# TODO: remove the probably obsolete application=safari setting after verifying
+default_filter_server_minimize_custom_apache_config: |
+  RewriteCond %{QUERY_STRING} (?:^|&)application=safari [OR]
+  RewriteCond %{QUERY_STRING} (?:^|&)addonName=(?:abp\.for\.uc|adblockplussafari|libadblockplus(?:-android)?)
+  RewriteRule ^ - [E=MIN_LIST:true]
+
+  RewriteCond %{ENV:MIN_LIST} =true
+  RewriteRule ^/exceptionrules\.(.+) /exceptionrules-minimal.$1 [L]
+
+  RewriteCond %{ENV:MIN_LIST} =true
+  RewriteRule ^/(easylist|easyprivacy|fanboy-social)\.(.+) /$1-minified.$2 [L]
+
+  RewriteCond %{ENV:MIN_LIST} =true
+  RewriteRule ^/(easylist(?:china|czechslovak|dutch|germany|italy|lithuania|polish|portuguese|spanish)\+easylist)\.(.+) /$1-minified.$2 [L]
+
+  RewriteCond %{ENV:MIN_LIST} =true
+  RewriteRule ^/((?:abpindo|abpvn|bulgarian_list|israellist|latvianlist|liste_fr|liste_ar|rolist|ruadlist)\+easylist)\.(.+) /$1-minified.$2 [L]
+
+  RewriteCond %{ENV:MIN_LIST} =true
+  RewriteRule ^/indianlist\+easylist\.(.+) /indianlist-full+easylist-minified.$1 [L]
+
+  RewriteCond %{ENV:MIN_LIST} =true
+  RewriteRule ^/dandelion_sprouts_nordic_filters\+easylist\.(.+) /dandelion_sprouts_nordic_filters+easylist-minified.$1 [L]
+
+  RewriteCond %{ENV:MIN_LIST} =true
+  RewriteRule ^/korleanlist\+easylist\.(.+) /korleanlist+easylist-minified.$1 [L]
+
+default_filter_server_compliance_custom_apache_config: |
+  RewriteCond %{ENV:GEOIP_COUNTRY_CODE} ^CN$ [OR]
+  RewriteCond %{ENV:GEOIP_COUNTRY_CODE_V6} ^CN$
+  RewriteCond %{QUERY_STRING} (?:^|&)addonName=(?:adblockplus(chrome|firefox|edge|opera))
+  RewriteRule ^ - [E=COMPLIANCE_LIST:true]
+
+  RewriteCond %{ENV:GEOIP_COUNTRY_CODE} ^CN$ [OR]
+  RewriteCond %{ENV:GEOIP_COUNTRY_CODE_V6} ^CN$
+  RewriteCond %{QUERY_STRING} (?:^|&)addonName=(?:adblockplussbrowser)
+  RewriteCond %{QUERY_STRING} (?:^|&)application=(?:sbrowser)
+  RewriteRule ^ - [E=COMPLIANCE_LIST:true]
+
+  RewriteCond %{ENV:COMPLIANCE_LIST} =true
+  RewriteRule ^/easylistchina\+easylist\.(.+) /easylistchina+easylistchina_compliance+easylist.$1 [R=302,L]
+
+# yamllint enable rule:line-length

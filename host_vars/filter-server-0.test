@@ -1,0 +1,105 @@
+# Copyright (c) 2021-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+# group_vars/filter-servers.yml
+filter_server_mirror_user:
+  "rsync"
+
+filter_origin_server_spec:
+  "rsync@filtermaster.adblockplus.org"
+
+filter_server_mirror_cron_job_minute:
+  0
+
+filter_server_abuse_custom_apache_config: |
+  {{ default_filter_server_abuse_custom_apache_config }}
+
+  <Location /easylist.txt>
+    RewriteCond %{HTTP_USER_AGENT} "evil-bot-that-deserves-nothing" [NC]
+    RewriteRule "^" "-" [R=400,L]
+  </Location>
+
+# group_vars/apache2-geoip-servers.yml
+custom_geoip_email_notification_address:
+  "root"
+
+filter_server_custom_packages__to_merge:
+  curl: "present"
+
+custom_geoip_stub_custom_paths__to_merge:
+  /var/www/easylist/GeoIPv4.dat:
+    path: "{{ filter_server_document_root_path }}/GeoIPv4.dat"
+    state: "copy"
+    content: "This is just to make the tests succeed"
+    mode: "0644"
+  /var/www/easylist/GeoIPv6.dat:
+    path: "{{ filter_server_document_root_path }}/GeoIPv6.dat"
+    state: "copy"
+    content: "This is just to make the tests succeed"
+    mode: "0644"
+
+custom_geoip_data_remote_url:
+  "localhost"
+
+# tasks/shells.yml
+test_example_filter_server_custom_shells__to_merge:
+  1_prepare_easylist_data:
+    chdir: "{{ filter_server_document_root_path }}"
+    # yamllint disable rule:line-length
+    cmd: |
+      curl -O https://easylist-downloads.adblockplus.org/easylist.txt &&
+      curl -O https://easylist-downloads.adblockplus.org/easylist.txt.gz &&
+      curl -O https://easylist-downloads.adblockplus.org/easylist-minified.txt &&
+      curl -O https://easylist-downloads.adblockplus.org/easylist-minified.txt.gz
+    # yamllint enable rule:line-length
+  2_test_basic_minified_rewrite:
+    cmd: >
+      curl -sS 'http://localhost/easylist.txt?addonName=libadblockplus'
+      | grep minified -q
+
+# roles/apache2/tasks/main.yml
+example_filter_server_apache2_sites__to_merge:
+  filter-server.adblockplus.org:
+    configuration: |
+      <VirtualHost *:80>
+        ServerName filter-server.adblockplus.org
+
+        {{ filter_server_custom_apache_config | indent(2) }}
+
+      </VirtualHost>
+
+# tasks/apache2.yml
+apache2_logrotate_count:
+  7
+
+# https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
+vagrant_groups:
+  - "filter-servers"
+  - "apache2-servers"
+  - "apache2-geoip-servers"
+
+# https://www.vagrantup.com/intro/getting-started/networking.html
+vagrant_networks:
+  - private_network:
+      ip: "10.8.100.66"
+
+# https://www.vagrantup.com/docs/provisioning/ansible.html
+vagrant_playbooks:
+  - "provision-custom-systems.yml"
+  - "provision-apache2-servers.yml"
+  - "provision-apache2-geoip-servers.yml"
+  - "provision-custom-shells.yml"
