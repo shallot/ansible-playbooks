@@ -83,7 +83,7 @@
     dest: "{{ custom_ansible_user.home }}/playbooks"
     repo: "{{ custom_ansible_playbooks_repository | mandatory }}"
   when:
-    "custom_ansible_user.name != 'ansible'"
+    - "custom_ansible_playbooks_repository == '/vagrant'"
   become:
     true
   become_user:
