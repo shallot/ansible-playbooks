@@ -19,9 +19,9 @@
 ansible_master_sshd_config__to_merge:
   AllowAgentForwarding: "yes"
 
-# tasks/ansible-master-pre.yml
-ansible_master_pre_packages__to_merge:
-  "{{ ansible_master_pre_default_packages }}"
+# tasks/ansible-master.yml
+ansible_master_packages__to_merge:
+  "{{ ansible_master_default_packages }}"
 
 # tasks/ansible.yml
 ansible_packages__to_merge:
