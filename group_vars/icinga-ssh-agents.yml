@@ -25,37 +25,37 @@ eyeo_icinga_ssh_agent_custom_icinga_services:
   bandwidth:
     name: "bandwidth"
     service_definition: |
-      {{ lookup('file', 'roles/monitoring-plugins/files/icinga-services/bandwidth.conf') }}
+      {{ lookup('template', 'roles/monitoring-plugins/files/icinga-services/bandwidth.conf') }}
     assign:
       - 'host.vars.ansible.os_family == "Debian"'
   connections:
     name: "connections"
     service_definition: |
-      {{ lookup('file', 'roles/monitoring-plugins/files/icinga-services/connections.conf') }}
+      {{ lookup('template', 'roles/monitoring-plugins/files/icinga-services/connections.conf') }}
     assign:
       - 'host.vars.ansible.system == "Linux"'
   memory:
     name: "memory"
     service_definition: |
-      {{ lookup('file', 'roles/monitoring-plugins/files/icinga-services/memory.conf') }}
+      {{ lookup('template', 'roles/monitoring-plugins/files/icinga-services/memory.conf') }}
     assign:
       - 'host.vars.ansible.system == "Linux"'
   needrestart:
     name: "needrestart"
     service_definition: |
-      {{ lookup('file', 'roles/monitoring-plugins/files/icinga-services/needrestart.conf') }}
+      {{ lookup('template', 'roles/monitoring-plugins/files/icinga-services/needrestart.conf') }}
     assign:
       - 'host.vars.ansible.os_family == "Debian"'
   raid:
     name: "raid"
     service_definition: |
-      {{ lookup('file', 'roles/monitoring-plugins/files/icinga-services/raid.conf') }}
+      {{ lookup('template', 'roles/monitoring-plugins/files/icinga-services/raid.conf') }}
     assign:
       - 'host.vars.ansible.system == "Linux"'
   zombie_procs:
     name: "zombie-processes"
     service_definition: |
-      {{ lookup('file', 'roles/monitoring-plugins/files/icinga-services/zombie_procs.conf') }}
+      {{ lookup('template', 'roles/monitoring-plugins/files/icinga-services/zombie_procs.conf') }}
     assign:
       - 'host.vars.ansible.system == "Linux"'
 # yamllint enable rule:line-length
