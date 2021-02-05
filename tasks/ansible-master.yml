@@ -34,7 +34,7 @@
     "tasks/packages.yml"
   vars:
     custom_packages_suffix:
-      "ansible_master_pre_packages__to_merge"
+      "ansible_master_packages__to_merge"
 
 # https://docs.ansible.com/ansible/latest/modules/group_module.html
 - name:
@@ -74,20 +74,6 @@
     "custom_ansible_user"
   become:
     true
-
-# https://docs.ansible.com/ansible/latest/modules/git_module.html
-- name:
-    "git : ~ansible/playbooks"
-  git:
-    accept_hostkey: true
-    dest: "{{ custom_ansible_user.home }}/playbooks"
-    repo: "{{ custom_ansible_playbooks_repository | mandatory }}"
-  when:
-    - "custom_ansible_playbooks_repository == '/vagrant'"
-  become:
-    true
-  become_user:
-    "{{ custom_ansible_user.name }}"
 
 # https://docs.ansible.com/ansible/latest/modules/command_module.html
 - name:

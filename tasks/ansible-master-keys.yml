@@ -1,0 +1,39 @@
+# Copyright (c) 2021-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+# https://docs.ansible.com/ansible/latest/include_tasks_module.html
+# must happen after ansible-master.yml and ansible-master-vagrant.yml
+# because it depends on both custom_ansible_user and custom_vagrant_user
+# through host_vars/admin-0.test
+- name:
+    "authorized_keys : {{ custom_ansible_user.name }}"
+  include_tasks:
+    "tasks/authorized-keys.yml"
+  vars:
+    custom_authorized_keys:
+      "{{ custom_ansible_user.name }}":
+        key: "{{ custom_ansible_authorized_keys | join('\n') }}"
+        key_options: "{{ custom_ansible_authorized_key_options }}"
+        user: "{{ custom_ansible_user.name }}"
+        exclusive: true
+    custom_ansible_authorized_key_options:
+      - "command=\"git-shell -c \\\"$SSH_ORIGINAL_COMMAND\\\"\""
+      - "from=\"{{ custom_ansible_authorized_from_hosts | join(',') }}\""
+      - "no-agent-forwarding"
+      - "no-port-forwarding"
+      - "no-pty"
+      - "no-X11-forwarding"

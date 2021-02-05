@@ -1,0 +1,76 @@
+# Copyright (c) 2020-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+# https://docs.ansible.com/ansible/latest/modules/user_module.html
+- name:
+    "user : vagrant"
+  user:
+    name: "vagrant"
+    generate_ssh_key: true
+    ssh_key_comment: "vagrant@{{ ansible_fqdn }}"
+  register:
+    "custom_vagrant_user"
+  become:
+    true
+
+# https://docs.ansible.com/ansible/latest/modules/copy_module.html
+# https://docs.ansible.com/ansible/latest/plugins/lookup/filetree.html
+- name:
+    "copy : .vagrant/machines/*/*/private_key"
+  copy:
+    dest: "/home/vagrant/.ssh/id-{{ custom_machine_name }}"
+    group: "vagrant"
+    mode: "0600"
+    owner: "vagrant"
+    src: "{{ item }}"
+  vars:
+    custom_machine_name:
+      "{{ item | dirname | dirname | basename }}"
+  loop:
+    "{{ lookup('filetree', playbook_dir + '/.vagrant/machines')
+      | selectattr('path', 'match', '[^/]+/[^/]+/private_key')
+      | map(attribute='src')
+      | list }}"
+  loop_control:
+    label: "{{ custom_machine_name }}"
+  become:
+    true
+  become_user:
+    "vagrant"
+
+# https://docs.ansible.com/ansible/latest/modules/template_module.html
+- name:
+    "file : /etc/ansible/hosts"
+  template:
+    dest: "/etc/ansible/hosts"
+    group: "{{ custom_ansible_user.group }}"
+    owner: "{{ custom_ansible_user.name }}"
+    src: "vagrant-inventory.j2"
+  become:
+    true
+
+# https://docs.ansible.com/ansible/latest/modules/git_module.html
+- name:
+    "git : ~ansible/playbooks"
+  git:
+    accept_hostkey: true
+    dest: "{{ custom_ansible_user.home }}/playbooks"
+    repo: "{{ custom_ansible_playbooks_repository | mandatory }}"
+  become:
+    true
+  become_user:
+    "{{ custom_ansible_user.name }}"

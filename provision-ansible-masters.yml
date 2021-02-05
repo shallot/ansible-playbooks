@@ -29,7 +29,7 @@
 
     # https://docs.ansible.com/ansible/latest/import_tasks_module.html
     - import_tasks:
-        "tasks/ansible-master-pre.yml"
+        "tasks/ansible-master.yml"
 
     # https://docs.ansible.com/ansible/latest/import_tasks_module.html
     - import_tasks:
@@ -37,4 +37,10 @@
 
     # https://docs.ansible.com/ansible/latest/import_tasks_module.html
     - import_tasks:
-        "tasks/ansible-master-post.yml"
+        "tasks/ansible-master-vagrant.yml"
+      when:
+        "custom_ansible_playbooks_repository == '/vagrant'"
+
+    # https://docs.ansible.com/ansible/latest/import_tasks_module.html
+    - import_tasks:
+        "tasks/ansible-master-keys.yml"
