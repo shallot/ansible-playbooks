@@ -1,0 +1,134 @@
+# Copyright (c) 2021-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+# these variables need to be in sync with what's inside
+# https://gitlab.com/eyeo/crumbs/crumbs-relay .gitlab-ci.yml
+# base variables for python virtual environment are
+# shared between build machines and web servers
+crumbs_web_base_path:
+  "/var/www/crumbs-relay"
+crumbs_web_servers_venv:
+  "{{ crumbs_web_base_path }}/venv"
+crumbs_web_httpd_document_root:
+  "{{ crumbs_web_base_path }}/public"
+
+# provision-crumbs-web-servers.yml
+# Because we re-using the gitlab-runner system user here, which is
+# provisioned by roles/gitlab/runner, in order to avoid the chicken
+# and egg problem between that and provision-custom-systems.yml, all later
+# references to this variable that evaluate at the time of provisioning
+# must come with a custom suffix that makes sure it won't choke up
+# provision-custom-systems.yml on initial bootstrap
+# References that evaluate later, at run-time, do not have to abide by this
+crumbs_web_servers_venv_user:
+  "gitlab-runner"
+
+# tasks/paths.yml
+crumbs_web_servers_prerequisite_paths__to_merge:
+  "{{ crumbs_web_base_path }}":
+    state: "directory"
+    path: "{{ crumbs_web_base_path }}"
+    mode: "0775"
+    owner: "{{ crumbs_web_servers_venv_user }}"
+    group: "{{ crumbs_web_servers_venv_user }}"
+  crumbs_relay_relay_subdirectory:
+    state: "directory"
+    path: "{{ crumbs_web_base_path }}/relay"
+    mode: "0775"
+    owner: "{{ crumbs_web_servers_venv_user }}"
+    group: "{{ crumbs_web_servers_venv_user }}"
+  crumbs_relay_relay_settings_subdirectory:
+    state: "directory"
+    path: "{{ crumbs_web_base_path }}/relay/settings"
+    mode: "0775"
+    owner: "{{ crumbs_web_servers_venv_user }}"
+    group: "{{ crumbs_web_servers_venv_user }}"
+  crumbs_relay_env_file:
+    state: "copy"
+    content: "{{ crumbs_relay_env_file_contents }}"
+    dest: "{{ crumbs_web_base_path }}/relay/settings/environment.py"
+    mode: "0644"
+    owner: "{{ crumbs_web_servers_venv_user }}"
+    group: "{{ crumbs_web_servers_venv_user }}"
+
+# tasks/paths.yml
+crumbs_relay_service_handling_custom_paths__to_merge:
+  /etc/sudoers.d/local-crumbs-relay:
+    state: "copy"
+    owner: "root"
+    group: "root"
+    mode: "0440"
+    # yamllint disable rule:line-length
+    content: |
+      {{ crumbs_web_servers_venv_user }} ALL=(root) NOPASSWD:/bin/systemctl restart crumbs_relay_gunicorn
+      {{ crumbs_web_servers_venv_user }} ALL=(root) NOPASSWD:/bin/systemctl status crumbs_relay_gunicorn
+      {{ crumbs_web_servers_venv_user }} ALL=(root) NOPASSWD:/bin/systemctl status -l crumbs_relay_gunicorn
+    # yamllint enable rule:line-length
+    validate: "/usr/sbin/visudo --check --file=%s"
+
+# roles/apache2/tasks/main.yml
+# provision-apache2-servers.yml
+crumbs_web_apache2_modules__to_merge:
+  headers: &apache2_standard_module
+  proxy_http:
+    *apache2_standard_module
+  rewrite:
+    *apache2_standard_module
+
+# tasks/packages.yml
+# adding python packages for venv
+crumbs_web_custom_packages__to_merge:
+  ca-certificates: "present"
+  curl: "present"
+  python3-venv: "present"
+  redis-tools: "present"
+  ssl-cert: "present"
+  wget: "present"
+
+# tasks/services.yml
+crumbs_custom_services__to_merge:
+  crumbs_relay_gunicorn:
+    enabled: "{{ crumbs_gunicorn_service_enabled }}"
+    state: "{{ crumbs_gunicorn_service_state }}"
+    service:
+      Unit:
+        Description: "Crumbs Gunicorn runner"
+        After: "network.target"
+      Service:
+        # yamllint disable rule:line-length
+        Environment: "DJANGO_SETTINGS_MODULE={{ crumbs_django_settings_module }}"
+        ExecStart: "{{ crumbs_web_servers_venv }}/bin/gunicorn {{ crumbs_gunicorn_name }}.wsgi:application -w {{ crumbs_gunicorn_workers }} --log-file -"
+        # yamllint enable rule:line-length
+        User: "{{ crumbs_web_servers_venv_user }}"
+        Group: "{{ crumbs_web_servers_venv_user }}"
+        RuntimeDirectory: "{{ crumbs_web_servers_venv }}"
+        RuntimeDirectoryMode: "2755"
+        WorkingDirectory: "{{ crumbs_web_base_path }}"
+        LimitNOFILE: "65535"
+      Install:
+        WantedBy: "multi-user.target"
+
+crumbs_web_server_app_port:
+  "8000"
+
+crumbs_web_server_app_proxy_custom_apache_config: |
+  ProxyPass /server-status !
+  ProxyPass /static !
+  RequestHeader set Host "{{ crumbs_web_hostname }}"
+  ProxyPreserveHost On
+  ProxyPass "/" "http://localhost:{{ crumbs_web_server_app_port }}/"
+  ProxyPassReverse "/" "http://localhost:{{ crumbs_web_server_app_port }}/"

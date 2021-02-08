@@ -104,6 +104,11 @@ chromium-gitlab-runner-0:
   # https://gitlab.com/eyeo/devops/ansible-playbooks/issues/25
   allow_failure: true
 
+crumbs-web-server-0:
+  extends: ".vagrantjob"
+  variables:
+    TEST_HOST: "crumbs-web-server-0.test"
+
 custom-centos7-0:
   extends: ".vagrantjob"
   variables:

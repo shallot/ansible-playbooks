@@ -1,0 +1,123 @@
+# Copyright (c) 2021-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+# roles/gitlab/runner/tasks/main.yml
+# https://gitlab.com/eyeo/devops/ansible-role-gitlab#synopsis
+# gitlab_runners:
+#   - parameters:
+#       registration-token: "<value obtained from gitlab project instance>"
+#       name: "gitlab-runner@{{ ansible_fqdn }}"
+#       url: "https://gitlab.com"
+#       executor: "shell"
+#       extra:
+#         tag-list: "test-crumbs-web-server-0"
+
+# group_vars/crumbs-web-servers.yml
+crumbs_web_hostname:
+  "crumbs-web-server-0.test"
+crumbs_django_settings_module:
+  "crumbs-web-server-0.test.settings"
+crumbs_gunicorn_name:
+  "relay"
+crumbs_gunicorn_workers:
+  "2"
+
+# Example values for gunicorn service provisioning
+crumbs_relay_gateway_api_key:
+  "changeme"
+test_crumbs_relay_django_secret_key:
+  "changeme"
+test_crumbs_relay_magic_link_jwt_secret:
+  "changeme"
+
+test_crumbs_postgresql_user:
+  "example"
+test_crumbs_postgresql_name:
+  "example"
+test_crumbs_postgresql_password:
+  "changeme"
+test_crumbs_redis_port:
+  "6380"
+test_crumbs_database_server_host:
+  "crumbs-postgresql-server-0.test"
+test_crumbs_postgresql_port:
+  "5342"
+
+# this part can go into inventory group vars later
+# yamllint disable rule:line-length
+crumbs_relay_env_file_contents: |
+  RELAY_GATEWAY_API_KEY = '{{ crumbs_relay_gateway_api_key }}'
+  RELAY_DATABASE_HOST = '{{ test_crumbs_database_server_host }}'
+  RELAY_DATABASE_PORT = '{{ test_crumbs_postgresql_port }}'
+  RELAY_DATABASE_USER = '{{ test_crumbs_postgresql_user }}'
+  RELAY_DATABASE_NAME = '{{ test_crumbs_postgresql_name }}'
+  RELAY_DATABASE_PASSWORD = '{{ test_crumbs_postgresql_password }}'
+  RELAY_CACHE_LOCATION = 'redis://{{ test_crumbs_database_server_host }}:{{ test_crumbs_redis_port }}/1'
+  SECRET_KEY = '{{ test_crumbs_relay_django_secret_key }}'
+  MAGIC_LINK_JWT_SECRET = '{{ test_crumbs_relay_magic_link_jwt_secret }}'
+# yamllint enable rule:line-length
+
+# tasks/paths.yml
+crumbs_web_server_test_custom_paths__to_merge:
+  /var/www/crumbs-web-server-0.test:
+    state: "directory"
+    mode: "0755"
+  /var/www/crumbs-web-server-0.test/index.html:
+    state: "copy"
+    src: "/dev/null"
+    mode: "0644"
+
+# roles/apache2/tasks/main.yml
+crumbs_web_server_test_apache2_sites__to_merge:
+  crumbs-web-server-0.test:
+    # yamllint disable rule:line-length
+    configuration: |
+      <VirtualHost *:80>
+
+        ServerName crumbs-web-server-0.test
+        ServerAdmin webmaster@crumbs-web-server-0.test
+
+        ErrorLog ${APACHE_LOG_DIR}/crumbs-web-server-0.test-error.log
+        CustomLog ${APACHE_LOG_DIR}/crumbs-web-server-0.test-access.log combined
+
+        DocumentRoot "/var/www/crumbs-web-server-0.test"
+
+        {{ crumbs_web_server_app_proxy_custom_apache_config | indent(2) }}
+
+      </VirtualHost>
+    # yamllint enable rule:line-length
+
+# TODO: change enable to true when there is something to run
+# aka after crumbs repo is added to provision-crumbs-web-servers.yml
+crumbs_gunicorn_service_enabled: false
+crumbs_gunicorn_service_state: "stopped"
+
+# https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
+vagrant_groups:
+  - "apache2-servers"
+  - "crumbs-web-servers"
+  - "gitlab-runners"
+
+# https://www.vagrantup.com/intro/getting-started/networking.html
+vagrant_networks:
+  - private_network:
+      ip: "10.8.100.140"
+
+# https://www.vagrantup.com/docs/provisioning/ansible.html
+vagrant_playbooks:
+  - "provision-custom-systems.yml"
+  - "provision-crumbs-web-servers.yml"
