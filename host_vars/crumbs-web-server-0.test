@@ -39,23 +39,37 @@ crumbs_gunicorn_workers:
 # Example values for gunicorn service provisioning
 crumbs_relay_gateway_api_key:
   "changeme"
-crumbs_relay_django_secret_key:
+test_crumbs_relay_django_secret_key:
   "changeme"
-crumbs_relay_magic_link_jwt_secret:
+test_crumbs_relay_magic_link_jwt_secret:
   "changeme"
 
-crumbs_relay_database_user:
+test_crumbs_postgresql_user:
   "example"
-crumbs_relay_database_name:
+test_crumbs_postgresql_name:
   "example"
-crumbs_relay_database_password:
+test_crumbs_postgresql_password:
   "changeme"
-crumbs_relay_database_port:
+test_crumbs_redis_port:
   "6380"
 test_crumbs_database_server_host:
   "crumbs-postgresql-server-0.test"
-test_crumbs_database_server_port:
+test_crumbs_postgresql_port:
   "5342"
+
+# this part can go into inventory group vars later
+# yamllint disable rule:line-length
+crumbs_relay_env_file_contents: |
+  RELAY_GATEWAY_API_KEY = '{{ crumbs_relay_gateway_api_key }}'
+  RELAY_DATABASE_HOST = '{{ test_crumbs_database_server_host }}'
+  RELAY_DATABASE_PORT = '{{ test_crumbs_postgresql_port }}'
+  RELAY_DATABASE_USER = '{{ test_crumbs_postgresql_user }}'
+  RELAY_DATABASE_NAME = '{{ test_crumbs_postgresql_name }}'
+  RELAY_DATABASE_PASSWORD = '{{ test_crumbs_postgresql_password }}'
+  RELAY_CACHE_LOCATION = 'redis://{{ test_crumbs_database_server_host }}:{{ test_crumbs_redis_port }}/1'
+  SECRET_KEY = '{{ test_crumbs_relay_django_secret_key }}'
+  MAGIC_LINK_JWT_SECRET = '{{ test_crumbs_relay_magic_link_jwt_secret }}'
+# yamllint enable rule:line-length
 
 # tasks/paths.yml
 crumbs_web_server_test_custom_paths__to_merge:

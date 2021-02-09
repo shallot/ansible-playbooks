@@ -37,19 +37,6 @@ crumbs_web_httpd_document_root:
 crumbs_web_servers_venv_user:
   "gitlab-runner"
 
-# yamllint disable rule:line-length
-crumbs_relay_env_file_contents: |
-  RELAY_GATEWAY_API_KEY = '{{ crumbs_relay_gateway_api_key }}'
-  RELAY_DATABASE_HOST = '{{ test_crumbs_database_server_host }}'
-  RELAY_DATABASE_PORT = '{{ test_crumbs_database_server_port }}'
-  RELAY_DATABASE_USER = '{{ crumbs_relay_database_user }}'
-  RELAY_DATABASE_NAME = '{{ crumbs_relay_database_name }}'
-  RELAY_DATABASE_PASSWORD = '{{ crumbs_relay_database_password }}'
-  RELAY_CACHE_LOCATION = 'redis://{{ test_crumbs_database_server_host }}:{{ crumbs_relay_database_port }}/1'
-  SECRET_KEY = '{{ crumbs_relay_django_secret_key }}'
-  MAGIC_LINK_JWT_SECRET = '{{ crumbs_relay_magic_link_jwt_secret }}'
-# yamllint enable rule:line-length
-
 # tasks/paths.yml
 crumbs_web_servers_prerequisite_paths__to_merge:
   "{{ crumbs_web_base_path }}":
