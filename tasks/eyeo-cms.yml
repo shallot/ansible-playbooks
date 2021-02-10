@@ -26,8 +26,8 @@
       set_fact:
         eyeo_cms_site_hostnames:
           "{{ eyeo_cms_site_hostnames
-            | default({})
-            | combine({ item.key: 'eyeo_cms_web_required' })
+            | default([])
+            + [ item.key ]
             }}"
       when:
         "item.value.eyeo_cms_web_required | default(false)"
@@ -83,12 +83,12 @@
 - name:
     "file : /usr/local/sbin/deploy_eyeo_cms_web_*"
   copy:
-    dest: "/usr/local/sbin/deploy_eyeo_cms_web_{{ item.key }}"
+    dest: "/usr/local/sbin/deploy_eyeo_cms_web_{{ item }}"
     mode: "0744"
     # yamllint disable rule:line-length
     content: |
       #!/bin/sh -ex
-      DOMAIN="{{ item.key }}"
+      DOMAIN="{{ item }}"
       test -n "$DOMAIN" || exit 1
       user="{{ eyeo_cms_system_username }}"
       id "$user" || exit 2
@@ -114,14 +114,14 @@
         sudo service apache2 reload
       fi
     # yamllint enable rule:line-length
-  with_dict:
+  loop:
     "{{ eyeo_cms_site_hostnames }}"
   become:
     true
 - name:
     "file : /usr/local/sbin/undeploy_eyeo_cms_web_*"
   copy:
-    dest: "/usr/local/sbin/undeploy_eyeo_cms_web_{{ item.key }}"
+    dest: "/usr/local/sbin/undeploy_eyeo_cms_web_{{ item }}"
     mode: "0744"
     content: |
       #!/bin/sh -ex
@@ -129,7 +129,7 @@
         echo "Can only remove staging system not production master"
         exit 1
       fi
-      DOMAIN="{{ item.key }}"
+      DOMAIN="{{ item }}"
       test -n "$DOMAIN" || exit 2
       user="{{ eyeo_cms_system_username }}"
       id "$user" || exit 3
@@ -143,7 +143,7 @@
       sudo service apache2 reload
       sudo rm -v $base_virtual_host_file
       sudo rm -rv $final_dest_dir
-  with_dict:
+  loop:
     "{{ eyeo_cms_site_hostnames }}"
   become:
     true
@@ -153,17 +153,17 @@
     "file : /etc/sudoers.d/deploy_eyeo_cms_web_*"
   copy:
     # yamllint disable rule:line-length
-    dest: "/etc/sudoers.d/deploy_eyeo_cms_web_{{ item.key | replace('.', '_') }}"
+    dest: "/etc/sudoers.d/deploy_eyeo_cms_web_{{ item | replace('.', '_') }}"
     # yamllint enable rule:line-length
     mode: "0440"
     # yamllint disable rule:line-length
     content: |
       Defaults:gitlab-runner env_keep += "CI_COMMIT_REF_SLUG"
-      gitlab-runner ALL=(root) NOPASSWD: /usr/local/sbin/deploy_eyeo_cms_web_{{ item.key }}
+      gitlab-runner ALL=(root) NOPASSWD: /usr/local/sbin/deploy_eyeo_cms_web_{{ item }}
     # yamllint enable rule:line-length
     validate:
       "/usr/sbin/visudo --check --file=%s"
-  with_dict:
+  loop:
     "{{ eyeo_cms_site_hostnames }}"
   become:
     true
@@ -171,17 +171,17 @@
     "file : /etc/sudoers.d/undeploy_eyeo_cms_web_*"
   copy:
     # yamllint disable rule:line-length
-    dest: "/etc/sudoers.d/undeploy_eyeo_cms_web_{{ item.key | replace('.', '_') }}"
+    dest: "/etc/sudoers.d/undeploy_eyeo_cms_web_{{ item | replace('.', '_') }}"
     # yamllint enable rule:line-length
     mode: "0440"
     # yamllint disable rule:line-length
     content: |
       Defaults:gitlab-runner env_keep += "CI_COMMIT_REF_SLUG"
-      gitlab-runner ALL=(root) NOPASSWD: /usr/local/sbin/undeploy_eyeo_cms_web_{{ item.key }}
+      gitlab-runner ALL=(root) NOPASSWD: /usr/local/sbin/undeploy_eyeo_cms_web_{{ item }}
     # yamllint enable rule:line-length
     validate:
       "/usr/sbin/visudo --check --file=%s"
-  with_dict:
+  loop:
     "{{ eyeo_cms_site_hostnames }}"
   become:
     true
