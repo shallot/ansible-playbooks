@@ -16,10 +16,10 @@
 ---
 
 - name:
-    "provision-ansible-masters"
+    "provision-ansible-admin-hosts"
 
   hosts:
-    "ansible-masters"
+    "ansible-admin-hosts"
 
   tasks:
 
@@ -29,7 +29,7 @@
 
     # https://docs.ansible.com/ansible/latest/import_tasks_module.html
     - import_tasks:
-        "tasks/ansible-master.yml"
+        "tasks/ansible-admin.yml"
 
     # https://docs.ansible.com/ansible/latest/import_tasks_module.html
     - import_tasks:
@@ -37,10 +37,10 @@
 
     # https://docs.ansible.com/ansible/latest/import_tasks_module.html
     - import_tasks:
-        "tasks/ansible-master-vagrant.yml"
+        "tasks/ansible-admin-vagrant.yml"
       when:
         "custom_ansible_playbooks_repository == '/vagrant'"
 
     # https://docs.ansible.com/ansible/latest/import_tasks_module.html
     - import_tasks:
-        "tasks/ansible-master-keys.yml"
+        "tasks/ansible-admin-keys.yml"

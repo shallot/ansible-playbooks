@@ -164,7 +164,7 @@ Vagrant.configure('2') do |vagrant|
 
         # Exclude transient data as well as the Git sub-modules because at this
         # point only the playbooks repository itself is required, and in one
-        # single case only. Refer to the provision-ansible-masters.yml playbook
+        # single case only. Refer to the provision-ansible-admin-hosts.yml playbook
         # and the host_vars/admin-0.test file for details.
         rsync_exclude = ['.vagrant/', 'builds/', 'roles/']
         rsync_options[:rsync__exclude] = rsync_exclude
