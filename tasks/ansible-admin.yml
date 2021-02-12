@@ -34,7 +34,7 @@
     "tasks/packages.yml"
   vars:
     custom_packages_suffix:
-      "ansible_master_packages__to_merge"
+      "ansible_admin_packages__to_merge"
 
 # https://docs.ansible.com/ansible/latest/modules/group_module.html
 - name:

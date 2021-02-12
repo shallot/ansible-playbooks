@@ -16,8 +16,8 @@
 ---
 
 # Default list of packages necessary for the initial part of the
-# Ansible master machine provision to work
-ansible_master_default_packages:
+# Ansible admin host provision to work
+ansible_admin_default_packages:
   ca-certificates: "present"
   git: "present"
 

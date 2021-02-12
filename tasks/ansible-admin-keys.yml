@@ -16,7 +16,7 @@
 ---
 
 # https://docs.ansible.com/ansible/latest/include_tasks_module.html
-# must happen after ansible-master.yml and ansible-master-vagrant.yml
+# must happen after ansible-admin.yml and ansible-admin-vagrant.yml
 # because it depends on both custom_ansible_user and custom_vagrant_user
 # through host_vars/admin-0.test
 - name:
