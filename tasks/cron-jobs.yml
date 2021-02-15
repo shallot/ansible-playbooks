@@ -19,7 +19,7 @@
     "cron"
   cron:
     backup: "{{ cron_job.value.backup | default(omit) }}"
-    file: "{{ cron_job.value.file | default(omit) }}"
+    cron_file: "{{ cron_job.value.file | default(omit) }}"
     day: "{{ cron_job.value.day | default(omit) }}"
     disabled: "{{ cron_job.value.disabled | default(omit) }}"
     env: "{{ cron_job.value.env | default(omit) }}"
