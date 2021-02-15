@@ -32,6 +32,14 @@
     name: "apt_repositories"
     suffix: "apt_repositories__to_merge"
 
+# https://docs.ansible.com/ansible/latest/modules/copy_module.html
+- name:
+    "merge_variable : apt_preferences"
+  merge_variable:
+    default: {}
+    name: "apt_preferences"
+    suffix: "apt_preferences__to_merge"
+
 # https://gitlab.com/eyeo/devops/ansible-playbooks/tree/master/roles/apt
 - import_role:
     name: "apt"
