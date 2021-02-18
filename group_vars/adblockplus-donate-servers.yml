@@ -138,7 +138,7 @@ adblockplus_donate_server_deploy_custom_paths__to_merge:
       test -d "$SOURCE_DIR" || exit 3
       sudo install -d -o "$user" "$dest_dir"
       sudo -u "$user" rsync -aHAX --del \
-                          --exclude=etc/ \
+                          --exclude=/etc/ \
                           -vP --stats \
                             "$SOURCE_DIR/" \
                             "$dest_dir/"
