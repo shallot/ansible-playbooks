@@ -45,3 +45,13 @@
           "{{ ansible_fqdn }}"
         icinga_web_php_module_name:
           "fpm"
+
+    # https://docs.ansible.com/ansible/latest/modules/include_tasks_module.html
+    - name:
+        "generate_api_setup"
+      include_tasks:
+        "roles/icinga/server/tasks/generate_api_setup.yml"
+
+  vars:
+    icinga_notification_handler:
+      "server : service : icinga2"
