@@ -36,42 +36,31 @@ test-telemetry-pingv1-1_custom_paths__to_merge:
     src: "/dev/null"
     mode: "0644"
 
-telemetry_pingv1_extra_log_location:
-  "/var/log/apache2/test-telemetry-pingv1-post.log"
+telemetry_pingv1_domain:
+  "telemetry.example.com"
+
+telemetry_pingv1_doc_root:
+  "/var/www/test-telemetry-pingv1"
+
+# Proxying to the app is done only when this is defined
+# telemetry_pingv1_app_port:
+#   "8000"
+
+# Enables HTTPS only when set
+# telemetry_pingv1_ssl_cert_file:
+#   "/etc/apache2/ssl/wildcard.{{ telemetry_pingv1_domain }}.crt"
+# telemetry_pingv1_ssl_chain_file:
+#   "/etc/apache2/ssl/wildcard.{{ telemetry_pingv1_domain }}.chain.crt"
+# telemetry_pingv1_ssl_key_file:
+#   "/etc/apache2/ssl/wildcard.{{ telemetry_pingv1_domain }}.key"
+
+telemetry_pingv1_products:
+  - product1
+  - product2
+  - product3
 
 telemetry_pingv1_logrotate_count:
   "{{ apache2_logrotate_count | default('14') }}"
-
-# roles/apache2/tasks/main.yml
-# provision-apache2-servers.yml
-test-telemetry-pingv1-1_apache2_sites__to_merge:
-  test-telemetry-pingv1:
-    configuration: |
-      <VirtualHost *:80>
-
-        ServerName test-telemetry-pingv1.example.com
-
-        ErrorLog ${APACHE_LOG_DIR}/test-telemetry-pingv1-error.log
-        CustomLog ${APACHE_LOG_DIR}/test-telemetry-pingv1-access.log combined
-
-        # if necessary for rewrite debug
-        #LogLevel alert rewrite:trace3
-
-        DocumentRoot "/var/www/test-telemetry-pingv1"
-        <Directory "/var/www/test-telemetry-pingv1">
-          AllowOverride All
-          Require all granted
-        </Directory>
-
-        {{ telemetry_pingv1_app_proxy_custom_apache_config | indent(2) }}
-
-        {{ telemetry_pingv1_extra_log_custom_apache_config | indent(2) }}
-
-      #  RewriteEngine on
-      #  RewriteCond %{SERVER_NAME} =test-telemetry-pingv1.example.com
-      #  RewriteRule ^ https://%{SERVER_NAME}%{REQUEST_URI} [END,NE,R=permanent]
-
-      </VirtualHost>
 
 # TODO: HTTPS with a LE wildcard certificate
 

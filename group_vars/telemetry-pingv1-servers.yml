@@ -97,28 +97,168 @@ deploy-telemetry-pingv1_custom_paths__to_merge:
     validate:
       "/usr/sbin/visudo --check --file=%s"
 
+telemetry_pingv1_doc_root:
+  "/var/www/telemetry-pingv1"
+
 # TODO: fully parametrize port 8000, match it to server.env
-telemetry_pingv1_app_port:
-  "8000"
+# Enables proxying to the app is done only when this is defined
+# telemetry_pingv1_app_port:
+#   "8000"
 
-telemetry_pingv1_app_proxy_custom_apache_config: |
-  ProxyPass /server-status !
-  ProxyPreserveHost On
-  ProxyPass / "http://localhost:{{ telemetry_pingv1_app_port }}/"
-  ProxyPassReverse / "http://localhost:{{ telemetry_pingv1_app_port }}/"
+# Enables HTTPS only when set
+# telemetry_pingv1_ssl_cert_file:
+#   "/etc/apache2/ssl/wildcard.{{ telemetry_pingv1_domain }}.crt"
+# telemetry_pingv1_ssl_chain_file:
+#   "/etc/apache2/ssl/wildcard.{{ telemetry_pingv1_domain }}.chain.crt"
+# telemetry_pingv1_ssl_key_file:
+#   "/etc/apache2/ssl/wildcard.{{ telemetry_pingv1_domain }}.key"
 
-telemetry_pingv1_extra_log_custom_apache_config: |
-  <Location />
-    # this is an Apache+mod_security2-native POST logger
-    SecRuleEngine DetectionOnly
-    SecAuditEngine RelevantOnly
-    SecDefaultAction "nolog,noauditlog,allow,phase:request"
-    SecRequestBodyAccess On
-    SecAuditLog {{ telemetry_pingv1_extra_log_location }}
-    SecAuditLogParts ABCEFZ
-    SecRule REQUEST_METHOD "^POST$" "chain,allow,phase:request,id:123"
-    SecRule REQUEST_URI ".*" "auditlog"
-  </Location>
+# roles/apache2/tasks/main.yml
+# provision-apache2-servers.yml
+# In order to avoid requests from bots and scanners (good or bad)
+# being logged as product logs, default sites with "000-" prefix
+# and separate log files are used.
+default_apache2_sites__to_merge:
+  "000-{{ inventory_hostname }}":
+    configuration: |
+      <VirtualHost *:80>
+        {{ telemetry_pingv1_default_virtual_hosts_extras | default('') }}
+        ServerName {{ inventory_hostname }}
+        ErrorLog ${APACHE_LOG_DIR}/error.log
+        CustomLog ${APACHE_LOG_DIR}/access.log combined
+        DocumentRoot "{{ telemetry_pingv1_doc_root }}"
+        <Directory "{{ telemetry_pingv1_doc_root }}">
+          AllowOverride All
+          Require all granted
+        </Directory>
+      </VirtualHost>
+  "000-{{inventory_hostname }}-ssl":
+    # yamllint disable rule:line-length
+    configuration: |
+      {% if telemetry_pingv1_ssl_cert_file is defined %}
+      <VirtualHost *:443>
+        {{ telemetry_pingv1_default_ssl_virtual_host_extras | default('') }}
+        ServerName {{ inventory_hostname }}
+        ErrorLog ${APACHE_LOG_DIR}/error.log
+        CustomLog ${APACHE_LOG_DIR}/access.log combined
+        DocumentRoot "{{ telemetry_pingv1_doc_root }}"
+        <Directory "{{ telemetry_pingv1_doc_root }}">
+          AllowOverride All
+          Require all granted
+        </Directory>
+        SSLEngine On
+        SSLCertificateFile "{{ telemetry_pingv1_ssl_cert_file }}"
+        SSLCertificateChainFile "{{ telemetry_pingv1_ssl_chain_file }}"
+        SSLCertificateKeyFile "{{ telemetry_pingv1_ssl_key_file }}"
+      </VirtualHost>
+      {% endif %}
+    # yamllint enable rule:line-length
+
+# roles/apache2/tasks/main.yml
+# provision-apache2-servers.yml
+# This is different from other sites definitions that are usually
+# defined in private inventories. In this case a template is used
+# to generate multiple virtual hosts in the same site file,
+# in a loop over product ids. Splitting sites in Jinja would be
+# unmaintainable because of all the formatting added from the
+# JSON conversion.
+telemetry-pingv1_apache2_sites__to_merge:
+  telemetry-pingv1:
+    # yamllint disable rule:line-length
+    configuration: |
+      {% for product in telemetry_pingv1_products %}
+      <VirtualHost *:80>
+        {{ telemetry_pingv1_product_virtual_host_extras | default('') }}
+
+        ServerName {{ inventory_hostname }}
+        ServerAlias {{ product }}-?.{{ telemetry_pingv1_domain }}
+
+        ErrorLog ${APACHE_LOG_DIR}/{{ product }}-telemetry-pingv1-error.log
+        CustomLog ${APACHE_LOG_DIR}/{{ product }}-telemetry-pingv1-access.log combined
+
+        DocumentRoot "{{ telemetry_pingv1_doc_root }}"
+        <Directory "{{ telemetry_pingv1_doc_root }}">
+          AllowOverride All
+          Require all granted
+        </Directory>
+
+        {% if telemetry_pingv1_app_port is defined %}
+        ProxyPass /server-status !
+        ProxyPreserveHost On
+        ProxyPass / "http://localhost:{{ telemetry_pingv1_app_port }}/"
+        ProxyPassReverse / "http://localhost:{{ telemetry_pingv1_app_port }}/"
+        {% endif %}
+
+        <Location />
+          # this is an Apache+mod_security2-native POST logger
+          SecRuleEngine DetectionOnly
+          SecAuditEngine RelevantOnly
+          SecDefaultAction "nolog,noauditlog,allow,phase:request"
+          SecRequestBodyAccess On
+          SecAuditLog {{ telemetry_pingv1_log_directory }}/{{ product }}-post-raw.log
+          SecAuditLogParts ABCEFZ
+          SecRule REQUEST_METHOD "^POST$" "chain,allow,phase:request,id:123"
+          SecRule REQUEST_URI ".*" "auditlog"
+        </Location>
+
+        {% if telemetry_pingv1_ssl_cert_file is defined %}
+        RewriteEngine on
+        RewriteCond %{SERVER_NAME} {{telemetry_pingv1_domain}}$
+        RewriteRule ^ https://%{SERVER_NAME}%{REQUEST_URI} [END,NE,R=permanent]
+        {% endif %}
+
+      </VirtualHost>
+      {% endfor %}
+    # yamllint enable rule:line-length
+
+  telemetry-pingv1-ssl:
+    # yamllint disable rule:line-length
+    configuration: |
+      {% if telemetry_pingv1_ssl_cert_file is defined %}
+      {% for product in telemetry_pingv1_products %}
+      <VirtualHost *:443>
+        {{ telemetry_pingv1_product_ssl_virtual_host_extras | default('') }}
+
+        ServerName {{ inventory_hostname }}
+        ServerAlias {{ product }}-?.{{ telemetry_pingv1_domain }}
+
+        ErrorLog ${APACHE_LOG_DIR}/{{ product }}-telemetry-pingv1-error.log
+        CustomLog ${APACHE_LOG_DIR}/{{ product }}-telemetry-pingv1-access.log combined
+
+        DocumentRoot "{{ telemetry_pingv1_doc_root }}"
+        <Directory "{{ telemetry_pingv1_doc_root }}">
+          AllowOverride All
+          Require all granted
+        </Directory>
+
+        {% if telemetry_pingv1_app_port is defined %}
+        ProxyPass /server-status !
+        ProxyPreserveHost On
+        ProxyPass / "http://localhost:{{ telemetry_pingv1_app_port }}/"
+        ProxyPassReverse / "http://localhost:{{ telemetry_pingv1_app_port }}/"
+        {% endif %}
+
+        <Location />
+          # this is an Apache+mod_security2-native POST logger
+          SecRuleEngine DetectionOnly
+          SecAuditEngine RelevantOnly
+          SecDefaultAction "nolog,noauditlog,allow,phase:request"
+          SecRequestBodyAccess On
+          SecAuditLog {{ telemetry_pingv1_log_directory }}/{{ product }}-post-raw.log
+          SecAuditLogParts ABCEFZ
+          SecRule REQUEST_METHOD "^POST$" "chain,allow,phase:request,id:123"
+          SecRule REQUEST_URI ".*" "auditlog"
+        </Location>
+
+        SSLEngine On
+        SSLCertificateFile "{{ telemetry_pingv1_ssl_cert_file }}"
+        SSLCertificateChainFile "{{ telemetry_pingv1_ssl_chain_file }}"
+        SSLCertificateKeyFile "{{ telemetry_pingv1_ssl_key_file }}"
+
+      </VirtualHost>
+      {% endfor %}
+      {% endif %}
+    # yamllint enable rule:line-length
 
 # roles/apache2/tasks/main.yml
 # provision-apache2-servers.yml
@@ -187,13 +327,16 @@ logrotate-telemetry-pingv1_custom_paths__to_merge:
     # basically /etc/logrotate.d/apache2 from Debian 10, but for our location
     # yamllint disable rule:line-length
     content: |
-      {{ telemetry_pingv1_extra_log_location }} {
+      {{ telemetry_pingv1_log_directory}}/*-post-raw.log {
         daily
         rotate {{ telemetry_pingv1_logrotate_count }}
+        dateext
+        dateyesterday
+        dateformat .%Y-%m-%d
         compress
         delaycompress
         missingok
-        nodateext
+        create 640 root adm
         sharedscripts
         postrotate
           if invoke-rc.d apache2 status > {{ telemetry_pingv1_log_directory }}/telemetry-pingv1-apache2-status.log 2>&1; then \
