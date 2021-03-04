@@ -34,5 +34,8 @@
 # https://www.python.org/dev/peps/pep-3147/
 **/__pycache__
 
+# https://intellij-support.jetbrains.com/hc/en-us/articles/206544839
+/.idea
+
 # Backup files commonly created by text editors
 **/*~
