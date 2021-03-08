@@ -1,0 +1,45 @@
+# Copyright (c) 2021-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+# action_plugins/merge_variable.py
+- name:
+    "merge_variable : custom_commands"
+  merge_variable:
+    default: {}
+    name: "custom_commands"
+    suffix: "{{ custom_commands_suffix
+              | default('custom_commands__to_merge') }}"
+
+# https://docs.ansible.com/ansible/latest/collections/ansible/builtin/command_module.html
+- name:
+    "command"
+  command:
+    cmd: "{{ command.value.cmd | mandatory }}"
+    chdir: "{{ command.value.chdir | default(omit) }}"
+    creates: "{{ command.value.creates | default(omit) }}"
+    removes: "{{ command.value.removes | default(omit) }}"
+    stdin: "{{ command.value.stdin | default(omit) }}"
+    warn: "{{ command.value.warn | default(false) }}"
+  become:
+    true
+  become_user:
+    "{{ command.value.become_user | default(omit) }}"
+  loop:
+    "{{ custom_commands | dict2items | sort(attribute='key') }}"
+  loop_control:
+    loop_var:
+      "command"

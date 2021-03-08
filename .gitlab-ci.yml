@@ -114,6 +114,11 @@ custom-centos7-0:
   variables:
     TEST_HOST: "custom-centos7-0.test"
 
+custom-commands-shells-0:
+  extends: ".vagrantjob"
+  variables:
+    TEST_HOST: "custom-commands-shells-0.test"
+
 custom-debian9-0:
   extends: ".vagrantjob"
   variables:

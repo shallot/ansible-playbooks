@@ -1,0 +1,46 @@
+# Copyright (c) 2021-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+# action_plugins/merge_variable.py
+- name:
+    "merge_variable : custom_shells"
+  merge_variable:
+    default: {}
+    name: "custom_shells"
+    suffix: "{{ custom_shells_suffix
+              | default('custom_shells__to_merge') }}"
+
+# https://docs.ansible.com/ansible/latest/collections/ansible/builtin/shell_module.html
+- name:
+    "shell"
+  shell:
+    cmd: "{{ shell.value.cmd | mandatory }}"
+    executable: "{{ shell.value.executable | default(omit) }}"
+    chdir: "{{ shell.value.chdir | default(omit) }}"
+    creates: "{{ shell.value.creates | default(omit) }}"
+    removes: "{{ shell.value.removes | default(omit) }}"
+    stdin: "{{ shell.value.stdin | default(omit) }}"
+    warn: "{{ shell.value.warn | default(false) }}"
+  become:
+    true
+  become_user:
+    "{{ shell.value.become_user | default(omit) }}"
+  loop:
+    "{{ custom_shells | dict2items | sort(attribute='key') }}"
+  loop_control:
+    loop_var:
+      "shell"
