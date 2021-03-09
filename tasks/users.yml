@@ -115,7 +115,8 @@
         manage_dir: true
         user: "{{ item.name }}"
   when:
-    "item.exists and item.authorized_keys != None"
+    - "item.exists and item.authorized_keys != None"
+    - "state != 'absent' or (state == 'absent' and item.path is defined)"
   with_items:
     "{{ custom_user_info }}"
   loop_control:
