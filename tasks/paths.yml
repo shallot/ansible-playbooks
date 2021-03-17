@@ -33,14 +33,18 @@
 # https://docs.ansible.com/ansible/latest/user_guide/playbooks_blocks.html
 - block:
 
-    # Covers paths with missing state.
+    # Covers paths with missing state and numeric mode.
     # https://docs.ansible.com/ansible/latest/modules/fail_module.html
     - name:
-        "paths : check"
+        "paths : check state and mode"
       fail:
-        msg: "custom path '{{ item.key }}' must define a 'state'"
+        msg: "custom path '{{ item.key }}' must define
+          a 'state' and use a quoted 'mode'"
       loop:
-        "{{ custom_paths_for_fail }}"
+        "{{ custom_paths_for_fail_state
+          + custom_paths_for_fail_mode
+          + custom_paths_for_fail_directory_mode
+          }}"
 
     # Covers any target state beside "copy" and "template".
     # https://docs.ansible.com/ansible/latest/modules/file_module.html
@@ -119,9 +123,23 @@
       "{{ custom_paths | dict2items }}"
 
     # Identifies all custom_paths with a missing state.
-    custom_paths_for_fail:
+    custom_paths_for_fail_state:
       "{{ _itemized_custom_paths
         | selectattr('value.state', 'undefined')
+        | list
+        }}"
+
+    # Identifies all custom_paths with a numeric mode.
+    custom_paths_for_fail_mode:
+      "{{ _itemized_custom_paths
+        | selectattr('value.mode', 'number')
+        | list
+        }}"
+
+    # Identifies all custom_paths with a numeric directory_mode.
+    custom_paths_for_fail_directory_mode:
+      "{{ _itemized_custom_paths
+        | selectattr('value.directory_mode', 'number')
         | list
         }}"
 
