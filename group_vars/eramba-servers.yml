@@ -30,6 +30,19 @@ eramba_version:
 # For now, just use PHP version from tasks/os/debian/buster/apache2-php-fpm.yml
 eramba_php_version:
   "{{ php_version }}"
+# yamllint disable rule:line-length
+eramba_php_ini: |
+  ; according to eramba install documentation (as of 9.7.2020)
+  ; https://docs.google.com/document/d/1_w38Jb-qiWoDAkOSSgHlrr__bhOHrvoZWu9yinvAEjA
+  memory_limit = 4096M
+  post_max_size = 300M
+  file_uploads = On
+  upload_max_filesize = 300M
+  max_execution_time = 300
+  allow_url_fopen = On
+  max_input_vars = 3000
+  max_input_time = 600
+# yamllint enable rule:line-length
 
 # tasks/mysql-server.yml
 # https://gitlab.com/eyeo/devops/ansible-role-mysql
@@ -101,27 +114,17 @@ eramba_stage1_paths__to_merge:
     notify: "service : mysql"
   # custom php.ini settings
   # https://wiki.debian.org/PHP#Debian_Stretch_and_up
-  eramba_php_ini_fpm_local: &eramba_php_ini_local
+  eramba_php_ini_fpm_local:
     dest: "/etc/php/{{ eramba_php_version }}/fpm/conf.d/99-local.ini"
     mode: "0664"
     state: "copy"
-    # yamllint disable rule:line-length
-    content: |
-      ; according to eramba install documentation (as of 9.7.2020)
-      ; https://docs.google.com/document/d/1_w38Jb-qiWoDAkOSSgHlrr__bhOHrvoZWu9yinvAEjA
-      memory_limit = 4096M
-      post_max_size = 300M
-      file_uploads = On
-      upload_max_filesize = 300M
-      max_execution_time = 300
-      allow_url_fopen = On
-      max_input_vars = 3000
-      max_input_time = 600
-    # yamllint enable rule:line-length
+    content: "{{ eramba_php_ini }}"
     notify: "service : php-fpm"
   eramba_php_ini_cli_local:
-    <<: *eramba_php_ini_local
     dest: "/etc/php/{{ eramba_php_version }}/cli/conf.d/99-local.ini"
+    mode: "0664"
+    state: "copy"
+    content: "{{ eramba_php_ini }}"
   /etc/cron.d/eramba_local:
     mode: "0644"
     state: "copy"
