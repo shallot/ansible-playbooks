@@ -48,7 +48,7 @@ full_succeeding: &full_succeeding
     src: "{{ playbook_dir }}/templates/test.j2"
     state: "template"
 
-# Test manadtory "state" parameter
+# Test mandatory "state" parameter
 fail_for_missing_state: &fail_for_missing_state
   /tmp/test-files/directory:
     group: "vagrant"
@@ -57,7 +57,18 @@ fail_for_missing_state: &fail_for_missing_state
   /tmp/this-will-fail:
     src: "{{ playbook_dir }}/Vagrantfile"
 
-# test cases for regressions
+# Test non-numeric "mode" parameter
+fail_for_numeric_mode: &fail_for_numeric_mode
+  /tmp/this-will-work:
+    group: "vagrant"
+    mode: "0750"
+    state: "directory"
+  /tmp/this-will-fail:
+    group: "vagrant"
+    mode: 0750
+    state: "directory"
+
+# Test cases for regressions
 # https://gitlab.com/eyeo/devops/ansible-playbooks/-/issues/34
 single_entry: &single_entry
   /tmp/test-files/directory:
@@ -69,6 +80,7 @@ single_entry: &single_entry
 host_specific_custom_paths__to_merge:
   #  <<: *full_succeeding
   #  <<: *fail_for_missing_state
+  #  <<: *fail_for_numeric_mode
   <<: *single_entry
 
 # https://www.vagrantup.com/docs/vagrantfile/machine_settings.html
