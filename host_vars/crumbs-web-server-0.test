@@ -106,6 +106,15 @@ crumbs_web_server_test_apache2_sites__to_merge:
 crumbs_gunicorn_service_enabled: false
 crumbs_gunicorn_service_state: "stopped"
 
+# roles/postfix/agent/tasks/main.yml
+postfix_configuration:
+  mydomain:
+    "example.com"
+  myhostname:
+    "example.com"
+  smtp_helo_name:
+    "{{ inventory_hostname }}"
+
 # https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
 vagrant_groups:
   - "apache2-servers"
