@@ -192,6 +192,7 @@ telemetry-pingv1_apache2_sites__to_merge:
           Require all granted
         </Directory>
 
+        {% if telemetry_pingv1_ssl_cert_file is not defined %}
         {% if telemetry_pingv1_app_port is defined %}
         ProxyPass /server-status !
         ProxyPreserveHost On
@@ -201,19 +202,21 @@ telemetry-pingv1_apache2_sites__to_merge:
 
         <Location />
           # this is an Apache+mod_security2-native POST logger
+          # https://github.com/SpiderLabs/ModSecurity/wiki/Reference-Manual-(v2.x)
           SecRuleEngine DetectionOnly
-          SecAuditEngine RelevantOnly
+          SecAuditEngine On
           SecDefaultAction "nolog,noauditlog,allow,phase:request"
           SecRequestBodyAccess On
           SecAuditLog {{ telemetry_pingv1_log_directory }}/{{ product }}-post-raw.log
           SecAuditLogParts ABCEFZ
           SecRule REQUEST_METHOD "^POST$" "chain,allow,phase:request,id:123"
-          SecRule REQUEST_URI ".*" "auditlog"
+          SecRule REQUEST_URI "^" "auditlog"
         </Location>
+        {% endif %}
 
         {% if telemetry_pingv1_ssl_cert_file is defined %}
         RewriteEngine on
-        RewriteCond %{SERVER_NAME} {{telemetry_pingv1_domain}}$
+        RewriteCond %{SERVER_NAME} \.{{ telemetry_pingv1_domain }}$
         RewriteRule ^ https://%{SERVER_NAME}%{REQUEST_URI} [END,NE,R=permanent]
         {% endif %}
 
@@ -250,14 +253,15 @@ telemetry-pingv1_apache2_sites__to_merge:
 
         <Location />
           # this is an Apache+mod_security2-native POST logger
+          # https://github.com/SpiderLabs/ModSecurity/wiki/Reference-Manual-(v2.x)
           SecRuleEngine DetectionOnly
-          SecAuditEngine RelevantOnly
+          SecAuditEngine On
           SecDefaultAction "nolog,noauditlog,allow,phase:request"
           SecRequestBodyAccess On
           SecAuditLog {{ telemetry_pingv1_log_directory }}/{{ product }}-post-raw.log
           SecAuditLogParts ABCEFZ
           SecRule REQUEST_METHOD "^POST$" "chain,allow,phase:request,id:123"
-          SecRule REQUEST_URI ".*" "auditlog"
+          SecRule REQUEST_URI "^" "auditlog"
         </Location>
 
         SSLEngine On
