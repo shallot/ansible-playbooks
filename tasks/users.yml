@@ -56,34 +56,32 @@
 - name:
     "set_fact : set defaults"
   set_fact:
-    tmp_item: "{{ item
-                | combine({
+    custom_user_info:
+      "{{ custom_user_info
+          + [
+              {
+                  'state': item.item.value.state
+                    | default(item.state
+                    | default(None)),
                   'exists': 'home' in item,
+                  'home': item.home
+                    | default(None),
                   'home_mode': item.item.value.home_mode
                     | default(custom_users_default_home_mode
                     | default('0755')),
-                  'name': item['name']
-                    | default(item.item['key']),
+                  'name': item.name
+                    | default(item.item.key),
                   'authorized_keys': item.item.value.authorized_keys
                     | default(None),
-                })
-              }}"
+              }
+            ]
+       }}"
   with_items:
     "{{ custom_user.results }}"
   loop_control:
     label: "{{ item.item['key'] | to_json }}"
-  register:
-    "paired_tmp_items"
-
-# https://docs.ansible.com/ansible/latest/modules/set_fact_module.html
-- name:
-    "set_fact : flatten list"
-  set_fact:
-    custom_user_info:
-      "{{ paired_tmp_items.results
-        | map(attribute='ansible_facts.tmp_item') | list }}"
-  register:
-    "custom_user_info"
+  vars:
+    custom_user_info: []
 
 # https://docs.ansible.com/ansible/latest/modules/file_module.html
 - name:
@@ -93,7 +91,7 @@
     path: "{{ item.home }}"
     state: "directory"
   with_items:
-    "{{ custom_user_info }}"
+    "{{ custom_user_info | default([]) }}"
   loop_control:
     label: "{{ [item.name, item.home_mode] | to_json }}"
   when:
@@ -124,7 +122,7 @@
     # in the latter condition, but we don't support passing in a custom
     # authorized_keys_path through custom_users anyway
   with_items:
-    "{{ custom_user_info }}"
+    "{{ custom_user_info | default([]) }}"
   loop_control:
     label: "{{ item.name }}"
   vars:

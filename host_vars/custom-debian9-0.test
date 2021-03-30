@@ -38,12 +38,13 @@ host_specific_custom_users__to_merge:
       - "example_group"
     password: "$6$bCrd2ylJ$uQ.uN7Oy1QStmunslSMzYX0vM4wYXKdO9tgu.SE.hPdKBqcHk.CrHsUMxzN8rwiPcwRI3nzvzd9W4T0sJJmNz."
     authorized_keys: |
-      ssh-rsa This is just an example authorized key
+      {{ host_specific_custom_authorized_keys__to_merge.example.key }}
+    home: "/srv/example"
   example2:
     comment: "Second host-specific example user from Ansible"
     authorized_keys: |
-      ssh-rsa This is another example of an authorized key
-      ssh-rsa This is yet another example of an authorized key
+      {{ host_specific_custom_authorized_keys__to_merge.example2.key }}
+    home_mode: "0700"
   absentExample:
     comment: "Absent example user (via Ansible)"
     authorized_keys: "nokey"
@@ -108,6 +109,15 @@ host_specific_custom_authorized_keys__to_merge:
       - "no-port-forwarding"
       - "no-pty"
       - "no-X11-forwarding"
+  example:
+    user: "example"
+    key: |
+      ssh-rsa This-is-just-an-example-authorized-key
+  example2:
+    user: "example2"
+    key: |
+      ssh-rsa This-is-another-example-of-an-authorized-key
+      ssh-rsa This-is-yet-another-example-of-an-authorized-key
 
 # tasks/cron-jobs.yml
 host_specific_custom_cron_jobs__to_merge:
