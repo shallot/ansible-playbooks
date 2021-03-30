@@ -39,6 +39,11 @@ host_specific_custom_users__to_merge:
     password: "$6$bCrd2ylJ$uQ.uN7Oy1QStmunslSMzYX0vM4wYXKdO9tgu.SE.hPdKBqcHk.CrHsUMxzN8rwiPcwRI3nzvzd9W4T0sJJmNz."
     authorized_keys: |
       ssh-rsa This is just an example authorized key
+  example2:
+    comment: "Second host-specific example user from Ansible"
+    authorized_keys: |
+      ssh-rsa This is another example of an authorized key
+      ssh-rsa This is yet another example of an authorized key
   absentExample:
     comment: "Absent example user (via Ansible)"
     authorized_keys: "nokey"

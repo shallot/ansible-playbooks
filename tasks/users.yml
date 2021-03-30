@@ -101,19 +101,21 @@
   become:
     true
 
-# https://docs.ansible.com/ansible/latest/include_tasks_module.html
+# https://docs.ansible.com/ansible/latest/modules/set_fact_module.html
 - name:
-    "authorized_keys"
-  include_tasks:
-    "tasks/authorized-keys.yml"
-  vars:
+    "set_fact : custom_authorized_keys"
+  set_fact:
     custom_authorized_keys:
-      "{{ item.name }}":
-        exclusive: true
-        key: |
-          {{ item.authorized_keys }}
-        manage_dir: true
-        user: "{{ item.name }}"
+      "{{ custom_authorized_keys
+        | combine({
+          item.name: {
+            'exclusive': true,
+            'key': item.authorized_keys,
+            'manage_dir': true,
+            'user': item.name,
+          }
+        })
+       }}"
   when:
     - "item.exists and item.authorized_keys != None"
     - "item.state != 'absent' or
@@ -122,3 +124,11 @@
     "{{ custom_user_info }}"
   loop_control:
     label: "{{ item.name }}"
+  vars:
+    custom_authorized_keys: {}
+
+# https://docs.ansible.com/ansible/latest/include_tasks_module.html
+- name:
+    "authorized_keys"
+  include_tasks:
+    "tasks/authorized-keys.yml"
