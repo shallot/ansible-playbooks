@@ -30,6 +30,10 @@ telemetry_pingv1_system_username:
 telemetry_pingv1_server_dir:
   "/srv/telemetry-pingv1-server"
 
+# provision-telemetry-pingv1-servers.yml
+telemetry_pingv1_doc_root_dir:
+  "/var/www/telemetry-pingv1"
+
 # tasks/services.yml
 telemetry_pingv1_services__to_merge:
   telemetry-pingv1-server:
@@ -50,6 +54,15 @@ telemetry_pingv1_services__to_merge:
 
 # tasks/paths.yml
 telemetry_pingv1_prerequisite_paths__to_merge:
+  /var/www/telemetry-pingv1:
+    path: "{{ telemetry_pingv1_doc_root_dir }}"
+    state: "directory"
+    mode: "0755"
+  /var/www/telemetry-pingv1/index.html:
+    path: "{{ telemetry_pingv1_doc_root_dir }}/index.html"
+    state: "copy"
+    src: "/dev/null"
+    mode: "0644"
   /srv/telemetry-pingv1-server:
     state: "directory"
     path: "{{ telemetry_pingv1_server_dir }}"
@@ -97,9 +110,6 @@ deploy-telemetry-pingv1_custom_paths__to_merge:
     validate:
       "/usr/sbin/visudo --check --file=%s"
 
-telemetry_pingv1_doc_root:
-  "/var/www/telemetry-pingv1"
-
 # TODO: fully parametrize port 8000, match it to server.env
 # Enables proxying to the app is done only when this is defined
 # telemetry_pingv1_app_port:
@@ -126,8 +136,8 @@ default_apache2_sites__to_merge:
         ServerName {{ inventory_hostname }}
         ErrorLog ${APACHE_LOG_DIR}/error.log
         CustomLog ${APACHE_LOG_DIR}/access.log combined
-        DocumentRoot "{{ telemetry_pingv1_doc_root }}"
-        <Directory "{{ telemetry_pingv1_doc_root }}">
+        DocumentRoot "{{ telemetry_pingv1_doc_root_dir }}"
+        <Directory "{{ telemetry_pingv1_doc_root_dir }}">
           AllowOverride All
           Require all granted
         </Directory>
@@ -141,8 +151,8 @@ default_apache2_sites__to_merge:
         ServerName {{ inventory_hostname }}
         ErrorLog ${APACHE_LOG_DIR}/error.log
         CustomLog ${APACHE_LOG_DIR}/access.log combined
-        DocumentRoot "{{ telemetry_pingv1_doc_root }}"
-        <Directory "{{ telemetry_pingv1_doc_root }}">
+        DocumentRoot "{{ telemetry_pingv1_doc_root_dir }}"
+        <Directory "{{ telemetry_pingv1_doc_root_dir }}">
           AllowOverride All
           Require all granted
         </Directory>
@@ -176,8 +186,8 @@ telemetry-pingv1_apache2_sites__to_merge:
         ErrorLog ${APACHE_LOG_DIR}/{{ product }}-telemetry-pingv1-error.log
         CustomLog ${APACHE_LOG_DIR}/{{ product }}-telemetry-pingv1-access.log combined
 
-        DocumentRoot "{{ telemetry_pingv1_doc_root }}"
-        <Directory "{{ telemetry_pingv1_doc_root }}">
+        DocumentRoot "{{ telemetry_pingv1_doc_root_dir }}"
+        <Directory "{{ telemetry_pingv1_doc_root_dir }}">
           AllowOverride All
           Require all granted
         </Directory>
@@ -225,8 +235,8 @@ telemetry-pingv1_apache2_sites__to_merge:
         ErrorLog ${APACHE_LOG_DIR}/{{ product }}-telemetry-pingv1-error.log
         CustomLog ${APACHE_LOG_DIR}/{{ product }}-telemetry-pingv1-access.log combined
 
-        DocumentRoot "{{ telemetry_pingv1_doc_root }}"
-        <Directory "{{ telemetry_pingv1_doc_root }}">
+        DocumentRoot "{{ telemetry_pingv1_doc_root_dir }}"
+        <Directory "{{ telemetry_pingv1_doc_root_dir }}">
           AllowOverride All
           Require all granted
         </Directory>
