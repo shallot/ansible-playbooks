@@ -118,8 +118,11 @@
        }}"
   when:
     - "item.exists and item.authorized_keys != None"
-    - "item.state != 'absent' or
-       (item.state == 'absent' and item.path is defined)"
+    - "item.state != 'absent'"
+    # NB: there's another possibility of checking for:
+    # or (item.state == 'absent' and item.authorized_keys_path is defined)"
+    # in the latter condition, but we don't support passing in a custom
+    # authorized_keys_path through custom_users anyway
   with_items:
     "{{ custom_user_info }}"
   loop_control:
