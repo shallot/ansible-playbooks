@@ -52,23 +52,33 @@
   become:
     true
 
-# https://docs.ansible.com/ansible/latest/include_tasks_module.html
+# https://docs.ansible.com/ansible/latest/modules/set_fact_module.html
 - name:
-    "authorized_key"
-  include_tasks:
-    "tasks/authorized-keys.yml"
-  vars:
+    "set_fact : custom_authorized_keys"
+  set_fact:
     custom_authorized_keys:
-      "{{ item.value.owner }}":
-        exclusive: "yes"
-        key: |
-          {{ item.value.owner_ssh_authorized_keys }}
-        manage_dir: "yes"
-        user: "{{ item.value.owner }}"
+      "{{ custom_authorized_keys
+        | combine({
+          item.value.owner: {
+            'exclusive': true,
+            'key': item.value.owner_ssh_authorized_keys,
+            'manage_dir': true,
+            'user': item.value.owner,
+          }
+        })
+       }}"
   when:
     "item.value.owner_ssh_authorized_keys is defined"
   with_dict:
     "{{ lamp_web_spaces }}"
+  vars:
+    custom_authorized_keys: {}
+
+# https://docs.ansible.com/ansible/latest/include_tasks_module.html
+- name:
+    "user : authorized_keys"
+  include_tasks:
+    "tasks/authorized-keys.yml"
 
 # https://docs.ansible.com/ansible/latest/modules/user_module.html
 - name:

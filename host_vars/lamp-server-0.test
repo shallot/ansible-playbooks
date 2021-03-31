@@ -29,7 +29,7 @@ test_lamp_web_spaces__to_merge:
     owner_password: "$6$vgHd3kL6YYU$znTqvJ0VlcXzcxYDD8o5pUtASM/by45vkYeIH6D8UhMxk2ZY2xNO6gjqKL0xrVd/fT4UdNU7d2gCgbNlXcXam0"
     owner_ssh_authorized_keys: |
       ssh-rsa AAA... j.doe+key-comment@eyeo.com
-      ssh-rsa This is just an example second authorized key
+      ssh-rsa This-is-an-example-second-SSH-key Comment-indicating-key-origin
 
 # roles/mysql/tasks/main.yml
 # provision-lamp-servers.yml
