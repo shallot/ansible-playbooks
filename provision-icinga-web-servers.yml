@@ -51,10 +51,19 @@
         "generate_api_setup"
       include_tasks:
         "roles/icinga/server/tasks/generate_api_setup.yml"
-      vars:
-        icinga_notification_handler:
-          "server : service : icinga2"
 
     # https://docs.ansible.com/ansible/latest/modules/include_tasks_module.html
     - include_tasks:
         "roles/icinga/web/tasks/command_transports.yml"
+
+  vars:
+
+    icinga_notification_handler:
+      "server : service : icinga2"
+    icinga_server_name:
+      "{{ icinga_server_ip }}"
+
+  handlers:
+
+    - import_tasks:
+        "roles/icinga/web/handlers/main.yml"
