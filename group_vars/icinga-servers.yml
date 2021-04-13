@@ -66,14 +66,6 @@ eyeo_icinga_server_custom_icinga_services:
 
 # provision-icinga-servers.yml
 eyeo_icinga_server_monitoring_plugins:
-  check_content:
-    command: "check_content"
-    dest: "{{ icinga_server_plugin_directory }}"
-    group: "root"
-    owner: "root"
-    mode: "0755"
-    package: "curl"
-    src: "files/plugins/check_content"
   check_port:
     command: "check_port"
     dest: "{{ icinga_server_plugin_directory }}"
