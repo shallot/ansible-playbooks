@@ -39,5 +39,6 @@ icinga_web_postgresql_databases__to_merge:
     encoding: "UTF8"
 icinga_web_postgresql_users__to_merge:
   "{{ icinga_web_database_user }}":
+    name: "{{ icinga_web_database_user }}"
     password: "{{ icinga_web_database_password }}"
     role_attr_flags: "SUPERUSER"

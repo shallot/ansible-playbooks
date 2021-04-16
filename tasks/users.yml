@@ -46,8 +46,8 @@
     ssh_key_comment: "{{ item.value['ssh_key_comment'] | default(omit) }}"
     state: "{{ item.value['state'] | default('present') }}"
     uid: "{{ item.value['uid'] | default(omit) }}"
-  with_dict:
-    "{{ custom_users }}"
+  loop:
+    "{{ custom_users | dict2items }}"
   loop_control:
     label: "{{ item.key | to_json }}"
   register:
@@ -79,7 +79,7 @@
               }
             ]
        }}"
-  with_items:
+  loop:
     "{{ custom_user.results }}"
   loop_control:
     label: "{{ item.item['key'] | to_json }}"
@@ -96,7 +96,7 @@
     mode: "{{ item.home_mode }}"
     path: "{{ item.home }}"
     state: "directory"
-  with_items:
+  loop:
     "{{ custom_user_info | default([]) }}"
   loop_control:
     label: "{{ [item.name, item.home_mode] | to_json }}"
@@ -127,7 +127,7 @@
     # or (item.state == 'absent' and item.authorized_keys_path is defined)"
     # in the latter condition, but we don't support passing in a custom
     # authorized_keys_path through custom_users anyway
-  with_items:
+  loop:
     "{{ custom_user_info | default([]) }}"
   loop_control:
     label: "{{ item.name }}"

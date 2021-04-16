@@ -31,8 +31,8 @@
             }}"
       when:
         "item.value.eyeo_cms_web_required | default(false)"
-      with_dict:
-        "{{ apache2_sites }}"
+      loop:
+        "{{ apache2_sites | dict2items }}"
 
   when:
     "eyeo_cms_site_hostnames is not defined"

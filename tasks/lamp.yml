@@ -30,8 +30,8 @@
   group:
     name: "{{ item.value.owner }}"
     state: "present"
-  with_dict:
-    "{{ lamp_web_spaces }}"
+  loop:
+    "{{ lamp_web_spaces | dict2items }}"
   become:
     true
 
@@ -47,8 +47,8 @@
     name: "{{ item.value.owner }}"
     password: "{{ item.value.owner_password | default(omit) }}"
     state: "present"
-  with_dict:
-    "{{ lamp_web_spaces }}"
+  loop:
+    "{{ lamp_web_spaces | dict2items }}"
   become:
     true
 
@@ -69,8 +69,8 @@
        }}"
   when:
     "item.value.owner_ssh_authorized_keys is defined"
-  with_dict:
-    "{{ lamp_web_spaces }}"
+  loop:
+    "{{ lamp_web_spaces | dict2items }}"
   vars:
     custom_authorized_keys: {}
 
@@ -87,8 +87,8 @@
     name: "www-data"
     groups: "{{ item.value.owner }}"
     append: true
-  with_dict:
-    "{{ lamp_web_spaces }}"
+  loop:
+    "{{ lamp_web_spaces | dict2items }}"
   become:
     true
 
@@ -117,8 +117,8 @@
     path: "/var/www/{{ item.value.directory_prefix | default('') }}{{ item.key }}"
     # yamllint enable rule:line-length
     state: "directory"
-  with_dict:
-    "{{ lamp_web_spaces }}"
+  loop:
+    "{{ lamp_web_spaces | dict2items }}"
   become:
     true
 
@@ -134,8 +134,8 @@
     src: "/var/www/{{ item.value.directory_prefix | default('') }}{{ item.key }}"
     # yamllint enable rule:line-length
     state: "link"
-  with_dict:
-    "{{ lamp_web_spaces }}"
+  loop:
+    "{{ lamp_web_spaces | dict2items }}"
   become:
     true
   become_user:
@@ -154,8 +154,8 @@
     "content_repo"
   when:
     "item.value.repo is defined"
-  with_dict:
-    "{{ lamp_web_spaces }}"
+  loop:
+    "{{ lamp_web_spaces | dict2items }}"
   become:
     true
   become_user:
@@ -176,8 +176,8 @@
     false
   register:
     "lamp_web_document_root_files"
-  with_dict:
-    "{{ lamp_web_spaces }}"
+  loop:
+    "{{ lamp_web_spaces | dict2items }}"
   become:
     true
   become_user:
@@ -198,7 +198,7 @@
             }
           } )
         }}"
-  with_items:
+  loop:
     "{{ lamp_web_document_root_files.results }}"
   loop_control:
     label: "{{ [item.item.key, item.files | count] | to_json }}"
@@ -230,7 +230,7 @@
       ?>
   when:
     "item.value.matched | int == 0"
-  with_dict:
-    "{{ lamp_web_document_root_file_counts }}"
+  loop:
+    "{{ lamp_web_document_root_file_counts | dict2items }}"
   become:
     true
