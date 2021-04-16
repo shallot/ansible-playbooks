@@ -41,6 +41,7 @@ custom_ansible_user:
 # tasks/ansible-admin.yml
 ansible_admin_groups__to_merge:
   "{{ custom_ansible_user.group }}":
+    name: "{{ custom_ansible_user.group }}"
     state: "present"
 
 # tasks/ansible-admin.yml

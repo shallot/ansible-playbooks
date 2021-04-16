@@ -33,8 +33,8 @@
     name: "{{ item.value['name'] | default(item.key) }}"
     state: "{{ item.value['state'] | default('present') }}"
     system: "{{ item.value['system'] | default('false') }}"
-  with_dict:
-    "{{ custom_groups }}"
+  loop:
+    "{{ custom_groups | dict2items }}"
   loop_control:
     label: "{{ item.key | to_json }}"
   register:

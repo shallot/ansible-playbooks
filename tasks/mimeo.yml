@@ -36,5 +36,5 @@
                               | default(omit) }}"
     mimeo_output_filename: "{{ item.value.output_filename
                              | default(omit) }}"
-  with_dict:
-    "{{ custom_mimeo_settings }}"
+  loop:
+    "{{ custom_mimeo_settings | dict2items }}"

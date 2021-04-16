@@ -57,7 +57,7 @@
     append: true
     name: "{{ item }}"
     groups: "{{ custom_ansible_user.group }}"
-  with_items:
+  loop:
     "{{ custom_ansible_group_members | default([]) }}"
   become:
     true
@@ -78,8 +78,11 @@
     section: "{{ (item.key | splitext)[0] }}"
     state: "{{ (item.value is none) | ternary('absent', 'present') }}"
     value: "{{ item.value }}"
-  with_dict:
-    receive.denyCurrentBranch: "updateInstead"
+  loop:
+    "{{ git_config | dict2items }}"
+  vars:
+    git_config:
+      receive.denyCurrentBranch: "updateInstead"
   loop_control:
     label: "{{ [item.key, item.value] | to_json }}"
   become:
