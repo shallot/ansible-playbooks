@@ -21,7 +21,7 @@ eyeo_apache2_custom_paths__to_merge:
     state: "directory"
     mode: "0755"
     group: "adm"
-  "/etc/eyeo-apache2-logrotate.conf":
+  "/etc/logrotate.d/eyeo-apache2-logrotate.conf":
     state: "copy"
     # basically /etc/logrotate.d/apache2 from Debian 10 with exceptions
     # and with basic invoke-rc.d logging
