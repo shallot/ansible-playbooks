@@ -22,6 +22,19 @@ custom_geoip_email_notification_address:
 custom_geoip_data_remote_url:
   "localhost"
 
+custom_geoip_stub_custom_paths__to_merge:
+  /var/www/html:
+    state: "directory"
+    mode: "0755"
+  /var/www/html/GeoIPv4.dat:
+    state: "copy"
+    content: "This is just to make the tests succeed"
+    mode: "0644"
+  /var/www/html/GeoIPv6.dat:
+    state: "copy"
+    content: "This is just to make the tests succeed"
+    mode: "0644"
+
 # roles/apache2/tasks/main.yml
 example_geoip_apache2_sites__to_merge:
   example-geoip:
@@ -29,6 +42,8 @@ example_geoip_apache2_sites__to_merge:
     configuration: |
       <VirtualHost *:80>
         ServerName example-geoip
+
+        DocumentRoot /var/www/html
 
         ErrorLog ${APACHE_LOG_DIR}/example-geoip-error.log
         CustomLog ${APACHE_LOG_DIR}/example-geoip-access.log combined

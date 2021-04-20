@@ -21,4 +21,8 @@
 
 # https://docs.ansible.com/ansible/latest/import_tasks_module.html
 - import_tasks:
+    "tasks/commands.yml"
+
+# https://docs.ansible.com/ansible/latest/import_tasks_module.html
+- import_tasks:
     "tasks/cron-jobs.yml"

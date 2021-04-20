@@ -30,13 +30,16 @@ custom_geoip_data_path:
 custom_geoip_data_country_ipv4:
   "GeoIPv4.dat"
 
+custom_geoip_data_country_ipv6:
+  "GeoIPv6.dat"
+
 # tasks/paths.yml
 apache_geoip_custom_paths__to_merge:
   geoip_folder:
     path: "{{ custom_geoip_data_path }}"
     state: "directory"
     mode: "0755"
-  /usr/local/sbin/update-geoip-eyeofiles:
+  /usr/local/sbin/update-mod-geoip-data:
     content: |
       #!/bin/sh -e
       test -n "$1" || exit 1
@@ -47,11 +50,23 @@ apache_geoip_custom_paths__to_merge:
          {{ custom_geoip_data_path }}/"$1"
     mode: "0755"
     state: "copy"
-  /etc/cron.d/local-geoip-eyeofiles:
+  /etc/cron.d/local-mod-geoip-data:
     # yamllint disable rule:line-length
     content: |
       MAILTO={{ custom_geoip_email_notification_address }}
-      1 1 * * * root /usr/local/sbin/update-geoip-eyeofiles "{{ custom_geoip_data_country_ipv4 }}" && /bin/systemctl reload apache2
+      1 1 * * * root /usr/local/sbin/update-mod-geoip-data "{{ custom_geoip_data_country_ipv4 }}" && /bin/systemctl reload apache2
+      1 1 * * * root /usr/local/sbin/update-mod-geoip-data "{{ custom_geoip_data_country_ipv6 }}" && /bin/systemctl reload apache2
     # yamllint enable rule:line-length
     mode: "0644"
     state: "copy"
+
+# tasks/commands.yml
+# yamllint disable rule:line-length
+apache_geoip_custom_commands__to_merge:
+  first_fetch_ipv4:
+    cmd: "/usr/local/sbin/update-mod-geoip-data {{ custom_geoip_data_country_ipv4 }}"
+    creates: "{{ custom_geoip_data_path }}/{{ custom_geoip_data_country_ipv4 }}"
+  first_fetch_ipv6:
+    cmd: "/usr/local/sbin/update-mod-geoip-data {{ custom_geoip_data_country_ipv6 }}"
+    creates: "{{ custom_geoip_data_path }}/{{ custom_geoip_data_country_ipv6 }}"
+# yamllint enable rule:line-length
