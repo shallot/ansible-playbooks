@@ -144,6 +144,9 @@ Vagrant.configure('2') do |vagrant|
           ansible.tags = ansible_tags
           ansible.groups = ansible_host_groups
           ansible.playbook = File.join(__dir__, playbook)
+          ansible.raw_arguments = [
+            '--diff'
+          ]
         end
 
       end
