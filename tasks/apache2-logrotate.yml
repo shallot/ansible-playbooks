@@ -1,0 +1,55 @@
+# Copyright (c) 2021-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+# https://docs.ansible.com/ansible/latest/modules/lineinfile_module.html
+# The apache2_logrotate_count is typically reduced because of GDPR
+# compliance recommendations, and this implements it on Debian systems
+# NB: this assumes nothing else has fiddled with the Debian default of
+# "daily" which complements "rotate 14" that we in turn change
+- name:
+    "lineinfile : /etc/logrotate.d/apache2"
+  lineinfile:
+    backrefs: true
+    # yamllint disable rule:quoted-strings
+    line: '\g<spacing>rotate {{ apache2_logrotate_count }}'
+    # yamllint enable rule:quoted-strings
+    path: "/etc/logrotate.d/apache2"
+    # yamllint disable rule:quoted-strings
+    regexp: '^(?P<spacing>\s+)rotate (?!{{ apache2_logrotate_count }}$)\d+$'
+    # yamllint enable rule:quoted-strings
+    validate: "logrotate -d %s"
+  when:
+    - "apache2_logrotate_count is defined"
+    - "ansible_os_family == 'Debian'"
+  become:
+    true
+
+# https://docs.ansible.com/ansible/latest/collections/ansible/builtin/systemd_module.html
+# Verify that logrotate timers are set to daily and the next run
+# executes accordingly.
+# NB: Maybe make the verification even more granular.
+- name:
+    "systemd: sanity check logrotate timers"
+  systemd:
+    name: "logrotate.timer"
+  register: "apache2_logrotate_timer"
+  failed_when:
+    "'00:00:00' not in apache2_logrotate_timer.status.NextElapseUSecRealtime"
+  when:
+    - "'eyeo-apache2-servers' in group_names"
+    - "ansible_distribution == 'Debian'"
+    - "ansible_distribution_version|int > 9"
