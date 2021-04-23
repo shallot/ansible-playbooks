@@ -68,5 +68,5 @@ vagrant_networks:
 # https://www.vagrantup.com/docs/provisioning/ansible.html
 vagrant_playbooks:
   - "provision-custom-systems.yml"
-  - "provision-apache2-servers.yml"
   - "provision-apache2-geoip-servers.yml"
+  - "provision-custom-commands.yml"
