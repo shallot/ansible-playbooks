@@ -53,3 +53,5 @@
     - "'eyeo-apache2-servers' in group_names"
     - "ansible_distribution == 'Debian'"
     - "ansible_distribution_version|int > 9"
+  become:
+    true
