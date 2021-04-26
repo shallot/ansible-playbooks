@@ -48,7 +48,7 @@
     name: "logrotate.timer"
   register: "apache2_logrotate_timer"
   failed_when:
-    "'00:00:00' not in apache2_logrotate_timer.status.NextElapseUSecRealtime"
+    "' 00:00:00 ' not in apache2_logrotate_timer.status.NextElapseUSecRealtime"
   when:
     - "'eyeo-apache2-servers' in group_names"
     - "ansible_distribution == 'Debian'"
