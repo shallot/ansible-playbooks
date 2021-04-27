@@ -29,3 +29,14 @@
     "service : munin-node"
   become:
     true
+
+# https://docs.ansible.com/ansible/latest/collections/ansible/builtin/replace_module.html
+- name:
+    "Comments out CIDR if exists outside of block marker - seen on debian < 9"
+  replace:
+    path: "/etc/munin/munin-node.conf"
+    before: "# BEGIN ANSIBLE MANAGED BLOCK"
+    regexp: "^cidr_allow 54.38.154.25/32$"
+    replace: "# cidr_allow 54.38.154.25/32"
+  become:
+    true
