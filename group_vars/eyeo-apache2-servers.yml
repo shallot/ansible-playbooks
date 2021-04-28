@@ -22,7 +22,7 @@ eyeo_apache2_custom_paths__to_merge:
     mode: "0755"
     group: "adm"
   "/etc/eyeo-apache2-logrotate.conf":
-    name: "{{ (ansible_distribution == 'Debian' and
+    dest: "{{ (ansible_distribution == 'Debian' and
                ansible_distribution_version|int < 10)
             | ternary('/etc/eyeo-apache2-logrotate.conf',
                       '/etc/logrotate.d/local-eyeo-apache2')
