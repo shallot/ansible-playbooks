@@ -19,9 +19,6 @@
 [submodule "roles/gitlab"]
 	path = roles/gitlab
 	url = https://gitlab.com/eyeo/devops/ansible-role-gitlab.git
-[submodule "roles/chromium-builder"]
-	path = roles/chromium-builder
-	url = https://gitlab.com/eyeo/devops/ansible-role-chromium-builder.git
 [submodule "roles/docker"]
 	path = roles/docker
 	url = https://gitlab.com/eyeo/devops/ansible-role-docker.git
