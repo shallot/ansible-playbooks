@@ -102,13 +102,6 @@ backup-server-0.test:
   variables:
     TEST_HOST: "backup-server-0.test"
 
-chromium-gitlab-runner-0:
-  extends: ".vagrantjob"
-  variables:
-    TEST_HOST: "chromium-gitlab-runner-0.test"
-  # https://gitlab.com/eyeo/devops/ansible-playbooks/issues/25
-  allow_failure: true
-
 crumbs-web-server-0:
   extends: ".vagrantjob"
   variables:
