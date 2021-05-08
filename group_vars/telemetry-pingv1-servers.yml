@@ -207,8 +207,15 @@ telemetry-pingv1_apache2_sites__to_merge:
           SecAuditEngine On
           SecDefaultAction "nolog,noauditlog,allow,phase:request"
           SecRequestBodyAccess On
+          SecRequestBodyLimit 1048576
+          SecRequestBodyNoFilesLimit 1048576
+          SecRequestBodyLimitAction Reject
+          SecResponseBodyAccess On
+          SecResponseBodyLimit 524288
+          SecResponseBodyLimitAction ProcessPartial
           SecAuditLog {{ telemetry_pingv1_log_directory }}/{{ product }}-post-raw.log
           SecAuditLogParts ABCEFZ
+          SecAuditLogRelevantStatus ^
           SecRule REQUEST_METHOD "^POST$" "chain,allow,phase:request,id:123"
           SecRule REQUEST_URI "^" "auditlog"
         </Location>
@@ -258,8 +265,16 @@ telemetry-pingv1_apache2_sites__to_merge:
           SecAuditEngine On
           SecDefaultAction "nolog,noauditlog,allow,phase:request"
           SecRequestBodyAccess On
+          SecRequestBodyLimit 1048576
+          SecRequestBodyNoFilesLimit 1048576
+          SecRequestBodyLimitAction Reject
+          SecResponseBodyAccess On
+          SecResponseBodyLimit 524288
+          SecResponseBodyLimitAction ProcessPartial
+          SecResponseBodyAccess On
           SecAuditLog {{ telemetry_pingv1_log_directory }}/{{ product }}-post-raw.log
           SecAuditLogParts ABCEFZ
+          SecAuditLogRelevantStatus ^
           SecRule REQUEST_METHOD "^POST$" "chain,allow,phase:request,id:123"
           SecRule REQUEST_URI "^" "auditlog"
         </Location>
@@ -364,12 +379,3 @@ logrotate-telemetry-pingv1_custom_paths__to_merge:
         endscript
       }
     # yamllint enable rule:line-length
-
-# provision-apache2-modsecurity-servers.yml
-# tasks/paths.yml
-custom_modsecurity_paths:
-  /etc/modsecurity/modsecurity.conf:
-    mode: "0644"
-    state: "link"
-    src: "/etc/modsecurity/modsecurity.conf-recommended"
-    notify: "service : apache2"
