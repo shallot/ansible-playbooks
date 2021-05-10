@@ -36,15 +36,19 @@
     custom_packages_suffix:
       "ansible_admin_packages__to_merge"
 
-# https://docs.ansible.com/ansible/latest/modules/group_module.html
-- name:
-    "group : ansible"
-  group:
-    name: "ansible"
-  register:
-    "custom_ansible_group"
-  become:
-    true
+# https://docs.ansible.com/ansible/latest/import_tasks_module.html
+- import_tasks:
+    "tasks/groups.yml"
+  vars:
+    custom_groups_suffix:
+      "ansible_admin_groups__to_merge"
+
+# https://docs.ansible.com/ansible/latest/import_tasks_module.html
+- import_tasks:
+    "tasks/users.yml"
+  vars:
+    custom_users_suffix:
+      "ansible_admin_users__to_merge"
 
 # https://docs.ansible.com/ansible/latest/modules/user_module.html
 - name:
@@ -52,52 +56,18 @@
   user:
     append: true
     name: "{{ item }}"
-    groups: "{{ custom_ansible_group.name }}"
+    groups: "{{ custom_ansible_user.group }}"
   with_items:
     "{{ custom_ansible_group_members | default([]) }}"
   become:
     true
 
-# https://docs.ansible.com/ansible/latest/modules/user_module.html
-- name:
-    "user : ansible"
-  user:
-    comment: "Ansible Master"
-    generate_ssh_key: true
-    group: "{{ custom_ansible_group.name }}"
-    home: "/srv/ansible"
-    name: "ansible"
-    shell: "/bin/bash"
-    ssh_key_bits: 4096
-    ssh_key_comment: "ansible@{{ ansible_fqdn }}"
-  register:
-    "custom_ansible_user"
-  become:
-    true
-
-# https://docs.ansible.com/ansible/latest/modules/command_module.html
-- name:
-    "git : ~ansible/inventory"
-  command:
-    "git init '{{ custom_ansible_user.home }}/inventory'"
-  args:
-    creates: "{{ custom_ansible_user.home }}/inventory/.git"
-  become:
-    true
-  become_user:
-    "{{ custom_ansible_user.name }}"
-
-# https://docs.ansible.com/ansible/latest/modules/file_module.html
-- name:
-    "directory : ~ansible/inventory/.git"
-  file:
-    group: "{{ custom_ansible_user.group }}"
-    mode: "0750"
-    owner: "{{ custom_ansible_user.name }}"
-    path: "{{ custom_ansible_user.home }}/inventory/.git"
-    state: "directory"
-  become:
-    true
+# https://docs.ansible.com/ansible/latest/import_tasks_module.html
+- import_tasks:
+    "tasks/commands.yml"
+  vars:
+    custom_commands_suffix:
+      "ansible_admin_commands__to_merge"
 
 # https://docs.ansible.com/ansible/latest/modules/ini_file_module.html
 - name:
@@ -115,12 +85,9 @@
   become:
     true
 
-# https://docs.ansible.com/ansible/latest/modules/file_module.html
-- name:
-    "link : /etc/ansible : ~ansible/inventory"
-  file:
-    path: "/etc/ansible"
-    src: "{{ custom_ansible_user.home }}/inventory"
-    state: "link"
-  become:
-    true
+# https://docs.ansible.com/ansible/latest/import_tasks_module.html
+- import_tasks:
+    "tasks/paths.yml"
+  vars:
+    custom_paths_suffix:
+      "ansible_admin_paths__to_merge"

@@ -33,6 +33,7 @@
     create_home: true
     expires: "{{ item.value['expires'] | default(omit) }}"
     force: "{{ item.value['force'] | default(omit) }}"
+    generate_ssh_key: "{{ item.value['generate_ssh_key'] | default(omit) }}"
     group: "{{ item.value['group'] | default(omit) }}"
     groups: "{{ item.value['groups'] | default([]) }}"
     home: "{{ item.value['home'] | default(omit) }}"
@@ -41,6 +42,8 @@
     password: "{{ item.value['password'] | default(omit) }}"
     remove: true
     shell: "{{ item.value['shell'] | default('/bin/bash') }}"
+    ssh_key_bits: "{{ item.value['ssh_key_bits'] | default(omit) }}"
+    ssh_key_comment: "{{ item.value['ssh_key_comment'] | default(omit) }}"
     state: "{{ item.value['state'] | default('present') }}"
     uid: "{{ item.value['uid'] | default(omit) }}"
   with_dict:
