@@ -27,6 +27,41 @@ ansible_admin_packages__to_merge:
 ansible_packages__to_merge:
   "{{ ansible_default_packages }}"
 
+# tasks/ansible-admin.yml
+custom_ansible_user:
+  comment: "Ansible Admin"
+  generate_ssh_key: true
+  group: "ansible"
+  home: "/srv/ansible"
+  home_mode: "0750"
+  name: "ansible"
+  ssh_key_bits: 4096
+  ssh_key_comment: "ansible@{{ ansible_fqdn }}"
+
+# tasks/ansible-admin.yml
+ansible_admin_groups__to_merge:
+  "{{ custom_ansible_user.group }}":
+    state: "present"
+
+# tasks/ansible-admin.yml
+ansible_admin_users__to_merge:
+  "{{ custom_ansible_user.name }}":
+    "{{ custom_ansible_user }}"
+
+# tasks/ansible-admin.yml
+ansible_admin_paths__to_merge:
+  "{{ custom_ansible_user.home }}/inventory":
+    state: "link"
+    path: "/etc/ansible"
+    src: "{{ custom_ansible_user.home }}/inventory"
+
+# tasks/ansible-admin.yml
+ansible_admin_commands__to_merge:
+  git_checkout_inventory:
+    cmd: "git init '{{ custom_ansible_user.home }}/inventory'"
+    creates: "{{ custom_ansible_user.home }}/inventory/.git"
+    become_user: "{{ custom_ansible_user.name }}"
+
 # When users are able to access confidential files in the Ansible inventory
 # their home directory shall not be accessible to other users, in order to
 # protect sensitive information. Hence the default home directory access mode
