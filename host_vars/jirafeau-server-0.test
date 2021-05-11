@@ -24,11 +24,12 @@ vagrant_groups:
 # provision-lamp-servers.yml
 # NB: directory needs to match jirafeau_web_spaces__to_merge
 jirafeau_document_root:
-  "/var/www/jirafeau"
+  "/var/www/website/jirafeau"
 # NB: key needs to match "jirafeau" in order for jirafeau_document_root
 # to work
 jirafeau_web_spaces__to_merge:
   jirafeau:
+    directory_prefix: "website/"
     repo: "https://gitlab.com/eyeo/devops/dependencies/Jirafeau.git"
     version: "4.2.0"
     owner: "{{ jirafeau_owner }}"
@@ -41,7 +42,7 @@ jirafeau_apache2_sites__to_merge:
       <VirtualHost *:80>
 
         {{ lamp_shared_apache_config
-         | replace("_SITE_NAME_", "jirafeau")
+         | replace("_SITE_NAME_", "website")
          | indent(2)
         }}
 
@@ -54,7 +55,7 @@ jirafeau_apache2_sites__to_merge:
 jirafeau_web_server_user:
   "www-data"
 jirafeau_web_root:
-  "10.8.190.10"
+  "10.8.190.10/jirafeau"
 jirafeau_var_root:
   "/var/www/jirafeau-vars"
 jirafeau_admin_password: # changeme
