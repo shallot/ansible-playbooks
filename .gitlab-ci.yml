@@ -201,6 +201,11 @@ postfix-0:
   variables:
     TEST_HOST: "postfix-0.test"
 
+postfix-dkim-0:
+  extends: ".vagrantjob"
+  variables:
+    TEST_HOST: "postfix-dkim-0.test"
+
 postgresql-0:
   extends: ".vagrantjob"
   variables:
