@@ -34,6 +34,8 @@ icinga_web_database_user:
   "icingaweb"
 icinga_web_server_ipv4_address:
   "10.8.10.8"
+icinga_server_ip:
+  "10.8.10.8"
 
 # roles/apache2/tasks/main.yml
 test_icinga_apache2_sites__to_merge:
