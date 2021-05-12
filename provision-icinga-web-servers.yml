@@ -41,8 +41,6 @@
     - import_role:
         name: "icinga/web"
       vars:
-        icinga_server_name:
-          "{{ ansible_fqdn }}"
         icinga_web_php_module_name:
           "fpm"
 
