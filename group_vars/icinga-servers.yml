@@ -74,3 +74,61 @@ eyeo_icinga_server_monitoring_plugins:
     owner: "root"
     mode: "0775"
     src: "files/plugins/check_port"
+
+# provision-icinga-servers.yml
+eyeo_icinga_server_custom_icinga_users:
+  noc:
+    import:
+      - "generic-user"
+    display_name: "eyeo NOC"
+    email: "{{ eyeo_icinga_server_custom_icinga_user_email }}"
+    groups:
+      - "noc"
+
+# provision-icinga-servers.yml
+eyeo_icinga_server_custom_icinga_user_groups:
+  noc:
+    display_name: "eyeo NOC"
+
+# provision-icinga-servers.yml
+eyeo_icinga_server_custom_icinga_notifications:
+  mail-hourly:
+    command: "mail-service-notification"
+    interval: "1h"
+    user_groups:
+      - "noc"
+    states: # excludes Warning
+      - "Critical"
+      - "Unknown"
+      - "OK"
+    types: # exclude mundane ones
+      - "Problem"
+      - "Recovery"
+    assign:
+      - "service.name == \"ping4\""
+  mail-daily:
+    command: "mail-service-notification"
+    name: "mail-daily"
+    interval: "24h"
+    user_groups:
+      - "noc"
+    states: # exclude Unknown
+      - "Critical"
+      - "Warning"
+      - "OK"
+    assign:
+      - "service.name == \"disk\""
+  mail-weekly:
+    command: "mail-service-notification"
+    name: "mail-weekly"
+    interval: "168h"
+    user_groups:
+      - "noc"
+    states: # exclude all other than Critical
+      - "Critical"
+    types: # exclude all other than Problem
+      - "Problem"
+    assign:
+      - "service.name == \"needrestart\""
+      - "service.name == \"zombie_procs\""
+      - "service.name == \"ssl_cert\""
