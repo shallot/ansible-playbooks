@@ -206,6 +206,11 @@ public-git-web-server-0:
   variables:
     TEST_HOST: "public-git-web-server-0.test"
 
+telemetry-log-fetch-dest-host-0:
+  extends: ".vagrantjob"
+  variables:
+    TEST_HOST: "telemetry-log-fetch-dest-host-0.test"
+
 telemetry-pingv1-server-0:
   extends: ".vagrantjob"
   variables:

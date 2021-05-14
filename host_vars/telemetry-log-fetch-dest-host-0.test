@@ -1,0 +1,141 @@
+# Copyright (c) 2021-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+geoipupdate_accountid:
+  "changeme"
+geoipupdate_licensekey:
+  "changeme"
+geoipupdate_cron_job_mailto:
+  "root+geoipupdate@example.com"
+
+telemetry_log_fetch_user:
+  "telemetrylogfetch"
+telemetry_log_fetch_user_email:
+  "root"
+# TODO:
+#  "{{ lookup('file', telemetry_log_fetch_server_key_location + '.pub' }}"
+# this is inserted manually once the ssh-keys playbook runs
+# ansible telemetry-log-fetch-dest-hosts \
+#         -a 'cat /home/telemetrylogfetch/.ssh/id_rsa.pub' -bK
+telemetry_log_fetch_server_key: |
+  ssh-rsa example-server-key...
+
+telemetry_log_gcloud_sdk_key_id:
+  "836F4BEB"
+telemetry_log_gcloud_service_user:
+  "example-user"
+telemetry_log_gcloud_project_name:
+  "example-project"
+telemetry_log_gcloud_service_account_key_file:
+  "/home/{{ telemetry_log_fetch_user }}/telemetry-log-fetch-gcloud-key.json"
+
+# TODO: get a test service account for the purpose of this test
+telemetry_log_fetch_dummy_gcloud_auth_custom_paths__to_merge:
+  telemetry_log_gcloud_service_account_credentials:
+    dest: "{{ telemetry_log_gcloud_service_account_credentials }}"
+    state: "copy"
+    src: "/dev/null"
+
+dummy_test_telemetry_log_fetch_ssh_authorized_keys_paths__to_merge:
+  telemetry_log_fetch_server_key_location_authorized_keys:
+    dest: "/home/{{ telemetry_log_fetch_user }}/.ssh/authorized_keys"
+    state: "copy"
+    remote_src: true
+    src: "{{ telemetry_log_fetch_server_key_location }}.pub"
+  telemetry_pingv1_log_directory:
+    path: "{{ telemetry_pingv1_log_directory }}"
+    state: "directory"
+
+telemetry_log_fetch_products:
+  product1:
+    name: "product1"
+    directory: "product1.telemetry.example.com"
+    servers:
+      - "localhost"
+    bucket: "gs://product1-telemetry"
+    datastore_schema:
+      "{{ telemetry_log_fetch_base_dest_dir }}/telemetrylog.bq.schema.json"
+    datastore_prefix: "example:example.raw_product_server"
+    # imported from original implementation, TODO reconsider?
+    datastore_bad_threshold: "10"
+
+# TODO: generate these from the data structure of products
+# (looping through all the keys)
+# and move out of the inventory and into to the code
+# yamllint disable rule:line-length
+telemetry_log_fetch_per_product_product1_directory:
+  "{{ telemetry_log_fetch_base_dest_dir }}/{{ telemetry_log_fetch_products.product1.directory }}"
+# yamllint enable rule:line-length
+# tasks/paths.yml
+telemetry_log_fetch_per_product_product1_custom_paths__to_merge:
+  /srv/telemetry/product.example.env:
+    path: "{{ telemetry_log_fetch_base_dest_dir }}/product.example.env"
+    state: "copy"
+    # yamllint disable rule:line-length
+    content: |
+      # NB: the PRODUCT variable itself is not actually used
+      # if it's overridden by SERVER_LOG_PREFIX
+      export PRODUCT={{ telemetry_log_fetch_products.product1.name }}
+      export PRODUCT_DIRECTORY={{ telemetry_log_fetch_products.product1.directory }}
+      export PRODUCT_SERVERS="{{ telemetry_log_fetch_products.product1.servers | join(' ') }}"
+      export PRODUCT_DATASTORE_BUCKET={{ telemetry_log_fetch_products.product1.bucket }}
+      export PRODUCT_DATASTORE_SCHEMA={{ telemetry_log_fetch_products.product1.datastore_schema }}
+      export PRODUCT_DATASTORE_PREFIX={{ telemetry_log_fetch_products.product1.datastore_prefix }}
+      # TODO: think about whether we actually care if the partitions
+      # aren't mapped exactly daily?
+      export PRODUCT_DATASTORE_SUFFIX=$(date -d "$DATE" '+%Y%m%d')
+      export PRODUCT_DATASTORE_MAX_BAD_RECORDS={{ telemetry_log_fetch_products.product1.datastore_bad_threshold }}
+      # NB: use the default $product-post-raw SERVER_LOG_PREFIX which is fine
+      # NB: use the default date SERVER_LOG_SUFFIX which is fine
+      export SERVER_LOG_DIRECTORY={{ telemetry_pingv1_log_directory }}
+    # yamllint enable rule:line-length
+    owner: "{{ telemetry_log_fetch_user }}"
+    group: "adm"
+    mode: "0644"
+  /srv/telemetry/product-telemetry.example.com/downloaded:
+    path: "{{ telemetry_log_fetch_per_product_product1_directory }}/downloaded"
+    state: "directory"
+    owner: "{{ telemetry_log_fetch_user }}"
+    group: "adm"
+    mode: "02750"
+  /srv/telemetry/product-telemetry.example.com/rawcsv:
+    path: "{{ telemetry_log_fetch_per_product_product1_directory }}/rawcsv"
+    state: "directory"
+    owner: "{{ telemetry_log_fetch_user }}"
+    group: "adm"
+    mode: "02750"
+  /srv/telemetry/product-telemetry.example.com/dailycsv:
+    path: "{{ telemetry_log_fetch_per_product_product1_directory }}/dailycsv"
+    state: "directory"
+    owner: "{{ telemetry_log_fetch_user }}"
+    group: "adm"
+    mode: "02750"
+
+# https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
+vagrant_groups:
+  - "geoipupdate-hosts"
+  - "telemetry-log-fetch-dest-hosts"
+
+# https://www.vagrantup.com/docs/provisioning/ansible.html
+vagrant_playbooks:
+  - "provision-custom-systems.yml"
+  - "provision-telemetry-log-fetch-dest-hosts.yml"
+
+# https://www.vagrantup.com/intro/getting-started/networking.html
+vagrant_networks:
+  - private_network:
+      ip: "10.8.100.230"
