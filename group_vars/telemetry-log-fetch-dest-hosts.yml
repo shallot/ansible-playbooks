@@ -1,0 +1,267 @@
+# Copyright (c) 2021-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+# tasks/users.yml
+telemetry_log_fetch_custom_users__to_merge:
+  telemetrylogfetch:
+    name: "{{ telemetry_log_fetch_user }}"
+    comment: "Telemetry log fetch service account"
+    groups:
+      - "adm"
+
+# tasks/paths.yml
+telemetry_log_fetch_ssh_keys_dirs_custom_paths__to_merge:
+  /home/{{ telemetry_log_fetch_user }}/.ssh:
+    path: "/home/{{ telemetry_log_fetch_user }}/.ssh"
+    state: "directory"
+    owner: "{{ telemetry_log_fetch_user }}"
+    group: "{{ telemetry_log_fetch_user }}"
+    mode: "0750"
+
+telemetry_log_fetch_server_key_location:
+  "/home/{{ telemetry_log_fetch_user }}/.ssh/id_rsa"
+
+# tasks/ssh-keys.yml
+telemetry_log_fetch_custom_ssh_keys__to_merge:
+  id_rsa:
+    path: "{{ telemetry_log_fetch_server_key_location }}"
+    type: "rsa"
+    size: 4096
+    owner: "{{ telemetry_log_fetch_user }}"
+    group: "{{ telemetry_log_fetch_user }}"
+
+# tasks/packages.yml
+telemetry_log_fetch_custom_packages__to_merge:
+  make: "present"
+  rsync: "present"
+
+# files/telemetry-log-fetch/audit-log-to-ping-csv-with-country
+python_geoip_custom_packages__to_merge:
+  python3-geoip2: "present"
+
+# tasks/geoipupdate.yml
+geoipupdate_editionids:
+  "GeoLite2-Country"
+geoipupdate_cron_job_time:
+  "38 1 * * 5"
+
+telemetry_log_fetch_base_dest_dir:
+  "/srv/telemetry"
+
+telemetry_log_fetch_src_host_list: |
+  {{ telemetry_log_fetch_products
+   | dict2items
+   | map(attribute='value')
+   | map(attribute='servers')
+   | map('join', ' ')
+   | list
+   }}
+
+# NB: this is a copy of playbooks group_vars/telemetry-pingv1-servers.yml
+# necessary just when we run provision-custom-paths.yml instead of a custom
+# playbook that includes that file
+telemetry_pingv1_log_directory:
+  "/var/log/telemetry-pingv1-server"
+
+# tasks/shells.yml
+telemetry_log_fetch_src_dest_connection_custom_shells__to_merge:
+  0_telemetry_log_fetch_src_host_list:
+    cmd: >
+      echo {{ telemetry_log_fetch_src_host_list | join(' ') }}
+  1_seed_known_hosts:
+    cmd: >
+      for srchost in {{ telemetry_log_fetch_src_host_list | join(' ') }}; do
+      echo $srchost:;
+      sudo -H -u {{ telemetry_log_fetch_user }}
+      ssh -o StrictHostKeyChecking=false
+      $srchost
+      ls -ld {{ telemetry_pingv1_log_directory }}/;
+      done
+
+# tasks/paths.yml
+# yamllint disable rule:line-length
+telemetry_log_fetch_prerequisite_code_custom_paths__to_merge:
+  /srv/telemetry:
+    path: "{{ telemetry_log_fetch_base_dest_dir }}"
+    state: "directory"
+    owner: "{{ telemetry_log_fetch_user }}"
+    group: "adm"
+    mode: "02750"
+  /srv/telemetry/log:
+    path: "{{ telemetry_log_fetch_base_dest_dir }}/log"
+    state: "directory"
+    owner: "{{ telemetry_log_fetch_user }}"
+    group: "adm"
+    mode: "0750"
+  /srv/telemetry/cronjob:
+    path: "{{ telemetry_log_fetch_base_dest_dir }}/cronjob"
+    state: "copy"
+    src: "files/telemetry-log-fetch/cronjob"
+    owner: "{{ telemetry_log_fetch_user }}"
+    group: "adm"
+    mode: "0755"
+  /srv/telemetry/telemetry.env:
+    path: "{{ telemetry_log_fetch_base_dest_dir }}/telemetry.env"
+    state: "copy"
+    content: |
+      telemetry_logdir={{ telemetry_log_fetch_base_dest_dir }}/log
+      telemetry_base_dir={{ telemetry_log_fetch_base_dest_dir }}
+      telemetry_products="{{ telemetry_log_fetch_products
+                           | dict2items
+                           | map(attribute='value')
+                           | map(attribute='name')
+                           | list
+                           | join(' ')
+                           }}"
+    owner: "{{ telemetry_log_fetch_user }}"
+    group: "adm"
+    mode: "0644"
+  /srv/telemetry/Makefile:
+    path: "{{ telemetry_log_fetch_base_dest_dir }}/Makefile"
+    state: "copy"
+    src: "files/telemetry-log-fetch/Makefile"
+    owner: "{{ telemetry_log_fetch_user }}"
+    group: "adm"
+    mode: "0644"
+  /usr/local/bin/audit-log-to-ping-csv-with-country:
+    state: "copy"
+    src: "files/telemetry-log-fetch/audit-log-to-ping-csv-with-country"
+    mode: "0755"
+  /srv/telemetry/telemetrylog.bq.schema.json:
+    path: "{{ telemetry_log_fetch_base_dest_dir }}/telemetrylog.bq.schema.json"
+    state: "copy"
+    src: "files/telemetry-log-fetch/telemetrylog.bq.schema.json"
+    owner: "{{ telemetry_log_fetch_user }}"
+    group: "adm"
+    mode: "0644"
+  # the cron job runs a bit after midnight, so logrotate from
+  # group_vars/telemetry-pingv1-servers.yml
+  # /etc/logrotate.d/local-telemetry-pingv1-apache has run and
+  # the rotated file exists
+  # TODO: make sure the file exists upon bootstrap, because
+  # the first day gets skipped by default
+  # echo '"/var/log/telemetry-pingv1-server/example-post-raw.log" 2021-5-7-0:0:0' | sudo tee -a /var/lib/logrotate/status
+  /etc/cron.d/local-telemetry-log-fetch:
+    content: |
+      MAILTO={{ telemetry_log_fetch_user_email }}
+      0 2 * * * {{ telemetry_log_fetch_user }} {{ telemetry_log_fetch_base_dest_dir }}/cronjob
+    mode: "0644"
+    state: "copy"
+# yamllint enable rule:line-length
+
+telemetry_log_gcloud_config_dir:
+  "/home/{{ telemetry_log_fetch_user }}/.config/gcloud"
+
+# yamllint disable rule:line-length
+telemetry_log_gcloud_service_account:
+  "{{ telemetry_log_gcloud_service_user }}@{{ telemetry_log_gcloud_project_name }}.iam.gserviceaccount.com"
+telemetry_log_gcloud_service_account_credentials:
+  "{{ telemetry_log_gcloud_config_dir }}/legacy_credentials/{{ telemetry_log_gcloud_service_account }}"
+telemetry_log_bigquery_credentials:
+  "{{ telemetry_log_gcloud_service_account_credentials }}/singlestore_bq.json"
+# yamllint enable rule:line-length
+
+# tasks/paths.yml
+telemetry_log_fetch_prerequisite_config_custom_paths__to_merge:
+  /home/telemetrylogfetch/.config:
+    path: "/home/{{ telemetry_log_fetch_user }}/.config"
+    state: "directory"
+    owner: "{{ telemetry_log_fetch_user }}"
+    group: "{{ telemetry_log_fetch_user }}"
+    mode: "0755"
+  /home/telemetrylogfetch/.bigqueryrc:
+    path: "/home/{{ telemetry_log_fetch_user }}/.bigqueryrc"
+    state: "copy"
+    content: |
+      credential_file = {{ telemetry_log_bigquery_credentials }}
+      project_id = {{ telemetry_log_gcloud_project_name }}
+    owner: "{{ telemetry_log_fetch_user }}"
+    group: "{{ telemetry_log_fetch_user }}"
+    mode: "0644"
+  /home/telemetrylogfetch/.config/gcloud:
+    path: "{{ telemetry_log_gcloud_config_dir }}"
+    state: "directory"
+    owner: "{{ telemetry_log_fetch_user }}"
+    group: "{{ telemetry_log_fetch_user }}"
+    mode: "0755"
+  /home/telemetrylogfetch/.config/gcloud/configurations:
+    path: "{{ telemetry_log_gcloud_config_dir }}/configurations"
+    state: "directory"
+    owner: "{{ telemetry_log_fetch_user }}"
+    group: "{{ telemetry_log_fetch_user }}"
+    mode: "0755"
+  /home/telemetrylogfetch/.config/gcloud/configurations/config_default:
+    path: "{{ telemetry_log_gcloud_config_dir }}/configurations/config_default"
+    state: "copy"
+    content: |
+      [core]
+      account = {{ telemetry_log_gcloud_service_account }}
+    owner: "{{ telemetry_log_fetch_user }}"
+    group: "{{ telemetry_log_fetch_user }}"
+    mode: "0644"
+
+# this creates among other things:
+# ~/.config/gcloud/access_tokens.db
+# ~/.config/gcloud/credentials.db
+# ~/.config/gcloud/legacy_credentials/user@project.iam.gserviceaccount.com/.boto
+# (which sets the gs_service_key_file to adc.json)
+# ~/.config/gcloud/legacy_credentials/user@project.iam.gserviceaccount.com/adc.json
+# (which contains the gs private key)
+# tasks/shells.yml
+telemetry_log_fetch_prerequisites_custom_shells__to_merge:
+  activate_gcloud_service_account:
+    cmd: |
+      gcloud auth activate-service-account \
+        --key-file {{ telemetry_log_gcloud_service_account_key_file }}
+    creates: "{{ telemetry_log_gcloud_service_account_credentials }}"
+    become_user: "{{ telemetry_log_fetch_user }}"
+
+# tasks/packages.yml
+# the Google repo fails to verify HTTPS otherwise
+google_cloud_apt_packages__to_merge:
+  ca-certificates: "present"
+
+# tasks/os/debian/common.yml
+google_cloud_sdk_apt_keys__to_merge:
+  "{{ telemetry_log_gcloud_sdk_key_id }}":
+    id: "{{ telemetry_log_gcloud_sdk_key_id }}"
+    keyring: "cloud.google"
+    url: "https://packages.cloud.google.com/apt/doc/apt-key.gpg"
+
+# tasks/os/debian/common.yml
+google_cloud_sdk_apt_repositories__to_merge:
+  google-cloud-sdk:
+    # yamllint disable rule:line-length
+    repo: |
+      deb [signed-by=/etc/apt/trusted.gpg.d/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main
+    # yamllint enable rule:line-length
+
+# tasks/os/debian/common.yml
+google_cloud_apt_preferences__to_merge:
+  google-cloud-sdk:
+    content:
+      explanation: "Pin google-cloud-sdk to known good version"
+      package: "google-cloud-sdk"
+      pin: "version 315.0.0*"
+      priority: "1000"
+
+# tasks/packages.yml
+google_cloud_sdk_custom_packages__to_merge:
+  apt-transport-https: "present"
+  ca-certificates: "present"
+  gnupg: "present"
+  google-cloud-sdk: "present"

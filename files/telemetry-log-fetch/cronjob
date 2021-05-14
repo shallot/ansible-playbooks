@@ -1,0 +1,66 @@
+#!/bin/sh
+
+env_file=$(dirname $0)/telemetry.env
+if [ ! -r $env_file ]; then
+	echo "Missing env file $env_file" >&2
+	exit 1
+fi
+. $env_file
+
+logdate=${logdate:-`date +%Y-%m-%d`}
+logfile=$telemetry_logdir/cronjob.$logdate.log
+
+export DATE=${DATE:-`date -d "yesterday" "+%Y-%m-%d"`}
+
+if [ -f $logfile ]; then
+	echo "Saving former $logfile" >&2
+	savelog -qnl $logfile
+fi
+
+if [ -f $logfile ]; then
+	echo "Saving former $logfile" >&2
+	savelog -qnl $logfile
+fi
+
+echo "$0 ($@) started processing at $(date)" > $logfile
+
+errors=0
+
+# NB: to debug, use make DO=@echo
+for product in $telemetry_products; do
+	unset PRODUCT
+	unset PRODUCT_DIRECTORY
+	unset PRODUCT_SERVERS
+	unset PRODUCT_DATASTORE_BUCKET
+	unset PRODUCT_DATASTORE_SCHEMA
+	unset PRODUCT_DATASTORE_PREFIX
+	unset PRODUCT_DATASTORE_SUFFIX
+	unset PRODUCT_DATASTORE_MAX_BAD_RECORDS
+	unset SERVER_LOG_SUFFIX
+	unset SERVER_LOG_PREFIX
+	unset SERVER_LOG_DIRECTORY
+	product_env_file=$telemetry_base_dir/product.$product.env
+	if [ ! -r $product_env_file ]; then
+	        echo "Missing product env file $product_env_file" >&2
+	        exit 1
+	fi
+	. $product_env_file
+	for server in $PRODUCT_SERVERS; do
+		echo "$0 ($@) started processing PRODUCT=$PRODUCT SERVER=$server at $(date)" >> $logfile
+		# maybe later intervene in the ordering of $@ arguments to
+		# enforce execution order of e.g. the upload stage
+		make -C $telemetry_base_dir SERVER=$server "$@" \
+			>> $logfile 2>&1
+		ret=$?
+		if [ $ret -ne 0 ]; then
+			errors=$(($errors+1))
+			echo "aiee, product $PRODUCT server $server processing failed:" >&2
+			tail -64 $logfile >&2
+		fi
+	done
+done
+
+if [ $errors -ne 0 ]; then
+	echo "$errors parts of the processing failed" >&2
+	exit 2
+fi
