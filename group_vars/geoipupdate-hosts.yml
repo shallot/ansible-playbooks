@@ -1,0 +1,68 @@
+# Copyright (c) 2021-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+custom_base_apt_distribution_contrib_section:
+  "{{ (ansible_distribution == 'Debian')
+    | ternary('contrib',
+              (ansible_distribution == 'Ubuntu')
+              | ternary('multiverse',
+                        'FIXME'
+                        )
+                )
+    }}"
+
+# tasks/os/debian/common.yml
+geoipupdate_contrib_apt_repositories__to_merge:
+  base-contrib:
+    repo: >
+      deb {{ apt_debian_mirror_base_url }}
+      {{ ansible_distribution_release }}
+      {{ custom_base_apt_distribution_contrib_section }}
+
+# tasks/packages.yml
+geoipupdate_custom_packages__to_merge:
+  geoipupdate: "present"
+
+# TODO: need some logic to actually run geoipupdate once
+# to avoid the initial week race condition as {{ geoipupdate_cron_job_time }}
+# is recommended to run weekly
+geoipupdate_cron_job_time:
+  "38 1 * * 5"
+
+geoipupdate_custom_paths__to_merge:
+  /etc/GeoIP.conf:
+    state: "copy"
+    # license key should be made at
+    # https://www.maxmind.com/en/accounts/<example>/license-key/create
+    content: |
+      # GeoIP.conf file for `geoipupdate` program, for versions >= 3.1.1.
+      # Used to update GeoIP databases from https://www.maxmind.com.
+      # For more information about this config file, visit the docs at
+      # https://dev.maxmind.com/geoip/geoipupdate/.
+      # `AccountID` is from your MaxMind account.
+      AccountID {{ geoipupdate_accountid }}
+      # `LicenseKey` is from your MaxMind account
+      LicenseKey {{ geoipupdate_licensekey }}
+      # `EditionIDs` is from your MaxMind account.
+      EditionIDs {{ geoipupdate_editionids }}
+    mode: "0644"
+  /etc/cron.d/local-geoipupdate:
+    state: "copy"
+    content: |
+      MAILTO={{ geoipupdate_cron_job_mailto }}
+      {{ geoipupdate_cron_job_time }} root /usr/bin/geoipupdate
+    mode: "0644"
