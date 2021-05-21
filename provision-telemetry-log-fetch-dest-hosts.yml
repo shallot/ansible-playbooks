@@ -41,3 +41,7 @@
     # NB: we depend on this to give us packages and paths
     - import_tasks:
         "tasks/geoipupdate.yml"
+
+    # https://docs.ansible.com/ansible/latest/import_tasks_module.html
+    - import_tasks:
+        "tasks/shells.yml"
