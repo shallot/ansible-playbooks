@@ -114,6 +114,22 @@ postfix_configuration:
     "example.com"
   smtp_helo_name:
     "{{ inventory_hostname }}"
+  smtpd_milters:
+    "inet:localhost:8892"
+  non_smtpd_milters:
+    "$smtpd_milters"
+  milter_default_action:
+    "accept"
+
+opendkim_private_key_file:
+  "files/dkim_example.private"
+
+# roles/postfix/dkim/tasks/main.yml
+opendkim_configuration:
+  socket: "inet:8892@localhost"
+  domain: "example.com"
+  keyfile: "{{ opendkim_key_path }}/dkim_example.private"
+  selector: "example"
 
 # https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
 vagrant_groups:

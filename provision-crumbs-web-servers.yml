@@ -35,6 +35,10 @@
     - import_role:
         name: "gitlab/runner"
 
+    # roles/postfix/dkim/tasks/main.yml
+    - import_role:
+        name: "postfix/dkim"
+
     # https://docs.ansible.com/ansible/latest/import_tasks_module.html
     - import_tasks:
         "tasks/postfix-agent.yml"
