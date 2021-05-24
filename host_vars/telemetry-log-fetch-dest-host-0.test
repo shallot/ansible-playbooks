@@ -55,7 +55,7 @@ telemetry_log_fetch_products:
     name: "product1"
     directory: "product1.telemetry.example.com"
     servers:
-      - "product1-telemetry-1.example.com"
+      - "localhost"
     bucket: "gs://product1-telemetry"
     datastore_schema:
       "{{ telemetry_log_fetch_base_dest_dir }}/telemetrylog.bq.schema.json"
