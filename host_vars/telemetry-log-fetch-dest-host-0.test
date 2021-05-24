@@ -46,7 +46,7 @@ telemetry_log_gcloud_service_account_key_file:
 # TODO: get a test service account for the purpose of this test
 telemetry_log_fetch_dummy_gcloud_auth_custom_paths__to_merge:
   telemetry_log_gcloud_service_account_credentials:
-    path: "{{ telemetry_log_gcloud_service_account_credentials }}"
+    dest: "{{ telemetry_log_gcloud_service_account_credentials }}"
     state: "copy"
     src: "/dev/null"
 
