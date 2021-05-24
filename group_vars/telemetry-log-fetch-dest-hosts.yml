@@ -198,6 +198,12 @@ telemetry_log_fetch_prerequisite_config_custom_paths__to_merge:
     owner: "{{ telemetry_log_fetch_user }}"
     group: "{{ telemetry_log_fetch_user }}"
     mode: "0755"
+  /home/telemetrylogfetch/.config/gcloud/legacy_credentials:
+    path: "{{ telemetry_log_gcloud_config_dir }}/legacy_credentials"
+    state: "directory"
+    owner: "{{ telemetry_log_fetch_user }}"
+    group: "{{ telemetry_log_fetch_user }}"
+    mode: "0755"
   /home/telemetrylogfetch/.config/gcloud/configurations:
     path: "{{ telemetry_log_gcloud_config_dir }}/configurations"
     state: "directory"
