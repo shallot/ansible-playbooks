@@ -50,7 +50,7 @@ telemetry_log_fetch_dummy_gcloud_auth_custom_paths__to_merge:
     state: "copy"
     src: "/dev/null"
 
-telemetry_log_fetch_dummy_ssh_auth_custom_paths__to_merge:
+dummy_test_telemetry_log_fetch_ssh_authorized_keys_paths__to_merge:
   telemetry_log_fetch_server_key_location_authorized_keys:
     dest: "/home/{{ telemetry_log_fetch_user }}/.ssh/authorized_keys"
     state: "copy"

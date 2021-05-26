@@ -38,6 +38,13 @@
         "tasks/ssh-keys.yml"
 
     # https://docs.ansible.com/ansible/latest/import_tasks_module.html
+    - import_tasks:
+        "tasks/paths.yml"
+      vars:
+        custom_paths_suffix:
+          "telemetry_log_fetch_ssh_authorized_keys_paths__to_merge"
+
+    # https://docs.ansible.com/ansible/latest/import_tasks_module.html
     # NB: we depend on this to give us packages and paths
     - import_tasks:
         "tasks/geoipupdate.yml"
