@@ -56,6 +56,9 @@ dummy_test_telemetry_log_fetch_ssh_authorized_keys_paths__to_merge:
     state: "copy"
     remote_src: true
     src: "{{ telemetry_log_fetch_server_key_location }}.pub"
+  telemetry_pingv1_log_directory:
+    path: "{{ telemetry_pingv1_log_directory }}"
+    state: "directory"
 
 telemetry_log_fetch_products:
   product1:
