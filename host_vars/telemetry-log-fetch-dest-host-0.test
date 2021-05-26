@@ -50,6 +50,13 @@ telemetry_log_fetch_dummy_gcloud_auth_custom_paths__to_merge:
     state: "copy"
     src: "/dev/null"
 
+telemetry_log_fetch_dummy_ssh_auth_custom_paths__to_merge:
+  telemetry_log_fetch_server_key_location_authorized_keys:
+    dest: "/home/{{ telemetry_log_fetch_user }}/.ssh/authorized_keys"
+    state: "copy"
+    remote_src: true
+    src: "{{ telemetry_log_fetch_server_key_location }}.pub"
+
 telemetry_log_fetch_products:
   product1:
     name: "product1"
