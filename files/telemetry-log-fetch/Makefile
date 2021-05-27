@@ -87,7 +87,7 @@ $(PRODUCT_DIRECTORY)/dailycsv/$(SERVER)/$(SERVER_LOG_PREFIX).log.$(DATE).gz: \
 # NB: the zgrep of the file from the day before yesterday means we can't just use
 # implicit rules per https://www.gnu.org/software/make/manual/html_node/Chained-Rules.html
 # but always have to keep today's raw CSV files for reuse tomorrow
-	$(DO) zgrep -h '^$(DATE)' $(<D)/$(SERVER_LOG_PREFIX).log.$(DAY_BEFORE_DATE).gz $< | gzip > $@
+	$(DO) zgrep -a -h '^$(DATE)' $(<D)/$(SERVER_LOG_PREFIX).log.$(DAY_BEFORE_DATE).gz $< | gzip > $@
 
 # upload target is uploading the daily CSV files into Google Cloud Storage
 # and then from there ingesting them into Google BigQuery
