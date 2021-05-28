@@ -36,7 +36,7 @@ custom_geoip_data_country_ipv6:
 # tasks/paths.yml
 apache_geoip_custom_paths__to_merge:
   geoip_folder:
-    path: "{{ custom_geoip_data_path }}"
+    dest: "{{ custom_geoip_data_path }}"
     state: "directory"
     mode: "0755"
   /usr/local/sbin/update-mod-geoip-data:

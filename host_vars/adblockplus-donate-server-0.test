@@ -30,7 +30,7 @@
 adblockplus_donate_server_test_custom_paths__to_merge:
 # yamllint disable rule:comments-indentation
 #  "{{ adblockplus_donate_server_dir }}/etc/stripe.secret":
-#    path: "{{ adblockplus_donate_server_dir }}/etc/stripe.secret"
+#    dest: "{{ adblockplus_donate_server_dir }}/etc/stripe.secret"
 #    state: "copy"
 #    content: |
 #      changeme

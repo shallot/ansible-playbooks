@@ -68,6 +68,35 @@ fail_for_numeric_mode: &fail_for_numeric_mode
     mode: 0750
     state: "directory"
 
+# Test unsupported parameter 'user'
+fail_for_user: &fail_for_user
+  /tmp/this-will-work:
+    group: "vagrant"
+    owner: "vagrant"
+    state: "directory"
+  /tmp/this-will-fail:
+    group: "vagrant"
+    user: "vagrant"
+    state: "directory"
+
+# Test unsupported parameter 'path'
+fail_for_path: &fail_for_path
+  /tmp/this-will-work:
+    dest: "/tmp/this-will-work"
+    state: "directory"
+  /tmp/this-will-fail:
+    path: "/tmp/this-will-fail"
+    state: "directory"
+
+# Test unsupported parameter 'name'
+fail_for_name: &fail_for_name
+  /tmp/this-will-work:
+    dest: "/tmp/this-will-work"
+    state: "directory"
+  /tmp/this-will-fail:
+    name: "/tmp/this-will-fail"
+    state: "directory"
+
 # Test cases for regressions
 # https://gitlab.com/eyeo/devops/ansible-playbooks/-/issues/34
 single_entry: &single_entry
@@ -81,6 +110,9 @@ host_specific_custom_paths__to_merge:
   #  <<: *full_succeeding
   #  <<: *fail_for_missing_state
   #  <<: *fail_for_numeric_mode
+  #  <<: *fail_for_user
+  #  <<: *fail_for_path
+  #  <<: *fail_for_name
   <<: *single_entry
 
 # https://www.vagrantup.com/docs/vagrantfile/machine_settings.html

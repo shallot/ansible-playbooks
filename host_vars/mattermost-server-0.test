@@ -102,13 +102,13 @@ mattermost_users__to_merge:
     system: true
 mattermost_paths__to_merge:
   "{{ mattermost_directory }}":
-    path: "{{ mattermost_directory }}"
+    dest: "{{ mattermost_directory }}"
     group: "{{ mattermost_system_group_name }}"
     mode: "0775"
     owner: "{{ mattermost_system_user_name }}"
     state: "directory"
   "{{ mattermost_directory }}/data":
-    path: "{{ mattermost_directory }}/data"
+    dest: "{{ mattermost_directory }}/data"
     group: "{{ mattermost_system_group_name }}"
     mode: "0775"
     owner: "{{ mattermost_system_user_name }}"

@@ -41,19 +41,19 @@ crumbs_web_servers_venv_user:
 crumbs_web_servers_prerequisite_paths__to_merge:
   "{{ crumbs_web_base_path }}":
     state: "directory"
-    path: "{{ crumbs_web_base_path }}"
+    dest: "{{ crumbs_web_base_path }}"
     mode: "0775"
     owner: "{{ crumbs_web_servers_venv_user }}"
     group: "{{ crumbs_web_servers_venv_user }}"
   crumbs_relay_relay_subdirectory:
     state: "directory"
-    path: "{{ crumbs_web_base_path }}/relay"
+    dest: "{{ crumbs_web_base_path }}/relay"
     mode: "0775"
     owner: "{{ crumbs_web_servers_venv_user }}"
     group: "{{ crumbs_web_servers_venv_user }}"
   crumbs_relay_relay_settings_subdirectory:
     state: "directory"
-    path: "{{ crumbs_web_base_path }}/relay/settings"
+    dest: "{{ crumbs_web_base_path }}/relay/settings"
     mode: "0775"
     owner: "{{ crumbs_web_servers_venv_user }}"
     group: "{{ crumbs_web_servers_venv_user }}"

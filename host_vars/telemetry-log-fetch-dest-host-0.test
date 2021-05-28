@@ -57,7 +57,7 @@ dummy_test_telemetry_log_fetch_ssh_authorized_keys_paths__to_merge:
     remote_src: true
     src: "{{ telemetry_log_fetch_server_key_location }}.pub"
   telemetry_pingv1_log_directory:
-    path: "{{ telemetry_pingv1_log_directory }}"
+    dest: "{{ telemetry_pingv1_log_directory }}"
     state: "directory"
 
 telemetry_log_fetch_products:
@@ -83,7 +83,7 @@ telemetry_log_fetch_per_product_product1_directory:
 # tasks/paths.yml
 telemetry_log_fetch_per_product_product1_custom_paths__to_merge:
   /srv/telemetry/product.example.env:
-    path: "{{ telemetry_log_fetch_base_dest_dir }}/product.example.env"
+    dest: "{{ telemetry_log_fetch_base_dest_dir }}/product.example.env"
     state: "copy"
     # yamllint disable rule:line-length
     content: |
@@ -107,19 +107,19 @@ telemetry_log_fetch_per_product_product1_custom_paths__to_merge:
     group: "adm"
     mode: "0644"
   /srv/telemetry/product-telemetry.example.com/downloaded:
-    path: "{{ telemetry_log_fetch_per_product_product1_directory }}/downloaded"
+    dest: "{{ telemetry_log_fetch_per_product_product1_directory }}/downloaded"
     state: "directory"
     owner: "{{ telemetry_log_fetch_user }}"
     group: "adm"
     mode: "02750"
   /srv/telemetry/product-telemetry.example.com/rawcsv:
-    path: "{{ telemetry_log_fetch_per_product_product1_directory }}/rawcsv"
+    dest: "{{ telemetry_log_fetch_per_product_product1_directory }}/rawcsv"
     state: "directory"
     owner: "{{ telemetry_log_fetch_user }}"
     group: "adm"
     mode: "02750"
   /srv/telemetry/product-telemetry.example.com/dailycsv:
-    path: "{{ telemetry_log_fetch_per_product_product1_directory }}/dailycsv"
+    dest: "{{ telemetry_log_fetch_per_product_product1_directory }}/dailycsv"
     state: "directory"
     owner: "{{ telemetry_log_fetch_user }}"
     group: "adm"

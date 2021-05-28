@@ -52,7 +52,7 @@ ansible_admin_users__to_merge:
 ansible_admin_paths__to_merge:
   "{{ custom_ansible_user.home }}/inventory":
     state: "link"
-    path: "/etc/ansible"
+    dest: "/etc/ansible"
     src: "{{ custom_ansible_user.home }}/inventory"
 
 # tasks/ansible-admin.yml

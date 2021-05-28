@@ -41,13 +41,13 @@ only_test_dns_backup_custom_packages__to_merge:
 # tasks/paths.yml
 ssh_keys_dirs_custom_paths__to_merge:
   /opt/backup/keys:
-    path: "/opt/backup/keys"
+    dest: "/opt/backup/keys"
     state: "directory"
     owner: "backup"
     group: "backup"
     mode: "0750"
   "{{ automated_backup_server_directory }}":
-    path: "{{ automated_backup_server_directory }}"
+    dest: "{{ automated_backup_server_directory }}"
     state: "directory"
     owner: "backup"
     group: "backup"
@@ -56,7 +56,7 @@ ssh_keys_dirs_custom_paths__to_merge:
 # tasks/ssh-keys.yml
 default_custom_ssh_keys__to_merge:
   default:
-    path: "{{ automated_backup_server_key }}"
+    dest: "{{ automated_backup_server_key }}"
     type: "ed25519"
     size: 521
     owner: "backup"

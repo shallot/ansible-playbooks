@@ -24,7 +24,7 @@ apk_signing_hosts_groups__to_merge:
 
 apk_signing_hosts_paths__to_merge:
   "{{ apk_signing_directory }}":
-    path: "{{ apk_signing_directory }}"
+    dest: "{{ apk_signing_directory }}"
     state: "directory"
     owner: "root"
     group: "{{ apk_signing_group_name | mandatory }}"

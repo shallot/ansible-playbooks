@@ -33,12 +33,12 @@ adblockplus_donate_server_dir:
 # tasks/paths.yml
 adblockplus_donate_server_prerequisite_paths__to_merge:
   "{{ adblockplus_donate_server_dir }}":
-    path: "{{ adblockplus_donate_server_dir }}"
+    dest: "{{ adblockplus_donate_server_dir }}"
     state: "directory"
     mode: "0755"
     owner: "{{ adblockplus_donate_system_username }}"
   "{{ adblockplus_donate_server_dir }}/etc":
-    path: "{{ adblockplus_donate_server_dir }}/etc"
+    dest: "{{ adblockplus_donate_server_dir }}/etc"
     state: "directory"
     mode: "0755"
     owner: "{{ adblockplus_donate_system_username }}"
@@ -53,7 +53,7 @@ adblockplus_donate_server_logrotate_action:
 # tasks/paths.yml
 adblockplus_donate_server_log_custom_paths__to_merge:
   "{{ adblockplus_donate_server_log_directory }}":
-    path: "{{ adblockplus_donate_server_log_directory }}"
+    dest: "{{ adblockplus_donate_server_log_directory }}"
     state: "directory"
     mode: "0750"
     group: "adm"

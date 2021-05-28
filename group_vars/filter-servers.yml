@@ -31,7 +31,7 @@ filter_server_custom_paths__to_merge:
     state: "directory"
     mode: "0755"
   /var/www/easylist:
-    path: "{{ filter_server_document_root_path }}"
+    dest: "{{ filter_server_document_root_path }}"
     state: "directory"
     mode: "0755"
     owner: "{{ filter_server_mirror_user }}"

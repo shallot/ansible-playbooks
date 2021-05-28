@@ -95,7 +95,7 @@ eramba_custom_packages__to_merge:
 
 eramba_stage1_paths__to_merge:
   eramba_directory:
-    path: "{{ eramba_directory }}"
+    dest: "{{ eramba_directory }}"
     mode: "0775"
     state: "directory"
   # custom mysql settings

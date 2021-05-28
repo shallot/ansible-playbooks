@@ -26,7 +26,7 @@ telemetry_log_fetch_custom_users__to_merge:
 # tasks/paths.yml
 telemetry_log_fetch_ssh_keys_dirs_custom_paths__to_merge:
   /home/{{ telemetry_log_fetch_user }}/.ssh:
-    path: "/home/{{ telemetry_log_fetch_user }}/.ssh"
+    dest: "/home/{{ telemetry_log_fetch_user }}/.ssh"
     state: "directory"
     owner: "{{ telemetry_log_fetch_user }}"
     group: "{{ telemetry_log_fetch_user }}"
@@ -96,26 +96,26 @@ telemetry_log_fetch_src_dest_connection_custom_shells__to_merge:
 # yamllint disable rule:line-length
 telemetry_log_fetch_prerequisite_code_custom_paths__to_merge:
   /srv/telemetry:
-    path: "{{ telemetry_log_fetch_base_dest_dir }}"
+    dest: "{{ telemetry_log_fetch_base_dest_dir }}"
     state: "directory"
     owner: "{{ telemetry_log_fetch_user }}"
     group: "adm"
     mode: "02750"
   /srv/telemetry/log:
-    path: "{{ telemetry_log_fetch_base_dest_dir }}/log"
+    dest: "{{ telemetry_log_fetch_base_dest_dir }}/log"
     state: "directory"
     owner: "{{ telemetry_log_fetch_user }}"
     group: "adm"
     mode: "0750"
   /srv/telemetry/cronjob:
-    path: "{{ telemetry_log_fetch_base_dest_dir }}/cronjob"
+    dest: "{{ telemetry_log_fetch_base_dest_dir }}/cronjob"
     state: "copy"
     src: "files/telemetry-log-fetch/cronjob"
     owner: "{{ telemetry_log_fetch_user }}"
     group: "adm"
     mode: "0755"
   /srv/telemetry/telemetry.env:
-    path: "{{ telemetry_log_fetch_base_dest_dir }}/telemetry.env"
+    dest: "{{ telemetry_log_fetch_base_dest_dir }}/telemetry.env"
     state: "copy"
     content: |
       telemetry_logdir={{ telemetry_log_fetch_base_dest_dir }}/log
@@ -131,7 +131,7 @@ telemetry_log_fetch_prerequisite_code_custom_paths__to_merge:
     group: "adm"
     mode: "0644"
   /srv/telemetry/Makefile:
-    path: "{{ telemetry_log_fetch_base_dest_dir }}/Makefile"
+    dest: "{{ telemetry_log_fetch_base_dest_dir }}/Makefile"
     state: "copy"
     src: "files/telemetry-log-fetch/Makefile"
     owner: "{{ telemetry_log_fetch_user }}"
@@ -142,7 +142,7 @@ telemetry_log_fetch_prerequisite_code_custom_paths__to_merge:
     src: "files/telemetry-log-fetch/audit-log-to-ping-csv-with-country"
     mode: "0755"
   /srv/telemetry/telemetrylog.bq.schema.json:
-    path: "{{ telemetry_log_fetch_base_dest_dir }}/telemetrylog.bq.schema.json"
+    dest: "{{ telemetry_log_fetch_base_dest_dir }}/telemetrylog.bq.schema.json"
     state: "copy"
     src: "files/telemetry-log-fetch/telemetrylog.bq.schema.json"
     owner: "{{ telemetry_log_fetch_user }}"
@@ -178,13 +178,13 @@ telemetry_log_bigquery_credentials:
 # tasks/paths.yml
 telemetry_log_fetch_prerequisite_config_custom_paths__to_merge:
   /home/telemetrylogfetch/.config:
-    path: "/home/{{ telemetry_log_fetch_user }}/.config"
+    dest: "/home/{{ telemetry_log_fetch_user }}/.config"
     state: "directory"
     owner: "{{ telemetry_log_fetch_user }}"
     group: "{{ telemetry_log_fetch_user }}"
     mode: "0755"
   /home/telemetrylogfetch/.bigqueryrc:
-    path: "/home/{{ telemetry_log_fetch_user }}/.bigqueryrc"
+    dest: "/home/{{ telemetry_log_fetch_user }}/.bigqueryrc"
     state: "copy"
     content: |
       credential_file = {{ telemetry_log_bigquery_credentials }}
@@ -193,25 +193,25 @@ telemetry_log_fetch_prerequisite_config_custom_paths__to_merge:
     group: "{{ telemetry_log_fetch_user }}"
     mode: "0644"
   /home/telemetrylogfetch/.config/gcloud:
-    path: "{{ telemetry_log_gcloud_config_dir }}"
+    dest: "{{ telemetry_log_gcloud_config_dir }}"
     state: "directory"
     owner: "{{ telemetry_log_fetch_user }}"
     group: "{{ telemetry_log_fetch_user }}"
     mode: "0755"
   /home/telemetrylogfetch/.config/gcloud/legacy_credentials:
-    path: "{{ telemetry_log_gcloud_config_dir }}/legacy_credentials"
+    dest: "{{ telemetry_log_gcloud_config_dir }}/legacy_credentials"
     state: "directory"
     owner: "{{ telemetry_log_fetch_user }}"
     group: "{{ telemetry_log_fetch_user }}"
     mode: "0755"
   /home/telemetrylogfetch/.config/gcloud/configurations:
-    path: "{{ telemetry_log_gcloud_config_dir }}/configurations"
+    dest: "{{ telemetry_log_gcloud_config_dir }}/configurations"
     state: "directory"
     owner: "{{ telemetry_log_fetch_user }}"
     group: "{{ telemetry_log_fetch_user }}"
     mode: "0755"
   /home/telemetrylogfetch/.config/gcloud/configurations/config_default:
-    path: "{{ telemetry_log_gcloud_config_dir }}/configurations/config_default"
+    dest: "{{ telemetry_log_gcloud_config_dir }}/configurations/config_default"
     state: "copy"
     content: |
       [core]

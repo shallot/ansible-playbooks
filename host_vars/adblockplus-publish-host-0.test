@@ -35,12 +35,12 @@ host_specific_custom_paths__to_merge:
   /opt/oauth:
     state: "directory"
     mode: "0700"
-    user: "root"
+    owner: "root"
     group: "root"
   /opt/oauth/amo.json:
     state: "copy"
     mode: "0700"
-    user: "root"
+    owner: "root"
     group: "root"
     content: "{'key':'You can read me!'}"
 

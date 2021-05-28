@@ -42,12 +42,12 @@ filter_server_custom_packages__to_merge:
 
 custom_geoip_stub_custom_paths__to_merge:
   /var/www/easylist/GeoIPv4.dat:
-    path: "{{ filter_server_document_root_path }}/GeoIPv4.dat"
+    dest: "{{ filter_server_document_root_path }}/GeoIPv4.dat"
     state: "copy"
     content: "This is just to make the tests succeed"
     mode: "0644"
   /var/www/easylist/GeoIPv6.dat:
-    path: "{{ filter_server_document_root_path }}/GeoIPv6.dat"
+    dest: "{{ filter_server_document_root_path }}/GeoIPv6.dat"
     state: "copy"
     content: "This is just to make the tests succeed"
     mode: "0644"

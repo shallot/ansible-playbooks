@@ -53,7 +53,7 @@ jirafeau_custom_cron_jobs__to_merge:
 # tasks/paths.yml
 jirafeau_custom_paths:
   async:
-    path: "{{ jirafeau_var_root }}/async"
+    dest: "{{ jirafeau_var_root }}/async"
     state: "directory"
     mode: "0755"
     owner: "{{ jirafeau_web_server_user }}"
@@ -66,13 +66,13 @@ jirafeau_custom_paths:
     group: "{{ jirafeau_web_server_user }}"
     src: "jirafeau-config-local.j2"
   files:
-    path: "{{ jirafeau_var_root }}/files"
+    dest: "{{ jirafeau_var_root }}/files"
     state: "directory"
     mode: "0755"
     owner: "{{ jirafeau_web_server_user }}"
     group: "{{ jirafeau_web_server_user }}"
   links:
-    path: "{{ jirafeau_var_root }}/links"
+    dest: "{{ jirafeau_var_root }}/links"
     state: "directory"
     mode: "0755"
     owner: "{{ jirafeau_web_server_user }}"

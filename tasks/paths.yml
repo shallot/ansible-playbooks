@@ -46,13 +46,26 @@
           + custom_paths_for_fail_directory_mode
           }}"
 
+    # Covers paths that are using bad parameters.
+    # https://docs.ansible.com/ansible/latest/modules/fail_module.html
+    - name:
+        "paths : check for unsupported name, path, user"
+      fail:
+        msg: "custom path '{{ item.key }}' uses unsupported parameters:
+          'name', 'path, 'user'"
+      loop:
+        "{{ custom_paths_for_fail_user
+          + custom_paths_for_fail_path
+          + custom_paths_for_fail_name
+          }}"
+
     # Covers any target state beside "copy" and "template".
     # https://docs.ansible.com/ansible/latest/modules/file_module.html
     - name:
         "paths : file"
       file:
         follow: "{{ item.value.follow | default(omit) }}"
-        path: "{{ item.value.path | default(item.key) }}"
+        dest: "{{ item.value.dest | default(item.key) }}"
         recurse: "{{ item.value.recurse | default(omit) }}"
         state: "{{ item.value.state | default(omit) }}"
       args: &shared_parameters
@@ -140,6 +153,27 @@
     custom_paths_for_fail_directory_mode:
       "{{ _itemized_custom_paths
         | selectattr('value.directory_mode', 'number')
+        | list
+        }}"
+
+    # Identifies all custom_paths with unsupported parameter 'user'.
+    custom_paths_for_fail_user:
+      "{{ _itemized_custom_paths
+        | selectattr('value.user', 'defined')
+        | list
+        }}"
+
+    # Identifies all custom_paths with unsupported parameter 'path'.
+    custom_paths_for_fail_path:
+      "{{ _itemized_custom_paths
+        | selectattr('value.path', 'defined')
+        | list
+        }}"
+
+    # Identifies all custom_paths with unsupported parameter 'name'.
+    custom_paths_for_fail_name:
+      "{{ _itemized_custom_paths
+        | selectattr('value.name', 'defined')
         | list
         }}"
 

@@ -55,22 +55,22 @@ telemetry_pingv1_services__to_merge:
 # tasks/paths.yml
 telemetry_pingv1_prerequisite_paths__to_merge:
   /var/www/telemetry-pingv1:
-    path: "{{ telemetry_pingv1_doc_root_dir }}"
+    dest: "{{ telemetry_pingv1_doc_root_dir }}"
     state: "directory"
     mode: "0755"
   /var/www/telemetry-pingv1/index.html:
-    path: "{{ telemetry_pingv1_doc_root_dir }}/index.html"
+    dest: "{{ telemetry_pingv1_doc_root_dir }}/index.html"
     state: "copy"
     src: "/dev/null"
     mode: "0644"
   /srv/telemetry-pingv1-server:
     state: "directory"
-    path: "{{ telemetry_pingv1_server_dir }}"
+    dest: "{{ telemetry_pingv1_server_dir }}"
     mode: "0755"
     owner: "{{ telemetry_pingv1_system_username }}"
   /srv/telemetry-pingv1-server/etc:
     state: "directory"
-    path: "{{ telemetry_pingv1_server_dir }}/etc"
+    dest: "{{ telemetry_pingv1_server_dir }}/etc"
     mode: "0755"
     owner: "{{ telemetry_pingv1_system_username }}"
 
@@ -294,7 +294,7 @@ telemetry_pingv1_logrotate_action:
 # tasks/paths.yml
 logrotate-telemetry-pingv1_custom_paths__to_merge:
   "{{ telemetry_pingv1_log_directory }}":
-    path: "{{ telemetry_pingv1_log_directory }}"
+    dest: "{{ telemetry_pingv1_log_directory }}"
     state: "directory"
     mode: "0750"
     group: "adm"
