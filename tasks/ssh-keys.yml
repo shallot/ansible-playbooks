@@ -24,48 +24,80 @@
     suffix: "{{ custom_ssh_keys_suffix
               | default('custom_ssh_keys__to_merge') }}"
 
-# https://docs.ansible.com/ansible/latest/modules/openssh_keypair_module.html
-- name:
-    "openssh_keypair : custom_ssh_keys"
-  openssh_keypair:
-    attributes: "{{ ssh_key.value.attributes | default(omit) }}"
-    comment: "{{ ssh_key.value.comment | default(omit) }}"
-    force: "{{ ssh_key.value.force | default(omit) }}"
-    group: "{{ ssh_key.value.group | default(omit) }}"
-    mode: "{{ ssh_key.value.mode | default(omit) }}"
-    owner: "{{ ssh_key.value.owner | default(omit) }}"
-    path: "{{ ssh_key.value.path | default(ssh_key.key) }}"
-    selevel: "{{ ssh_key.value.selevel | default(omit) }}"
-    serole: "{{ ssh_key.value.serole | default(omit) }}"
-    seuser: "{{ ssh_key.value.seuser | default(omit) }}"
-    size: "{{ ssh_key.value.size | default(omit) }}"
-    state: "{{ ssh_key.value.state | default(omit) }}"
-    type: "{{ ssh_key.value.type | default(omit) }}"
-    unsafe_writes: "{{ ssh_key.value.unsafe_writes | default(omit) }}"
-  when:
-    "ssh_key.value.path is not defined or ssh_key.value.path != omit"
-  loop:
-    "{{ custom_ssh_keys | dict2items }}"
-  loop_control:
-    loop_var: "ssh_key"
-  become:
-    true
+# https://docs.ansible.com/ansible/latest/user_guide/playbooks_blocks.html
+- block:
 
-# https://github.com/ansible/ansible/pull/62037
-# https://docs.ansible.com/ansible/latest/modules/file_module.html
-- name:
-    "file : pub_ssh_keys"
-  file:
-    group: "{{ ssh_key.value.group | default(omit) }}"
-    mode: "{{ ssh_key.value.mode | default(omit) }}"
-    owner: "{{ ssh_key.value.owner | default(omit) }}"
-    path: "{{ ssh_key.value.path | default(ssh_key.key) }}.pub"
-  when:
-    - "ansible_version.full is version('2.9.0', '<')"
-    - "ssh_key.value.path is not defined or ssh_key.value.path != omit"
-  loop:
-    "{{ custom_ssh_keys | dict2items }}"
-  loop_control:
-    loop_var: "ssh_key"
+    # Covers ssh_keys that are using bad parameters.
+    # https://docs.ansible.com/ansible/latest/modules/fail_module.html
+    - name:
+        "ssh_keys : check for unsupported path, user"
+      fail:
+        msg: "custom ssh_key '{{ item.key }}' uses unsupported parameters:
+          'path', 'user'"
+      loop:
+        "{{ custom_ssh_keys_for_fail_user
+          + custom_ssh_keys_for_fail_path
+          }}"
+
+    # https://docs.ansible.com/ansible/latest/modules/openssh_keypair_module.html
+    - name:
+        "openssh_keypair : custom_ssh_keys"
+      openssh_keypair:
+        attributes: "{{ ssh_key.value.attributes | default(omit) }}"
+        comment: "{{ ssh_key.value.comment | default(omit) }}"
+        force: "{{ ssh_key.value.force | default(omit) }}"
+        group: "{{ ssh_key.value.group | default(omit) }}"
+        mode: "{{ ssh_key.value.mode | default(omit) }}"
+        owner: "{{ ssh_key.value.owner | default(omit) }}"
+        path: "{{ ssh_key.value.dest | default(ssh_key.key) }}"
+        selevel: "{{ ssh_key.value.selevel | default(omit) }}"
+        serole: "{{ ssh_key.value.serole | default(omit) }}"
+        seuser: "{{ ssh_key.value.seuser | default(omit) }}"
+        size: "{{ ssh_key.value.size | default(omit) }}"
+        state: "{{ ssh_key.value.state | default(omit) }}"
+        type: "{{ ssh_key.value.type | default(omit) }}"
+        unsafe_writes: "{{ ssh_key.value.unsafe_writes | default(omit) }}"
+      when:
+        "ssh_key.value.dest is not defined or ssh_key.value.dest != omit"
+      loop:
+        "{{ custom_ssh_keys | dict2items }}"
+      loop_control:
+        loop_var: "ssh_key"
+
+    # https://github.com/ansible/ansible/pull/62037
+    # https://docs.ansible.com/ansible/latest/modules/file_module.html
+    - name:
+        "file : pub_ssh_keys"
+      file:
+        group: "{{ ssh_key.value.group | default(omit) }}"
+        mode: "{{ ssh_key.value.mode | default(omit) }}"
+        owner: "{{ ssh_key.value.owner | default(omit) }}"
+        dest: "{{ ssh_key.value.dest | default(ssh_key.key) }}.pub"
+      when:
+        - "ansible_version.full is version('2.9.0', '<')"
+        - "ssh_key.value.dest is not defined or ssh_key.value.dest != omit"
+      loop:
+        "{{ custom_ssh_keys | dict2items }}"
+      loop_control:
+        loop_var: "ssh_key"
+
+  vars:
+    _itemized_custom_ssh_keys:
+      "{{ custom_ssh_keys | dict2items }}"
+
+    # Identifies all custom_ssh_keys with unsupported parameter 'user'.
+    custom_ssh_keys_for_fail_user:
+      "{{ _itemized_custom_ssh_keys
+        | selectattr('value.user', 'defined')
+        | list
+        }}"
+
+    # Identifies all custom_ssh_keys with a missing state.
+    custom_ssh_keys_for_fail_path:
+      "{{ _itemized_custom_ssh_keys
+        | selectattr('value.path', 'defined')
+        | list
+        }}"
+
   become:
     true

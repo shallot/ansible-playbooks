@@ -38,7 +38,7 @@ telemetry_log_fetch_server_key_location:
 # tasks/ssh-keys.yml
 telemetry_log_fetch_custom_ssh_keys__to_merge:
   id_rsa:
-    path: "{{ telemetry_log_fetch_server_key_location }}"
+    dest: "{{ telemetry_log_fetch_server_key_location }}"
     type: "rsa"
     size: 4096
     owner: "{{ telemetry_log_fetch_user }}"
