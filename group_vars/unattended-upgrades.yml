@@ -25,10 +25,10 @@ unattended_upgrades_packages__to_merge:
 # tasks/unattended-upgrades.yml
 unattended_upgrades_paths__to_merge:
   /etc/apt/apt.conf.d/99local-auto-upgrades:
-    state: "copy"
-    src: "files/unattended-upgrades/99local-auto-upgrades"
+    state: "template"
+    src: "templates/unattended-upgrades/99local-auto-upgrades"
     mode: "0644"
   /etc/apt/apt.conf.d/99local-unattended-upgrades:
-    state: "copy"
-    src: "files/unattended-upgrades/99local-unattended-upgrades"
+    state: "template"
+    src: "templates/unattended-upgrades/99local-unattended-upgrades"
     mode: "0644"
