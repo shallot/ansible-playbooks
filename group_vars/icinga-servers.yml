@@ -63,7 +63,7 @@ eyeo_icinga_server_custom_icinga_services:
     service_definition: |
       {{ lookup('template', 'roles/monitoring-plugins/files/icinga-services/ssl_cert.conf') }}
     assign:
-      - "intersection({{ icinga_server_http_service_group | to_json }}, host.vars.ansible.groups)"
+      - "intersection({{ icinga_server_https_service_group | to_json }}, host.vars.ansible.groups)"
 
 # provision-icinga-servers.yml
 eyeo_icinga_server_monitoring_plugins:
