@@ -130,16 +130,10 @@ default_filter_server_minimize_custom_apache_config: |
   RewriteRule ^/(easylist(?:china|czechslovak|dutch|germany|italy|lithuania|polish|portuguese|spanish)\+easylist)\.(.+) /$1-minified.$2 [L]
 
   RewriteCond %{ENV:MIN_LIST} =true
-  RewriteRule ^/((?:abpindo|abpvn|bulgarian_list|israellist|latvianlist|liste_fr|liste_ar|rolist|ruadlist)\+easylist)\.(.+) /$1-minified.$2 [L]
+  RewriteRule ^/((?:abpindo|abpvn|bulgarian_list|dandelion_sprouts_nordic_filters|israellist|koreanlist|latvianlist|liste_fr|liste_ar|rolist|ruadlist)\+easylist)\.(.+) /$1-minified.$2 [L]
 
   RewriteCond %{ENV:MIN_LIST} =true
   RewriteRule ^/indianlist\+easylist\.(.+) /indianlist-full+easylist-minified.$1 [L]
-
-  RewriteCond %{ENV:MIN_LIST} =true
-  RewriteRule ^/dandelion_sprouts_nordic_filters\+easylist\.(.+) /dandelion_sprouts_nordic_filters+easylist-minified.$1 [L]
-
-  RewriteCond %{ENV:MIN_LIST} =true
-  RewriteRule ^/korleanlist\+easylist\.(.+) /korleanlist+easylist-minified.$1 [L]
 
 default_filter_server_compliance_custom_apache_config: |
   RewriteCond %{ENV:GEOIP_COUNTRY_CODE} ^CN$ [OR]
