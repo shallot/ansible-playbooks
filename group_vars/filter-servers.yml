@@ -71,6 +71,9 @@ filter_server_custom_apache_config: |
   {{ filter_server_elem_hide_custom_apache_config
    | default(default_filter_server_elem_hide_custom_apache_config) }}
 
+  {{ filter_server_mobile_anticv_custom_apache_config
+   | default(default_filter_server_mobile_anticv_custom_apache_config) }}
+
   {{ filter_server_minimize_custom_apache_config
    | default(default_filter_server_minimize_custom_apache_config) }}
 
@@ -113,6 +116,22 @@ default_filter_server_elem_hide_custom_apache_config: |
   #RewriteRule ^ - [E=REDIRECT:ELEM_HIDE]
   RewriteCond %{ENV:NO_ELEM_HIDE} =true
   RewriteRule "^/easylistgermany\+easylist\.(.+)" /easylistgermany_noelemhide+easylist_noelemhide.$1 [R=302,L]
+
+default_filter_server_mobile_anticv_custom_apache_config: |
+  RewriteCond %{QUERY_STRING} (?:^|&)application=org\.adblockplus\.browser(?:\.beta)?
+  RewriteRule ^ - [E=MOBILE_ANTICV_LIST:true]
+
+  RewriteCond %{ENV:MOBILE_ANTICV_LIST} =true
+  RewriteRule ^/(easylist)\.(.+) /$1+mobile-anti-cv.$2 [L]
+
+  RewriteCond %{ENV:MOBILE_ANTICV_LIST} =true
+  RewriteRule ^/(easylist(?:china|czechslovak|dutch|germany|italy|lithuania|polish|portuguese|spanish)\+easylist)\.(.+) /$1+mobile-anti-cv.$2 [L]
+
+  RewriteCond %{ENV:MOBILE_ANTICV_LIST} =true
+  RewriteRule ^/((?:abpindo|abpvn|liste_ar\+liste_fr|liste_fr)\+easylist)\.(.+) /$1+mobile-anti-cv.$2 [L]
+
+  RewriteCond %{ENV:MOBILE_ANTICV_LIST} =true
+  RewriteRule ^/((?:bulgarian_|indian|israel|korean|latvian|ro|ruad)list\+easylist)\.(.+) /$1+mobile-anti-cv.$2 [L]
 
 # TODO: remove the probably obsolete application=safari setting after verifying
 default_filter_server_minimize_custom_apache_config: |
