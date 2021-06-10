@@ -25,7 +25,9 @@ eyeo_icinga_ssh_agent_custom_icinga_services:
   bandwidth:
     name: "bandwidth"
     service_definition: |
-      {{ lookup('template', 'roles/monitoring-plugins/files/icinga-services/bandwidth.conf') }}
+      {{ lookup('template', 'roles/monitoring-plugins/files/icinga-services/bandwidth.conf',
+                 template_vars=dict(monitoring_plugins_bandwidth_warning=icinga_ssh_agent_bandwidth_warning,
+                                    monitoring_plugins_bandwidth_critical=icinga_ssh_agent_bandwidth_critical) ) }}
     assign:
       - 'host.vars.ansible.os_family == "Debian"'
   connections:
