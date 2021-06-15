@@ -1,0 +1,53 @@
+# Copyright (c) 2021-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+aab_signing_group_name:
+  "signers"
+aab_signing_directory:
+  "/srv/{{ aab_signing_group_name }}/exampleproject"
+aab_signing_group_credentials_source:
+  "{{ aab_signing_directory }}/keystore.credentials"
+
+APK_KEYSTORE_NAME: "test_name"
+APK_KEY_ALIAS_NAME: "alias_test_name"
+APK_STOREPASS: "test_store_password"
+APK_KEYPASS: "test_key_password"
+
+aab_signing_users: &aab_signing_users
+  "signer1":
+  "signer2":
+
+# tasks/users.yml
+# https://yaml.org/type/merge.html
+aab_signing_custom_users__to_merge:
+  <<: *aab_signing_users
+  NonSigningUser:
+    comment: "Arbitrary user NOT allowed so sign packages"
+
+# https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
+vagrant_groups:
+  - "aab-signing-hosts"
+
+# https://www.vagrantup.com/intro/getting-started/networking.html
+vagrant_networks:
+  - private_network:
+      ip: "10.8.10.15"
+
+# https://www.vagrantup.com/docs/provisioning/ansible.html
+vagrant_playbooks:
+  - "provision-custom-systems.yml"
+  - "provision-aab-signing-hosts.yml"
