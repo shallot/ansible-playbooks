@@ -1,0 +1,56 @@
+#!/bin/sh -e
+# Copyright (c) 2021-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+SIGNER=`which jarsigner`
+CREDENTIALS_FILE="{{ aab_signing_group_credentials_source }}"
+
+test -r "$CREDENTIALS_FILE" || { echo "Credentials file $CREDENTIALS_FILE not readable" >&2; exit 1; }
+
+. $CREDENTIALS_FILE;
+
+test -n "$SIGNER" || { echo "Missing jarsigner" >&2; exit 1; }
+test -n "$APK_KEYSTORE_NAME" || { echo "Missing environment variable APK_KEYSTORE_NAME" >&2; exit 1; }
+test -n "$APK_KEY_ALIAS_NAME" || { echo "Missing environment variable APK_KEY_ALIAS_NAME" >&2; exit 1; }
+test -n "$APK_STOREPASS" || { echo "Missing environment variable APK_STOREPASS" >&2; exit 1; }
+test -n "$APK_KEYPASS" || { echo "Missing environment variable APK_KEYPASS" >&2; exit 1; }
+
+
+OUTPUT_FILE=`mktemp "/tmp/output.aab.XXXXXXXXXXX"`
+if [ -z "$OUTPUT_FILE" ]; then
+    echo "Temporary output file creation failed" >&2
+    exit 1
+fi
+
+INPUT_FILE=`mktemp "/tmp/input.aab.XXXXXXXXXXX"`
+if [ -z "$INPUT_FILE" ]; then
+    echo "Temporary input file creation failed" >&2
+    exit 1
+fi
+trap "rm $INPUT_FILE $OUTPUT_FILE" EXIT
+cat > "$INPUT_FILE"
+
+sudo "$SIGNER" \
+     -sigalg SHA256withRSA \
+     -digestalg SHA-256 \
+     -keystore "$APK_KEYSTORE_NAME" \
+     -storepass "$APK_STOREPASS" \
+     -signedjar "$OUTPUT_FILE" \
+     "$INPUT_FILE" \
+     "$APK_KEY_ALIAS_NAME" >&2
+
+cat "$OUTPUT_FILE"
+
+exit 0

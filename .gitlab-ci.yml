@@ -49,6 +49,11 @@ yamllint:
 include:
   local: ".vagrant-jobs.gitlab-ci.yml"
 
+aab-signing-0:
+  extends: ".vagrantjob"
+  variables:
+    TEST_HOST: "aab-signing-0.test"
+
 adblockplus-donate-server-0:
   extends: ".vagrantjob"
   variables:
