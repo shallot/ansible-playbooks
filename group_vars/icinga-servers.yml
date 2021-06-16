@@ -106,6 +106,10 @@ eyeo_icinga_server_custom_icinga_notifications:
       - "Recovery"
     assign:
       - "service.name == \"ping4\""
+      - "service.name == \"ssh\""
+      - "service.name == \"icinga\""
+      - "service.name == \"http_port\""
+      - "service.name == \"https_port\""
   mail-daily:
     command: "mail-service-notification"
     name: "mail-daily"
@@ -117,7 +121,17 @@ eyeo_icinga_server_custom_icinga_notifications:
       - "Warning"
       - "OK"
     assign:
+      - "service.name == \"ping6\""
+      - "service.name == \"load\""
       - "service.name == \"disk\""
+      - "service.name == \"raid\""
+      - "service.name == \"memory\""
+      - "service.name == \"swap\""
+      - "service.name == \"http_response_time\""
+      - "service.name == \"https_response_time\""
+      - "service.name == \"connections\""
+      - "service.name == \"users\""
+      - "service.name == \"bandwidth\""
   mail-weekly:
     command: "mail-service-notification"
     name: "mail-weekly"
@@ -130,5 +144,7 @@ eyeo_icinga_server_custom_icinga_notifications:
       - "Problem"
     assign:
       - "service.name == \"needrestart\""
+      - "service.name == \"processes\""
       - "service.name == \"zombie_procs\""
       - "service.name == \"ssl_cert\""
+      - "service.name == \"apt\""
