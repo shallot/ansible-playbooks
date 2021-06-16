@@ -139,8 +139,15 @@ icinga_server_custom_icinga_user_groups:
 icinga_server_custom_icinga_notifications:
   "{{ eyeo_icinga_server_custom_icinga_notifications }}"
 
+icinga_server_custom_icinga_app_config:
+  "{{ icinga_server_app_config }}"
+
 eyeo_icinga_server_custom_icinga_user_email:
   "root@example.com"
+
+icinga_host_vars:
+  ping_wrta: 20
+  ping_crta: 30
 
 # https://www.vagrantup.com/docs/vagrantfile/machine_settings.html
 vagrant_box:

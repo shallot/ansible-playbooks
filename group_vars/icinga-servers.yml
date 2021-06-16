@@ -30,18 +30,14 @@ eyeo_icinga_server_custom_icinga_services:
   http_response_time:
     name: "http-response-time"
     service_definition: |
-      {{ lookup('template', 'roles/monitoring-plugins/files/icinga-services/response_time.conf',
-         template_vars=dict(monitoring_plugins_response_time_warning=monitoring_plugins_http_response_time_warning,
-                            monitoring_plugins_response_time_critical=monitoring_plugins_http_response_time_critical) ) }}
+      {{ lookup('template', 'roles/monitoring-plugins/files/icinga-services/response_time.conf') }}
     assign:
       - "intersection({{ icinga_server_http_service_group | to_json }}, host.vars.ansible.groups)"
   https_response_time:
     name: "https_response_time"
     service_definition: |
       {{ lookup('template', 'roles/monitoring-plugins/files/icinga-services/response_time.conf',
-         template_vars=dict(monitoring_plugins_response_time_warning=monitoring_plugins_https_response_time_warning,
-                            monitoring_plugins_response_time_critical=monitoring_plugins_https_response_time_critical,
-                            monitoring_plugins_response_time_ssl=1) ) }}
+         template_vars=dict(monitoring_plugins_response_time_ssl=1) ) }}
     assign:
       - "intersection({{ icinga_server_https_service_group | to_json }}, host.vars.ansible.groups)"
   http_port:
