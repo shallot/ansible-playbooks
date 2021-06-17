@@ -30,6 +30,8 @@ eyeo_icinga_ssh_agent_custom_icinga_services:
                                     monitoring_plugins_bandwidth_critical=icinga_ssh_agent_bandwidth_critical) ) }}
     assign:
       - 'host.vars.ansible.os_family == "Debian"'
+    ignore:
+      - 'host.vars.no_service_bandwidth'
   connections:
     name: "connections"
     service_definition: |
