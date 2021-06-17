@@ -3,9 +3,9 @@
 //
 
 Unattended-Upgrade::Origins-Pattern {
-       "{{ unattended_upgrades_origins_pattern |
-           default("origin=Debian,codename=${distro_codename},label=Debian-Security")
-       }}";
+        "{{ unattended_upgrades_origins_pattern |
+            default("origin=Debian,codename=${distro_codename},label=Debian-Security")
+        }}";
 };
 
 Unattended-Upgrade::MinimalSteps "{{ unattended_upgrades_minimal_steps | default("true") }}";
