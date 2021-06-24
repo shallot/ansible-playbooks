@@ -31,9 +31,9 @@
 
 # https://docs.ansible.com/ansible/latest/modules/copy_module.html
 - name:
-    "copy : /etc/sudoers.d/{{ item.key }}"
+    "copy : /etc/sudoers.d/aab_signing_{{ item.key }}"
   copy:
-    dest: "/etc/sudoers.d/{{ item.key }}"
+    dest: "/etc/sudoers.d/aab_signing_{{ item.key }}"
     mode: "0440"
     content: |
       {{ item.key }} ALL=(ALL) NOPASSWD:/usr/bin/jarsigner
