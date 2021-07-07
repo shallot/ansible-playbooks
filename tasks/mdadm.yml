@@ -1,0 +1,48 @@
+# Copyright (c) 2021-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+# action_plugins/merge_variable.py
+- name:
+    "merge_variable : custom_mdadm_arrays"
+  merge_variable:
+    default: {}
+    name: "custom_mdadm_arrays"
+    suffix: "custom_mdadm_arrays__to_merge"
+
+# https://docs.ansible.com/ansible/2.9/modules/set_fact_module.html
+# https://linux.die.net/man/8/mdadm
+# https://docs.ansible.com/ansible/latest/user_guide/playbooks_filters.html#combining-hashes-dictionaries
+- name: "set_fact : mdadm_arrays_custom_shells__to_merge"
+  set_fact:
+    mdadm_arrays_custom_shells__to_merge:
+      "{{ mdadm_arrays_custom_shells__to_merge | default({})
+        | combine({
+            item.key: {
+              'cmd': 'sudo mdadm --create ' + item.value.name +
+                     ' --level=' + item.value.level | default('') +
+                     ' --raid-devices=' + item.value.device_count +
+                     ' --metadata=1' +
+                     ' ' + item.value.device_names | join(' '),
+              'creates': item.value.name
+            }
+          })
+        }}"
+  loop: "{{ custom_mdadm_arrays | dict2items }}"
+
+- include_tasks: "tasks/shells.yml"
+  vars:
+    custom_shells_prefix: "mdadm_arrays_custom_shells__to_merge"

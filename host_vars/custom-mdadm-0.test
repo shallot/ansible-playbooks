@@ -1,0 +1,59 @@
+# Copyright (c) 2021-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+# https://linux.die.net/man/8/losetup
+# https://linux.die.net/man/1/dd
+pre_seed_test_data_custom_shells__to_merge:
+  0_loop_devices:
+    cmd: |
+      for i in $(seq 1 4); do
+      test -s /tmp/file.$i ||
+      dd if=/dev/zero of=/tmp/file.$i bs=1M count=10;
+      sudo losetup /dev/loop$i ||
+      sudo losetup loop$i /tmp/file.$i;
+      done
+
+# tasks/mdadm.yml
+my_custom_mdadm_arrays__to_merge:
+  extra_disk_raid5:
+    name: "/dev/md/test5"
+    level: "5"
+    device_count: "2"
+    device_names:
+      - "/dev/loop1"
+      - "/dev/loop2"
+  extra_disk_raid10:
+    name: "/dev/md/test10"
+    level: "10"
+    device_count: "2"
+    device_names:
+      - "/dev/loop3"
+      - "/dev/loop4"
+
+# https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
+vagrant_groups:
+  - "mdadm-hosts"
+
+# https://www.vagrantup.com/intro/getting-started/networking.html
+vagrant_networks:
+  - private_network:
+      ip: "10.8.10.113"
+
+# https://www.vagrantup.com/docs/provisioning/ansible.html
+vagrant_playbooks:
+  - "provision-custom-systems.yml"
+  - "provision-mdadm-hosts.yml"
