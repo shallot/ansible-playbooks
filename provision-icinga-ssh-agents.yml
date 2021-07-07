@@ -33,6 +33,24 @@
 
   tasks:
 
+    # roles/openssh/server/defaults/main.yml
+    # action_plugins/merge_variable.py
+    - name:
+        "merge_variable : icinga_host_vars"
+      merge_variable:
+        default: {}
+        name: "icinga_host_vars"
+        suffix: "icinga_host_vars__to_merge"
+
+    # roles/openssh/server/defaults/main.yml
+    # action_plugins/merge_variable.py
+    - name:
+        "merge_variable : icinga_ssh_agent_notifications"
+      merge_variable:
+        default: {}
+        name: "icinga_ssh_agent_notifications"
+        suffix: "icinga_ssh_agent_notifications__to_merge"
+
     # https://docs.ansible.com/ansible/latest/import_role_module.html
     - import_role:
         name: "icinga/ssh-agent"
