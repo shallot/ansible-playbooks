@@ -41,7 +41,7 @@
   stage:
     "vagrant"
   retry:
-    max: 2
+    max: 1
     when:
       - "always"
   resource_group:
