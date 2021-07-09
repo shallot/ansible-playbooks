@@ -22,8 +22,8 @@
     append: true
     group: "{{ aab_signing_group_name | mandatory }}"
     name: "{{ item.key }}"
-  with_dict:
-    "{{ aab_signing_users | mandatory }}"
+  loop:
+    "{{ aab_signing_users | mandatory | dict2items }}"
   loop_control:
     label: "{{ item.key | to_json }}"
   become:
@@ -43,5 +43,5 @@
     true
   loop_control:
     label: "{{ item.key | to_json }}"
-  with_dict:
-    "{{ aab_signing_users | mandatory }}"
+  loop:
+    "{{ aab_signing_users | mandatory | dict2items }}"
