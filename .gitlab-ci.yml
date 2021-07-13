@@ -181,6 +181,11 @@ mattermost-server-0:
   variables:
     TEST_HOST: "mattermost-server-0.test"
 
+munin-0:
+  extends: ".vagrantjob"
+  variables:
+    TEST_HOST: "munin-0.test"
+
 munin-node-0:
   extends: ".vagrantjob"
   variables:

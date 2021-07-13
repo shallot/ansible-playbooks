@@ -1,0 +1,89 @@
+# Copyright (c) 2021-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+# provision-munin-node-hosts.yml
+munin_server_ip:
+  "127.0.0.1"
+munin_server_from_host_list:
+  - "{{ munin_server_ip }}"
+# TODO: test our own
+munin_server_ssh_key:
+  "ssh-ed25519 Example-ssh-key-of-a-Munin-server"
+munin_node_service_enabled:
+  true
+munin_async_service_enabled:
+  true
+
+# group_vars/munin-servers.yml
+munin_cgi_graph_jobs:
+  8
+
+munin_server_auth_settings: |
+  AuthType Basic
+  AuthBasicProvider file
+  AuthUserFile "/etc/munin.htpasswd.users"
+  AuthName "{{ inventory_hostname }}"
+  Require valid-user
+
+munin_cgi_graph_debug:
+  "true"
+
+munin_contact_email:
+  "root@example.com"
+
+# tasks/paths.yml
+munin_server_web_auth_custom_paths__to_merge:
+  /etc/munin.htpasswd.users:
+    state: "copy"
+    content: |
+      example:$apr1$cfj2a5Wx$pizg5eRI1rQLWFAuBrPq.0
+    mode: "0640"
+    group: "www-data"
+
+# roles/apache2/tasks/main.yml
+# provision-apache2-servers.yml
+munin_server_apache2_sites__to_merge:
+  munin:
+    configuration: |
+      <VirtualHost *:80>
+        ServerName {{ inventory_hostname }}
+
+        ErrorLog /var/log/apache2/munin-error.log
+        CustomLog /var/log/apache2/munin-access.log combined
+        #LogLevel alert rewrite:trace3
+
+        {{ munin_server_apache2_site_config | indent(2) }}
+
+      </VirtualHost>
+
+# https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
+vagrant_groups:
+  - "munin-servers"
+  - "munin-node-hosts"
+  - "apache2-servers"
+
+# https://www.vagrantup.com/intro/getting-started/networking.html
+vagrant_networks:
+  - private_network:
+      ip: "10.8.90.2"
+
+# https://www.vagrantup.com/docs/provisioning/ansible.html
+vagrant_playbooks:
+  - "provision-custom-systems.yml"
+  - "provision-munin-node-hosts.yml"
+  - "provision-munin-servers.yml"
+  - "provision-apache2-servers.yml"
