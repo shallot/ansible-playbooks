@@ -18,9 +18,16 @@
 # provision-munin-node-hosts.yml
 munin_server_ip:
   "127.0.0.1"
+munin_server_from_host_list:
+  - "{{ munin_server_ip }}"
+munin_server_ssh_key:
+  "ssh-ed25519 Example-ssh-key-of-a-Munin-server"
 custom_munin_node_configuration:
+  # NB: this is only if you want to avoid using munin-async
   cidr_allow: "{{ munin_server_ip }}/32"
 munin_node_service_enabled:
+  true
+munin_async_service_enabled:
   true
 
 # tasks/packages.yml

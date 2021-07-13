@@ -19,9 +19,54 @@
 munin_custom_packages__to_merge:
   munin-node: "present"
   munin-plugins-extra: "present"
+  munin-async: "present"
+  patch: "present"
+
+munin_server_from_rule:
+  "{{ munin_server_from_host_list | join(',') }}"
+
+# tasks/authorized-keys.yml
+munin_async_custom_authorized_keys__to_merge:
+  munin-async:
+    user: "munin-async"
+    key_options:
+      - 'from="{{ munin_server_from_rule }}"'
+      - 'command="/usr/share/munin/munin-async --spoolfetch"'
+      - "no-agent-forwarding"
+      - "no-port-forwarding"
+      - "no-pty"
+      - "no-X11-forwarding"
+      - "no-user-rc"
+    key: "{{ munin_server_ssh_key }}"
+
+# minrate reduce from default 300->60 to match munin update_rate 60
+# verbose so we see what's going on
+# interval/retain reduce from default 86400/7 -> 300/5 so that
+# we spend less disk space on nodes
+munin_asyncd_parameters:
+  "--verbose --minrate 60 --interval 300 --retain 5"
+
+# provision-munin-node-hosts.yml
+munin_async_systemd_munin_node_paths__to_merge:
+  /etc/systemd/system/munin-async.service.d:
+    state: "directory"
+  /etc/systemd/system/munin-async.service.d/override.conf:
+    state: "copy"
+    content: |
+      [Service]
+      ExecStart=
+      ExecStart=/usr/share/munin/munin-asyncd {{ munin_asyncd_parameters }}
+    mode: "0644"
+    notify:
+      - "systemd : daemon-reload"
+      - "service : munin-async"
 
 # provision-munin-node-hosts.yml
 munin_node_service_state:
   "{{ munin_node_service_enabled | ternary('started', 'stopped') }}"
 munin_node_service_strategy:
+  "restart"
+munin_async_service_state:
+  "{{ munin_async_service_enabled | ternary('started', 'stopped') }}"
+munin_async_service_strategy:
   "restart"

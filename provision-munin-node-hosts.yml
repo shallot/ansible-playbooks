@@ -42,9 +42,21 @@
 
     # https://docs.ansible.com/ansible/latest/import_tasks_module.html
     - import_tasks:
+        "tasks/authorized-keys.yml"
+
+    # https://docs.ansible.com/ansible/latest/import_tasks_module.html
+    - import_tasks:
         "tasks/munin-node.yml"
 
   handlers:
+
+    # https://docs.ansible.com/ansible/latest/modules/systemd_module.html
+    - name:
+        "systemd : daemon-reload"
+      systemd:
+        daemon_reload: true
+      become:
+        true
 
     # https://docs.ansible.com/ansible/latest/modules/service_module.html
     - name:
@@ -54,5 +66,16 @@
         state: "{{ munin_node_service_strategy | mandatory }}ed"
       when:
         - "munin_node_service_state != 'stopped'"
+      become:
+        true
+
+    # https://docs.ansible.com/ansible/latest/modules/service_module.html
+    - name:
+        "service : munin-async"
+      service:
+        name: "munin-async"
+        state: "{{ munin_async_service_strategy | mandatory }}ed"
+      when:
+        - "munin_async_service_state != 'stopped'"
       become:
         true

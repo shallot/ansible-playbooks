@@ -29,3 +29,25 @@
     "service : munin-node"
   become:
     true
+  when:
+    "custom_munin_node_configuration is defined"
+
+# NB: module not available by default
+# https://docs.ansible.com/ansible/latest/collections/community/general/dpkg_divert_module.html
+# - name:
+#     "dpkg-divert : /usr/share/munin/munin-asyncd"
+#   dpkg_divert:
+#     path: "/usr/share/munin/munin-asyncd"
+
+# TODO: fix actual upstream code to not have a hardcoded 5 minute default
+# https://github.com/munin-monitoring/munin/issues/1409
+# https://docs.ansible.com/ansible/latest/collections/ansible/posix/patch_module.html
+- name:
+    "patch : /usr/share/munin/munin-asyncd"
+  patch:
+    src: "files/munin-asyncd.plugin_update_rate.patch"
+    dest: "/usr/share/munin/munin-asyncd"
+  notify:
+    "service : munin-async"
+  become:
+    true
