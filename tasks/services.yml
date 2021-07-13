@@ -24,30 +24,65 @@
     suffix: "{{ custom_services_suffix
               | default('custom_services__to_merge') }}"
 
-# https://docs.ansible.com/ansible/latest/modules/ini_file_module.html
-# filter_plugins/ini_input_from_dict.py
-- name:
-    "service : ini_file"
-  ini_file:
-    dest: "{{ service_file_directory }}/{{ service_file_name }}"
-    group: "root"
-    mode: "0644"
-    option: "{{ item.option }}"
-    owner: "root"
-    section: "{{ item.section }}"
-    value: "{{ item.value }}"
+- block:
+
+    # https://docs.ansible.com/ansible/latest/modules/ini_file_module.html
+    # filter_plugins/ini_input_from_dict.py
+    - name:
+        "service : ini_file"
+      ini_file:
+        dest: "{{ service_file_directory }}/{{ service_file_name }}"
+        group: "root"
+        mode: "0644"
+        option: "{{ item.option }}"
+        owner: "root"
+        section: "{{ item.section }}"
+        value: "{{ item.value }}"
+      vars:
+        service_file_name:
+          "{{ item.config.name
+            | default(item.ini_file) }}.{{ item.config.type
+                                         | default('service') }}"
+      loop:
+        "{{ custom_services | ini_input_from_dict }}"
+      loop_control:
+        label: "{{ [service_file_name, item.section, item.option, item.config]
+                 | to_json }}"
+      register:
+        "custom_service"
+      become:
+        true
+      when:
+        "item.config is defined"
+
+    # https://docs.ansible.com/ansible/latest/modules/copy_module.html
+    - name:
+        "service : copy"
+      copy:
+        content: "{{ item.value.content }}"
+        dest: "{{ service_file_directory }}/{{ service_file_name }}"
+        group: "root"
+        mode: "0644"
+        owner: "root"
+      vars:
+        service_file_name:
+          "{{ item.value.name
+            | default(item.key) }}.{{ item.value.type
+                                    | default('service') }}"
+      loop:
+        "{{ custom_services | dict2items }}"
+      loop_control:
+        label: "{{ [service_file_name, item.value.content | default('')]
+                 | to_json }}"
+      register:
+        "custom_service"
+      when:
+        "item.value.content is defined"
+
   vars:
     service_file_directory:
       "{{ custom_systemd_service_location
         | default('/etc/systemd/system') }}"
-    service_file_name:
-      "{{ item.ini_file }}.service"
-  loop:
-    "{{ custom_services | ini_input_from_dict }}"
-  loop_control:
-    label: "{{ [service_file_name, item.section, item.option] | to_json }}"
-  register:
-    "custom_service"
   become:
     true
 
@@ -74,7 +109,9 @@
     label: "{{ [service_name, service_enabled, service_state] | to_json }}"
   vars:
     service_enabled: "{{ item.value.enabled | default(true) }}"
-    service_name: "{{ item.value.name | default(item.key) }}.service"
+    service_name: "{{ item.value.name
+                    | default(item.key) }}.{{ item.value.type
+                                            | default('service') }}"
     service_state: "{{ item.value.state | default('started') }}"
   become:
     true

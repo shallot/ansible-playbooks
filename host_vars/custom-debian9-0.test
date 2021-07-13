@@ -55,6 +55,7 @@ host_specific_custom_services__to_merge:
   example_disabled_service:
     enabled: false
     state: "stopped"
+    name: "disabled_service_example"
     service:
       Unit:
         Description: "Example disabled service"
@@ -81,6 +82,17 @@ host_specific_custom_services__to_merge:
         LimitNOFILE: "49152"
       Install:
         WantedBy: "multi-user.target"
+  example_disabled_raw_service:
+    enabled: false
+    state: "stopped"
+    content: |
+      [Unit]
+      Description=Another example disabled service
+      [Service]
+      Type=oneshot
+      ExecStart=/bin/false
+      [Install]
+      WantedBy=multi-user.target
 
 # provision-custom-systems.yml
 host_specific_sshd_config__to_merge:
