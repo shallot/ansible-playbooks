@@ -1,0 +1,66 @@
+# Copyright (c) 2021-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+# action_plugins/merge_variable.py
+- name:
+    "merge_variable : git_checkouts"
+  merge_variable:
+    default: {}
+    name: "git_checkouts"
+    suffix: "{{ git_checkouts
+              | default('git_checkouts__to_merge') }}"
+
+# https://docs.ansible.com/ansible/latest/collections/ansible/builtin/git_module.html
+- name:
+    "git_checkout"
+  git:
+    repo: "{{ git_vars.value.repo }}"
+    dest: "{{ git_vars.value.dest }}"
+    accept_hostkey: "{{ git_vars.value.accept_hostkey | default(omit) }}"
+    archive: "{{ git_vars.value.archive | default(omit) }}"
+    # archive_prefix is available in ansible 2.10 (so will fail unless omited)
+    archive_prefix: "{{ git_vars.value.archive_prefix | default(omit) }}"
+    bare: "{{ git_vars.value.bare | default(false) }}"
+    clone: "{{ git_vars.value.clone | default(true) }}"
+    depth: "{{ git_vars.value.depth | default(omit) }}"
+    executable: "{{ git_vars.value.executable | default(omit) }}"
+    force: "{{ git_vars.value.force | default(omit) }}"
+    gpg_whitelist: "{{ git_vars.value.gpg_whitelist | default(omit) }}"
+    key_file: "{{ git_vars.value.key_file | default(omit) }}"
+    recursive: "{{ git_vars.value.recursive | default(true) }}"
+    reference: "{{ git_vars.value.reference | default(omit) }}"
+    refspec: "{{ git_vars.value.refspec | default(omit) }}"
+    remote: "{{ git_vars.value.remote | default(omit) }}"
+    separate_git_dir: "{{ git_vars.value.separate_git_dir | default(omit) }}"
+    # single_branch is available in ansible 2.11 (so will fail unless omited)
+    single_branch: "{{ git_vars.value.single_branch | default(omit) }}"
+    ssh_opts: "{{ git_vars.value.ssh_opts | default(omit) }}"
+    track_submodules: "{{ git_vars.value.track_submodules | default(false) }}"
+    umask: "{{ git_vars.value.umask | default(omit) }}"
+    # update's default is yes, but will harm idempotence if set
+    # loop variable name has been changed as update is a python reserved word
+    update: "{{ git_vars.value.to_update | default(false) }}"
+    verify_commit: "{{ git_vars.value.verify_commit | default(false) }}"
+    version: "{{ git_vars.value.version| default(omit) }}"
+  become:
+    true
+  become_user:
+    "{{ git_vars.value.user | default(omit) }}"
+  loop:
+    "{{ git_checkouts | dict2items }}"
+  loop_control:
+    loop_var: "git_vars"

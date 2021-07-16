@@ -137,6 +137,15 @@ host_specific_custom_cron_jobs__to_merge:
     user: "root"
     state: "present"
 
+# tasks/git.yml
+host_specific_git_checkouts__to_merge:
+  ansible-playbook:
+    repo: "https://gitlab.com/eyeo/devops/ansible-playbooks.git"
+    dest: "/tmp/ansible-playbooks"
+    user: "example2"
+    to_update: "true"
+    force: "true"
+
 # https://www.vagrantup.com/docs/vagrantfile/machine_settings.html
 vagrant_box:
   "debian/bullseye64"
@@ -145,6 +154,7 @@ vagrant_box:
 vagrant_groups:
   - "examples.test"
   - "unattended-upgrades"
+  - "git-hosts"
 
 # https://www.vagrantup.com/intro/getting-started/networking.html
 vagrant_networks:
@@ -157,4 +167,5 @@ vagrant_playbooks:
   - "provision-unattended-upgrades.yml"
   - "provision-ssh-keys.yml"
   - "provision-authorized-keys.yml"
+  - "provision-git-hosts.yml"
   - "provision-cron-jobs.yml"
