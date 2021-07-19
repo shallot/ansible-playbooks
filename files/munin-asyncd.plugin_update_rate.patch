@@ -1,11 +1,11 @@
 --- /usr/share/munin/munin-asyncd~	2021-07-12 13:55:48.000000000 +0000
-+++ /usr/share/munin/munin-asyncd	2021-07-12 13:58:53.354922717 +0000
++++ /usr/share/munin/munin-asyncd	2021-07-19 12:22:00.000000000 +0000
 @@ -164,7 +164,7 @@
  	my $sock;
  	PLUGIN: foreach my $plugin (@plugins) {
  		# See if this plugin should be updated
 -		my $plugin_rate = $spoolwriter->get_metadata("plugin_rates/$plugin") || 300;
-+		my $plugin_rate = $spoolwriter->get_metadata("plugin_rates/$plugin") || 60;
++		my $plugin_rate = $spoolwriter->get_metadata("plugin_rates/$plugin") || $minrate;
  		if ($when < ($last_updated{$plugin} || 0) + $plugin_rate) {
  			# not yet, next plugin
- 			print STDERR "[$$][$process_name][$plugin] not yet, next plugin\n" if $verbose;
+ 			next;
