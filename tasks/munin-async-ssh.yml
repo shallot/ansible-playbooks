@@ -1,0 +1,50 @@
+# Copyright (c) 2021-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+- block:
+    # https://docs.ansible.com/ansible/latest/collections/ansible/builtin/slurp_module.html
+    - name:
+        "slurp : munin server public key"
+      slurp:
+        src: "{{ munin_server_ssh_key_path }}.pub"
+      delegate_to:
+        "{{ item.name }}"
+      become:
+        true
+      become_user:
+        "munin"
+      register:
+        "munin_server_public_key_list"
+      loop:
+        "{{ munin_servers }}"
+      when:
+        "item.ssh_key_path is defined"
+
+    # https://docs.ansible.com/ansible/latest/modules/set_fact_module.html
+    - name:
+        "set_fact : munin_server_ssh_key"
+      set_fact:
+        munin_server_ssh_key: |
+          {{ munin_server_ssh_key | default('') }}
+          {{ item['content'] | b64decode | trim }} {{ item['item'] }}
+      loop:
+        "{{ munin_server_public_key_list['results'] | default([]) }}"
+      when:
+        "item.skipped is not defined"
+
+  when:
+    "munin_servers is defined"

@@ -18,8 +18,11 @@
 # provision-munin-node-hosts.yml
 munin_server_ip:
   "127.0.0.1"
+munin_servers:
+  - name: "munin-0.test"
+    ip: "{{ munin_server_ip }}"
 munin_server_from_host_list:
-  - "{{ munin_server_ip }}"
+  "{{ munin_servers | map(attribute='ip') | flatten }}"
 munin_server_ssh_key:
   "ssh-ed25519 Example-ssh-key-of-a-Munin-server"
 custom_munin_node_configuration:

@@ -29,11 +29,14 @@ munin_server_ssh_keys_dirs_custom_paths__to_merge:
     group: "munin"
     mode: "0700"
 
+munin_server_ssh_key_path:
+  "/var/lib/munin/.ssh/id_ed25519"
+
 # tasks/ssh-keys.yml
 munin_server_custom_ssh_keys__to_merge:
   # NB: this is later copied into group_vars/munin-node-hosts.yml
   default:
-    dest: "/var/lib/munin/.ssh/id_ed25519"
+    dest: "{{ munin_server_ssh_key_path }}"
     type: "ed25519"
     size: 521
     owner: "munin"

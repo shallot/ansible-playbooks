@@ -42,6 +42,10 @@
 
     # https://docs.ansible.com/ansible/latest/import_tasks_module.html
     - import_tasks:
+        "tasks/munin-async-ssh.yml"
+
+    # https://docs.ansible.com/ansible/latest/import_tasks_module.html
+    - import_tasks:
         "tasks/authorized-keys.yml"
 
     # https://docs.ansible.com/ansible/latest/import_tasks_module.html

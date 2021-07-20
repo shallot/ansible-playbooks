@@ -16,13 +16,16 @@
 ---
 
 # provision-munin-node-hosts.yml
-munin_server_ip:
-  "127.0.0.1"
+munin_servers:
+  - name: "munin-0.test"
+    ip: "10.8.90.2"
+    ssh_key_path: "{{ munin_server_ssh_key_path }}"
 munin_server_from_host_list:
-  - "{{ munin_server_ip }}"
-# TODO: test our own
+  "{{ munin_servers | map(attribute='ip') | flatten }}"
+
 munin_server_ssh_key:
-  "ssh-ed25519 Example-ssh-key-of-a-Munin-server"
+  "" # automatically filled from munin_servers with ssh_key_path
+
 munin_node_service_enabled:
   true
 munin_async_service_enabled:
@@ -84,6 +87,6 @@ vagrant_networks:
 # https://www.vagrantup.com/docs/provisioning/ansible.html
 vagrant_playbooks:
   - "provision-custom-systems.yml"
-  - "provision-munin-node-hosts.yml"
   - "provision-munin-servers.yml"
+  - "provision-munin-node-hosts.yml"
   - "provision-apache2-servers.yml"
