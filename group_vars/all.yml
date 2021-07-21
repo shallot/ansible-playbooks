@@ -16,9 +16,7 @@
 ---
 
 aa_default_custom_packages__to_merge:
-  bash: "present"
   sudo: "present"
-  vim: "present"
 
 aa_default_sshd_config__to_merge:
   AllowAgentForwarding: "no"
