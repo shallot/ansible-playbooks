@@ -34,6 +34,8 @@ munin_async_service_enabled:
 # group_vars/munin-servers.yml
 munin_cgi_graph_jobs:
   8
+munin_max_processes:
+  16
 
 munin_server_auth_settings: |
   AuthType Basic

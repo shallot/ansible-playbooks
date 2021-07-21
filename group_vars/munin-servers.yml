@@ -60,6 +60,7 @@ munin_server_config_custom_paths__to_merge:
     content: |
       graph_strategy cgi
       munin_cgi_graph_jobs {{ munin_cgi_graph_jobs }}
+      max_processes {{ munin_max_processes }}
       update_rate 60 # seconds
       graph_data_size custom 1d, 5m for 1w, 15m for 1y, 1h for 5y
       contact.email.command mail -s "${var:group}/${var:host} ${var:graph_title}" {{ munin_contact_email }}
