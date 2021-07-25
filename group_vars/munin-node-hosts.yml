@@ -46,6 +46,37 @@ munin_async_custom_authorized_keys__to_merge:
 munin_asyncd_parameters:
   "--verbose --minrate 60 --interval 300 --retain 5"
 
+munin_asyncd_plugin_update_rate_patches:
+  jessie: &munin_asyncd_pre_bullseye_patch # 2.0.25
+    "files/munin-asyncd.plugin_update_rate.patch"
+  stretch: # 2.0.33
+    *munin_asyncd_pre_bullseye_patch
+  bionic: # 2.0.37
+    *munin_asyncd_pre_bullseye_patch
+  stretch-backports: # 2.0.49
+    *munin_asyncd_pre_bullseye_patch
+  buster: # 2.0.49
+    *munin_asyncd_pre_bullseye_patch
+  focal: # 2.0.56
+    *munin_asyncd_pre_bullseye_patch
+  buster-backports: &munin_asyncd_bullseye_patch # 2.0.67
+    "files/munin-asyncd.plugin_update_rate.2.0.67.patch"
+  bullseye: # 2.0.67
+    *munin_asyncd_bullseye_patch
+
+# yamllint disable rule:line-length
+debian_family_backports_selector:
+  "{{ ansible_distribution_release +
+      (apt_enable_debian_backports is defined and
+       apt_enable_debian_backports == 'true' and
+       munin_asyncd_plugin_update_rate_patches[ansible_distribution_release + '-backports'] is defined)
+      | ternary('-backports', '')
+    }}"
+
+munin_asyncd_plugin_update_rate_patch:
+  "{{ munin_asyncd_plugin_update_rate_patches[debian_family_backports_selector] }}"
+# yamllint enable rule:line-length
+
 # provision-munin-node-hosts.yml
 munin_async_systemd_munin_node_paths__to_merge:
   /etc/systemd/system/munin-async.service.d:

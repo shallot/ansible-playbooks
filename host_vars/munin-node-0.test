@@ -48,6 +48,10 @@ test_munin_node_paths__to_merge:
       - "service : munin-node"
       - "service : munin-async"
 
+# https://www.vagrantup.com/docs/vagrantfile/machine_settings.html
+vagrant_box:
+  "debian/bullseye64"
+
 # https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
 vagrant_groups:
   - "munin-node-hosts"

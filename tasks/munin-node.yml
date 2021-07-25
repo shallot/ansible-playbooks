@@ -43,11 +43,13 @@
 # https://github.com/munin-monitoring/munin/issues/1409
 # https://docs.ansible.com/ansible/latest/collections/ansible/posix/patch_module.html
 - name:
-    "patch : /usr/share/munin/munin-asyncd"
+    "patch : {{ munin_asyncd_plugin_update_rate_patch | default('') }}"
   patch:
-    src: "files/munin-asyncd.plugin_update_rate.patch"
+    src: "{{ munin_asyncd_plugin_update_rate_patch }}"
     dest: "/usr/share/munin/munin-asyncd"
   notify:
     "service : munin-async"
   become:
     true
+  when:
+    "munin_asyncd_plugin_update_rate_patch | default('') | length > 0"
