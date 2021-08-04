@@ -51,6 +51,8 @@ filter_server_custom_cron_jobs__to_merge:
 filter_server_apache2_modules__to_merge:
   rewrite: &apache2_standard_module
     package: false
+  headers:
+    *apache2_standard_module
   geoip: &apache2_nonstandard_module
     package: true
 
@@ -67,6 +69,9 @@ filter_server_custom_apache_config: |
 
   {{ filter_server_prerequisite_custom_apache_config
    | default(default_filter_server_prerequisite_custom_apache_config) }}
+
+  {{ filter_server_skip_mod_deflate_config
+   | default(default_filter_server_skip_mod_deflate_config) }}
 
   {{ filter_server_elem_hide_custom_apache_config
    | default(default_filter_server_elem_hide_custom_apache_config) }}
@@ -116,6 +121,28 @@ default_filter_server_elem_hide_custom_apache_config: |
   #RewriteRule ^ - [E=REDIRECT:ELEM_HIDE]
   RewriteCond %{ENV:NO_ELEM_HIDE} =true
   RewriteRule "^/easylistgermany\+easylist\.(.+)" /easylistgermany_noelemhide+easylist_noelemhide.$1 [R=302,L]
+
+# This replicates legacy/infrastructure's modules/filterserver/files/site.conf
+# gzip_static setting and is based on the example from:
+# https://httpd.apache.org/docs/2.4/mod/mod_deflate.html#precompressed
+default_filter_server_skip_mod_deflate_config: |
+  # Serve gzip compressed files if they exist and the client accepts gzip.
+  RewriteCond "%{HTTP:Accept-encoding}" "gzip"
+  RewriteCond "%{DOCUMENT_ROOT}%{REQUEST_FILENAME}\.gz" -s
+  RewriteRule "^(.*)\.(json|tpl|txt)$" "$1\.$2\.gz" [QSA]
+
+  # Serve correct content types, and prevent mod_deflate double gzip.
+  RewriteRule "\.json\.gz$" "-" [T=application/json,E=no-gzip:1]
+  RewriteRule "\.tpl\.gz$" "-" [T=text/plain,E=no-gzip:1]
+  RewriteRule "\.txt\.gz$" "-" [T=text/plain,E=no-gzip:1]
+
+  <FilesMatch "(\.json\.gz|\.tpl\.gz|\.txt\.gz)$">
+    # Serve correct encoding type.
+    Header append Content-Encoding gzip
+    # Force proxies to cache gzipped &
+    # non-gzipped css/js files separately.
+    Header append Vary Accept-Encoding
+  </FilesMatch>
 
 default_filter_server_mobile_anticv_custom_apache_config: |
   RewriteCond %{QUERY_STRING} (?:^|&)application=org\.adblockplus\.browser(?:\.beta)?
