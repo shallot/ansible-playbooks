@@ -1,0 +1,71 @@
+# Copyright (c) 2021-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+# tasks/shells.yml
+pre_seed_test_data_custom_shells__to_merge:
+  0_loop_devices:
+    cmd: |
+      for i in $(seq 1 4); do
+      test -s /tmp/file.$i ||
+      dd if=/dev/zero of=/tmp/file.$i bs=1M count=10;
+      sudo losetup /dev/loop$i ||
+      sudo losetup loop$i /tmp/file.$i;
+      done
+
+# tasks/disk.yml
+custom_disk_volume_groups:
+  1_vg1:
+    name: "vg01"
+    pv:
+      - "/dev/loop1"
+      - "/dev/loop2"
+  1_vg2:
+    name: "vg02"
+    pv:
+      - "/dev/loop3"
+      - "/dev/loop4"
+
+# tasks/disk.yml
+custom_disk_logical_volumes:
+  2_lv1:
+    name: "lv1"
+    extents: "1"
+    vg: "vg01"
+    mountpoint: "/opt/lv1"
+    filesystem: "{{ custom_disk_filesystem }}"
+  2_lv2:
+    name: "lv2"
+    extents: "1"
+    vg: "vg02"
+
+# tasks/disk.yml
+custom_disk_filesystem:
+  "ext4"
+
+# https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
+vagrant_groups:
+  - "custom-disk-hosts"
+
+# https://www.vagrantup.com/intro/getting-started/networking.html
+vagrant_networks:
+  - private_network:
+      ip: "10.8.17.26"
+
+# https://www.vagrantup.com/docs/provisioning/ansible.html
+vagrant_playbooks:
+  - "provision-custom-systems.yml"
+  - "provision-custom-disk-hosts.yml"

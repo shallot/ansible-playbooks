@@ -1,0 +1,111 @@
+# Copyright (c) 2021-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+# https://docs.ansible.com/ansible/2.9/modules/set_fact_module.html
+# https://linux.die.net/man/8/vgcreate
+# https://docs.ansible.com/ansible/latest/user_guide/playbooks_filters.html#combining-hashes-dictionaries
+- name:
+    "set_fact : custom_disk_custom_shells__to_merge"
+  set_fact:
+    custom_disk_custom_shells__to_merge:
+      "{{ custom_disk_custom_shells__to_merge | default({})
+        | combine({
+            item.key: {
+              'cmd': cmd_string,
+              'creates': creates_string
+            }
+          })
+        }}"
+  loop:
+    "{{ custom_disk_volume_groups | dict2items }}"
+  vars:
+    cmd_string:
+      "sudo vgcreate {{ item.value.name }} {{ item.value.pv | join(' ') }}"
+    creates_string:
+      "/etc/lvm/backup/{{ item.value.name }}"
+
+# https://docs.ansible.com/ansible/2.9/modules/set_fact_module.html
+# https://linux.die.net/man/8/lvcreate
+# https://docs.ansible.com/ansible/latest/user_guide/playbooks_filters.html#combining-hashes-dictionaries
+- name:
+    "set_fact : custom_disk_custom_shells__to_merge"
+  set_fact:
+    custom_disk_custom_shells__to_merge:
+      "{{ custom_disk_custom_shells__to_merge
+        | combine({
+            item.key: {
+              'cmd': cmd_string,
+              'creates': creates_string
+            }
+          })
+        }}"
+  loop:
+    "{{ custom_disk_logical_volumes | dict2items }}"
+  vars:
+    cmd_string:
+      "{{ lv_create }}{{ (item.value.filesystem is defined)
+                       | ternary(' && ' + filesystem_create, none) }}"
+    creates_string:
+      "/dev/{{ item.value.vg }}/{{ item.value.name }}"
+    lv_create:
+      "sudo lvcreate -n {{ item.value.name }} -l {{ item.value.extents }}
+       {{ item.value.vg }}"
+    filesystem_create:
+      "sudo mkfs.{{ item.value.filesystem | default('') }}
+       /dev/{{ item.value.vg }}/{{ item.value.name }}"
+  when:
+    "custom_disk_logical_volumes is defined"
+
+# https://docs.ansible.com/ansible/2.9/modules/set_fact_module.html
+# https://man7.org/linux/man-pages/man8/mount.8.html
+# https://docs.ansible.com/ansible/latest/user_guide/playbooks_filters.html#combining-hashes-dictionaries
+- name:
+    "set_fact : custom_disk_custom_shells__to_merge"
+  set_fact:
+    custom_disk_custom_shells__to_merge:
+      "{{ custom_disk_custom_shells__to_merge
+        | combine({
+            item.value.name: {
+              'cmd': cmd_string,
+              'creates': item.value.mountpoint
+            }
+          })
+        }}"
+  loop:
+    "{{ custom_disk_logical_volumes | dict2items }}"
+  vars:
+    cmd_string:
+      "{{ mountpoint_mkdir }} &&
+       {{ record_mountpoint_fstab }} &&
+       {{ mount }}"
+    mountpoint_mkdir:
+      "sudo mkdir {{ item.value.mountpoint }}"
+    record_mountpoint_fstab:
+      "echo /dev/{{ item.value.vg }}/{{ item.value.name }}
+       {{ item.value.mountpoint }} {{ item.value.filesystem }} defaults 0 2 |
+       sudo tee -a /etc/fstab"
+    mount:
+      "sudo mount {{ item.value.mountpoint }}"
+  when:
+    "item.value.mountpoint is defined and item.value.filesystem is defined"
+
+# https://docs.ansible.com/ansible/latest/include_tasks_module.html
+- include_tasks:
+    "tasks/shells.yml"
+  vars:
+    custom_shells_prefix:
+      "custom_disk_custom_shells__to_merge"

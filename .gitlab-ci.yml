@@ -127,6 +127,11 @@ custom-debian11-0:
   variables:
     TEST_HOST: "custom-debian11-0.test"
 
+custom-disk-0:
+  extends: ".vagrantjob"
+  variables:
+    TEST_HOST: "custom-disk-0.test"
+
 custom-paths-0:
   extends: ".vagrantjob"
   variables:
