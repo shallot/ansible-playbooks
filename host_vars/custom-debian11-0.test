@@ -50,6 +50,28 @@ host_specific_custom_users__to_merge:
     authorized_keys: "nokey"
     state: "absent"
 
+# tasks/ini_files.yml
+host_custom_ini_files__to_merge:
+  section.option:
+    path: "/tmp/example.ini"
+    value: "lets_say_it_is_false"
+  foo.bar:
+    option: "baz" # see which value takes precedence
+    path: "/tmp/example.ini"
+    value: "lets_say_it_is_true"
+    no_extra_spaces: true
+  example2:
+    section: "foo"
+    option: "bar"
+    path: "/tmp/config.ini"
+    value: "lets_say_it_is_true" # change it before second run to test backup
+    backup: true
+  absentExample:
+    state: "absent"
+    path: "/tmp/example.ini"
+    section: "foo"
+    option: "bar" # make sure this option exists within the right section
+
 # tasks/services.yml
 host_specific_custom_services__to_merge:
   example_disabled_service:
@@ -169,3 +191,4 @@ vagrant_playbooks:
   - "provision-authorized-keys.yml"
   - "provision-git-hosts.yml"
   - "provision-cron-jobs.yml"
+  - "provision-custom-ini-files.yml"

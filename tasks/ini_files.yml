@@ -1,0 +1,49 @@
+# Copyright (c) 2021-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+# action_plugins/merge_variable.py
+- name:
+    "merge_variable : custom_ini_files"
+  merge_variable:
+    default: {}
+    name: "custom_ini_files"
+    suffix: "{{ custom_ini_files_suffix
+              | default('custom_ini_files__to_merge') }}"
+
+# https://docs.ansible.com/ansible/latest/modules/ini_file_module.html
+- ini_file:
+    attributes: "{{ item.value.attributes | default(omit) }}"
+    backup: "{{ item.value.backup | default(omit) }}"
+    create: "{{ item.value.create | default(omit) }}"
+    group: "{{ item.value.group | default(omit) }}"
+    mode: "{{ item.value.mode | default(omit) }}"
+    no_extra_spaces: "{{ item.value.no_extra_spaces | default(omit) }}"
+    option: "{{ item.value.option | default((item.key | splitext)[1][1:]) }}"
+    others: "{{ item.value.others | default(omit) }}"
+    owner: "{{ item.value.owner | default(omit) }}"
+    path: "{{ item.value.path | mandatory }}"
+    section: "{{ item.value.section | default((item.key | splitext)[0]) }}"
+    state: "{{ item.value.state | default('present') }}"
+    unsafe_writes: "{{ item.value.unsafe_writes | default(omit) }}"
+    value: "{{ (item.value.value | mandatory) if (item.value.state
+             | default('present') == 'present') else (omit) }}"
+  loop:
+    "{{ custom_ini_files | dict2items }}"
+  loop_control:
+    label: "{{ [item.key, item.value] | to_json }}"
+  become:
+    true
