@@ -80,11 +80,20 @@ eyeo_icinga_server_custom_icinga_users:
     email: "{{ eyeo_icinga_server_custom_icinga_user_email }}"
     groups:
       - "noc"
+  data:
+    import:
+      - "generic-user"
+    display_name: "Data Engineering"
+    email: "{{ data_icinga_server_custom_icinga_user_email }}"
+    groups:
+      - "data"
 
 # provision-icinga-servers.yml
 eyeo_icinga_server_custom_icinga_user_groups:
   noc:
     display_name: "eyeo NOC"
+  data:
+    display_name: "Data Engineering"
 
 # provision-icinga-servers.yml
 eyeo_icinga_server_custom_icinga_notifications:
