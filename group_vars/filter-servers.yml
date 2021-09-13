@@ -200,4 +200,10 @@ default_filter_server_compliance_custom_apache_config: |
   RewriteCond %{ENV:GEOIP_COUNTRY_CODE_V6} ^DE$
   RewriteRule ^/abp\-filters\-anti\-cv\.txt /abp-filters-ger.txt [R=302,L]
 
+  RewriteCond %{ENV:GEOIP_COUNTRY_CODE} ^PL$ [OR]
+  RewriteCond %{ENV:GEOIP_COUNTRY_CODE_V6} ^PL$ [OR]
+  RewriteCond %{ENV:GEOIP_COUNTRY_CODE} ^ZA$ [OR]
+  RewriteCond %{ENV:GEOIP_COUNTRY_CODE_V6} ^ZA$
+  RewriteRule ^/abp\-filters\-anti\-cv\.txt /abp-filters-graph.txt [R=302,L]
+
 # yamllint enable rule:line-length
