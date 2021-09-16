@@ -33,7 +33,9 @@
     follow: "{{ authorized_key.value.follow | default(omit) }}"
     key: "{{ authorized_key.value.key | mandatory }}"
     key_options:
-      "{{ authorized_key.value.key_options | default('') | join(',') }}"
+      "{{ authorized_key.value.key_options | default('') | join(',')
+        | default(omit, true)
+      }}"
     manage_dir: "{{ authorized_key.value.manage_dir | default(omit) }}"
     path: "{{ authorized_key.value.path | default(omit) }}"
     state: "{{ authorized_key.value.state | default(omit) }}"
