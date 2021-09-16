@@ -20,12 +20,16 @@
 # provision-libvirt-hosts.yml
 libvirt_guests_volume_group: "vg0"
 libvirt_guests_bridge: "br0"
+libvirt_guests_authorized_keys:
+  "ssh-rsa This-is-an-example-SSH-key Comment-indicating-key-origin"
 libvirt_guests_debootstrap_packages:
   - "linux-image-amd64"
   - "less"
   - "openssh-server"
   - "acpid"
   - "acpi-support-base"
+  - "python3-minimal"
+  - "libpython3-stdlib"
 libvirt_guests:
   "guest1":
     hostname: "guest1a"
@@ -35,6 +39,12 @@ libvirt_guests:
     vcpus: 4
     ram: "16G"
     os_variant: "debian9"
+    ifupdown:
+      name: "eth0"
+      configuration: |
+        example eth0 interface configuration
+    autostart: false
+    start: false
   "guest2":
     name: "guest2-fancy-name"
     logical_volume_size: "20G"
@@ -49,6 +59,15 @@ libvirt_guests:
     vcpus: 4
     ram: "16G"
     os_variant: "debian10"
+    mac: "00:11:22:aa:bb:cc"
+    ifupdown:
+      name: "eth0"
+      configuration: |
+        example eth0 interface configuration
+    autostart: true
+    start: false
+    firstboot_commands:
+      - "systemctl enable acpid --now"
 
 # https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
 vagrant_groups:
