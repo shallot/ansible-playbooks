@@ -163,7 +163,7 @@ default_filter_server_mobile_anticv_custom_apache_config: |
 # TODO: remove the probably obsolete application=safari setting after verifying
 default_filter_server_minimize_custom_apache_config: |
   RewriteCond %{QUERY_STRING} (?:^|&)application=safari [OR]
-  RewriteCond %{QUERY_STRING} (?:^|&)addonName=(?:abp\.for\.uc|adblockplussafari|libadblockplus(?:-android)?)
+  RewriteCond %{QUERY_STRING} (?:^|&)addonName=(?:abp\.for\.uc|adblockplussafari|libadblockplus(?:-android)?|aaonly)
   RewriteRule ^ - [E=MIN_LIST:true]
 
   RewriteCond %{ENV:MIN_LIST} =true
