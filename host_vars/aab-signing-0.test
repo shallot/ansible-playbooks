@@ -27,6 +27,20 @@ APK_KEY_ALIAS_NAME: "alias_test_name"
 APK_STOREPASS: "test_store_password"
 APK_KEYPASS: "test_key_password"
 
+aab_signing_custom_authorized_keys__to_merge:
+  signer1:
+    user: "signer1"
+    key: |
+      ssh-rsa This-is-just-an-example-authorized-key
+    key_options:
+      - command="/usr/local/bin/aab_signer"
+  signer2:
+    user: "signer2"
+    key: |
+      ssh-rsa This-is-just-an-example-authorized-key
+    key_options:
+      - command="/usr/local/bin/aab_signer"
+
 aab_signing_users: &aab_signing_users
   "signer1":
   "signer2":
