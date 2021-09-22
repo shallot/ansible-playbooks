@@ -29,7 +29,13 @@ APK_KEYPASS: "test_key_password"
 
 apk_signing_users: &apk_signing_users
   "signer1":
+    authorized_keys: >
+      command="/usr/local/bin/apk_signer"
+      ssh-rsa This-is-just-an-example-authorized-key
   "signer2":
+    authorized_keys: >
+      command="/usr/local/bin/apk_signer"
+      ssh-rsa This-is-just-an-example-authorized-key
 
 # tasks/users.yml
 # https://yaml.org/type/merge.html
