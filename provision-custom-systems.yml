@@ -26,6 +26,8 @@
 
     # https://docs.ansible.com/ansible/latest/import_tasks_module.html
     - import_tasks:
+        "tasks/hosts.yml"
+    - import_tasks:
         "tasks/common.yml"
     - import_tasks:
         "tasks/groups.yml"
