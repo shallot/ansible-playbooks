@@ -15,6 +15,29 @@
 
 ---
 
+# https://docs.ansible.com/ansible/latest/collections/ansible/builtin/lineinfile_module.html
+- name:
+    "apt : stable keyword check"
+  lineinfile:
+    path: "/etc/apt/sources.list"
+    regexp: "^deb(-src)?.* stable.*$"
+    state: "absent"
+  check_mode:
+    true
+  changed_when:
+    false
+  register:
+    "apt_sources_list"
+
+# https://docs.ansible.com/ansible/latest/modules/fail_module.html
+- fail:
+    msg: >-
+      Found {{ apt_sources_list.found }} occurences of the 'stable' keyword
+      in apt sources.list files. Replace this with the distribution codename
+      and try again.
+  when:
+    "apt_sources_list.found"
+
 # action_plugins/merge_variable.py
 # https://docs.ansible.com/ansible/latest/modules/apt_key_module.html
 - name:
