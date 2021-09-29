@@ -42,12 +42,17 @@ apache_geoip_custom_paths__to_merge:
   /usr/local/sbin/update-mod-geoip-data:
     content: |
       #!/bin/sh -e
-      test -n "$1" || exit 1
-      wget -q {{ custom_geoip_data_remote_url }}/"$1" \
-           -O {{ custom_geoip_data_path }}/"$1".new
-      savelog -qnl {{ custom_geoip_data_path }}/"$1"
-      mv {{ custom_geoip_data_path }}/"$1".new \
-         {{ custom_geoip_data_path }}/"$1"
+      test -n "$1" || { echo first argument required >&2; exit 1; }
+      file="$1"
+      wget_params=${2:--q}
+      wget $wget_params \
+           {{ custom_geoip_data_remote_url }}/"$file" \
+           -O {{ custom_geoip_data_path }}/"$file".new
+      savelog_params=${3:--qnl}
+      savelog $savelog_params \
+              {{ custom_geoip_data_path }}/"$file"
+      mv {{ custom_geoip_data_path }}/"$file".new \
+         {{ custom_geoip_data_path }}/"$file"
     mode: "0755"
     state: "copy"
   /etc/cron.d/local-mod-geoip-data:
