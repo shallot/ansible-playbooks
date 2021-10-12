@@ -174,7 +174,12 @@ lamp-server-0:
   variables:
     TEST_HOST: "lamp-server-0.test"
 
-# libvirt-host-0 intentionally skipped as it can't have a vagrant/libvirt job
+libvirt-host-0:
+  extends: ".vagrantjob"
+  variables:
+    TEST_HOST: "libvirt-host-0.test"
+  # requires nested virtualization to complete
+  allow_failure: true
 
 mattermost-server-0:
   extends: ".vagrantjob"

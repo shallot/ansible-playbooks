@@ -15,8 +15,29 @@
 
 ---
 
-# NB: this doesn't actually currently work inside vagrant, but is useful
-# to provide an example of how to do it
+# NOTE: Preparing vg0 with tasks/packages.yml and tasks/shells.yml
+# is only necessary for libvirt-host-0.test, being able to run
+# through its ansible plays. This enables us to verify VM creation
+# and customization within CI.
+# tasks/packages.yml
+libvirt_host_0_custom_packages__to_merge:
+  lvm2: "present"
+
+# tasks/shells.yml
+libvirt_host_0_custom_shells__to_merge:
+  prepare_disk:
+    cmd: |
+      dd if=/dev/zero of=/tmp/libvirt_disk bs=128M count=50;
+    creates:
+      "/tmp/libvirt_disk"
+  prepare_vg:
+    cmd: |
+      DEVICE=$(losetup -f --show /tmp/libvirt_disk)
+      pvcreate $DEVICE
+      vgcreate vg0 $DEVICE
+    creates:
+      "/etc/lvm/backup/vg0"
+
 # provision-libvirt-hosts.yml
 libvirt_guests_volume_group: "vg0"
 libvirt_guests_bridge: "br0"
@@ -33,11 +54,11 @@ libvirt_guests_debootstrap_packages:
 libvirt_guests:
   "guest1":
     hostname: "guest1a"
-    logical_volume_size: "20G"
+    logical_volume_size: "2G"
     debootstrap_distribution: "stretch"
     virt_type: "kvm"
-    vcpus: 4
-    ram: "16G"
+    vcpus: 1
+    ram: "2G"
     os_variant: "debian9"
     ifupdown:
       name: "eth0"
@@ -47,7 +68,7 @@ libvirt_guests:
     start: false
   "guest2":
     name: "guest2-fancy-name"
-    logical_volume_size: "20G"
+    logical_volume_size: "3G"
     debootstrap_distribution: "buster"
     debootstrap_packages:
       - "linux-image-amd64"
@@ -56,8 +77,8 @@ libvirt_guests:
       - "acpi-support-base"
       - "joe"
     virt_type: "kvm"
-    vcpus: 4
-    ram: "16G"
+    vcpus: 2
+    ram: "3G"
     os_variant: "debian10"
     mac: "00:11:22:aa:bb:cc"
     ifupdown:
@@ -68,6 +89,14 @@ libvirt_guests:
     start: false
     firstboot_commands:
       - "systemctl enable acpid --now"
+
+# https://www.vagrantup.com/docs/providers/configuration
+vagrant_cpus:
+  "4"
+
+# https://www.vagrantup.com/docs/providers/configuration
+vagrant_memory:
+  "8192"
 
 # https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
 vagrant_groups:
@@ -81,4 +110,5 @@ vagrant_networks:
 # https://www.vagrantup.com/docs/provisioning/ansible.html
 vagrant_playbooks:
   - "provision-custom-systems.yml"
+  - "provision-custom-shells.yml"
   - "provision-libvirt-hosts.yml"
