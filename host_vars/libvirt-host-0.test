@@ -49,8 +49,7 @@ libvirt_guests_debootstrap_packages:
   - "openssh-server"
   - "acpid"
   - "acpi-support-base"
-  - "python3-minimal"
-  - "libpython3-stdlib"
+  - "python3"
 libvirt_guests:
   "guest1":
     hostname: "guest1a"
