@@ -44,7 +44,9 @@ test_munin_node_paths__to_merge:
   /etc/munin/plugins/netstat_multi:
     src: "/usr/share/munin/plugins/netstat_multi"
     state: "link"
-    notify: "service : munin-node"
+    notify:
+      - "service : munin-node"
+      - "service : munin-async"
 
 # https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
 vagrant_groups:
