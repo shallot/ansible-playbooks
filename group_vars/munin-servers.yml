@@ -75,7 +75,9 @@ munin_server_munin_node_paths__to_merge:
   /etc/munin/plugins/munin_update:
     src: "/usr/share/munin/plugins/munin_update"
     state: "link"
-    notify: "service : munin-node"
+    notify:
+      - "service : munin-node"
+      - "service : munin-async"
 
 # tasks/paths.yml
 munin_server_self_definition_custom_paths__to_merge:
