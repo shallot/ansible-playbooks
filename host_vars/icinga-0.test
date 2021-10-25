@@ -136,26 +136,17 @@ icinga_server_custom_icinga_user_groups:
   "{{ eyeo_icinga_server_custom_icinga_user_groups }}"
 
 icinga_server_custom_icinga_commands:
-  "{{ icinga_server_commands |
-      combine(example_custom_icinga_commands) }}"
-
-example_custom_icinga_commands:
-  test_command:
-    type: "notification"
-    import:
-      - "plugin-notification-command"
-    path: "check_something"
+  check_port:
     arguments:
-      --first-argument:
-        description: "Test"
+      -H:
         required: "true"
-        value: "Test"
-      --second-argument:
+        value: "$host$"
+      -p:
         required: "true"
-        value: "Something"
+        value: "$port$"
     vars:
-      Test: "foo"
-      Something: "bar"
+      host: "$host.name$"
+      port: "$port$"
 
 icinga_server_custom_icinga_notifications:
   "{{ eyeo_icinga_server_custom_icinga_notifications }}"
