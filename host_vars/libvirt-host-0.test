@@ -43,6 +43,7 @@ libvirt_guests_volume_group: "vg0"
 libvirt_guests_bridge: "br0"
 libvirt_guests_authorized_keys:
   "ssh-rsa This-is-an-example-SSH-key Comment-indicating-key-origin"
+libvirt_guests_virt_type: "kvm"
 libvirt_guests_debootstrap_packages:
   - "linux-image-amd64"
   - "less"
@@ -55,10 +56,10 @@ libvirt_guests:
     hostname: "guest1a"
     logical_volume_size: "2G"
     debootstrap_distribution: "stretch"
-    virt_type: "kvm"
     vcpus: 1
     ram: "2G"
     os_variant: "debian9"
+    bridge: "br0"
     ifupdown:
       name: "eth0"
       configuration: |
@@ -70,12 +71,8 @@ libvirt_guests:
     logical_volume_size: "3G"
     debootstrap_distribution: "buster"
     debootstrap_packages:
-      - "linux-image-amd64"
-      - "less"
-      - "acpid"
-      - "acpi-support-base"
-      - "joe"
-    virt_type: "kvm"
+      "{{ libvirt_guests_debootstrap_packages
+        + ['joe', 'lsof'] }}"
     vcpus: 2
     ram: "3G"
     os_variant: "debian10"
@@ -88,6 +85,9 @@ libvirt_guests:
     start: false
     firstboot_commands:
       - "systemctl enable acpid --now"
+    authorized_keys: |
+      {{ libvirt_guests_authorized_keys }}
+      ssh-rsa This-is-a-different-example-SSH-key With-different-key-origin
 
 # https://www.vagrantup.com/docs/providers/configuration
 vagrant_cpus:
