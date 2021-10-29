@@ -115,10 +115,6 @@ host_specific_custom_paths__to_merge:
   #  <<: *fail_for_name
   <<: *single_entry
 
-# https://www.vagrantup.com/docs/vagrantfile/machine_settings.html
-vagrant_box:
-  "debian/stretch64"
-
 # https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
 vagrant_groups:
   - "examples.test"

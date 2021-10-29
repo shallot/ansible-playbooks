@@ -141,7 +141,7 @@ host_specific_custom_cron_jobs__to_merge:
 
 # https://www.vagrantup.com/docs/vagrantfile/machine_settings.html
 vagrant_box:
-  "debian/stretch64"
+  "debian/bullseye64"
 
 # https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
 vagrant_groups:

@@ -122,10 +122,10 @@ custom-commands-shells-0:
   variables:
     TEST_HOST: "custom-commands-shells-0.test"
 
-custom-debian9-0:
+custom-debian11-0:
   extends: ".vagrantjob"
   variables:
-    TEST_HOST: "custom-debian9-0.test"
+    TEST_HOST: "custom-debian11-0.test"
 
 custom-paths-0:
   extends: ".vagrantjob"
