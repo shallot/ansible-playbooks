@@ -71,11 +71,9 @@ host_specific_custom_services__to_merge:
         Description: "Example enabled service"
         After: "network.target"
       Service:
-        Type: "notify"
+        Type: "oneshot"
         ExecStart: "/bin/true"
         TimeoutStartSec: "3600"
-        Restart: "always"
-        RestartSec: "10"
         WorkingDirectory: "/var/tmp"
         User: "nobody"
         Group: "nogroup"
