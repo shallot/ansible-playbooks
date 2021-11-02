@@ -32,6 +32,13 @@
 # https://docs.ansible.com/ansible/latest/modules/fail_module.html
 - fail:
     msg: >-
+      Ansible hostname {{ ansible_hostname }} does not match inventory hostname
+      short {{ inventory_hostname_short }}. Fix /etc/hostname and try again.
+  when: "ansible_hostname != inventory_hostname_short"
+
+# https://docs.ansible.com/ansible/latest/modules/fail_module.html
+- fail:
+    msg: >-
       Ansible FQDN {{ ansible_fqdn }} does not match inventory hostname
       {{ inventory_hostname }}. Fix /etc/hosts and try again.
   when: "ansible_fqdn != inventory_hostname"
