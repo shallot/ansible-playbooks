@@ -164,6 +164,16 @@ icinga_host_vars:
 example_icinga_host_options__to_merge:
   enable_flapping: "true"
 
+icinga_service_zombie_procs_name:
+  "zombie-procs"
+
+icinga_service_bandwidth_ignore:
+  - "host.vars.no_service_bandwidth"
+
+icinga_service_http_response_time_options:
+  notes: |
+    "Applied on icinga_http_response_time_check_group"
+
 # https://www.vagrantup.com/docs/vagrantfile/machine_settings.html
 vagrant_box:
   "debian/buster64"
