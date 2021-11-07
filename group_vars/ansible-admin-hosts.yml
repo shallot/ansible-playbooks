@@ -72,3 +72,31 @@ ansible_admin_commands__to_merge:
 custom_users_default_home_mode:
   "{{ (custom_user_name in custom_ansible_group_members | default([]))
     | ternary('0750', '0755') }}"
+
+# Log ansible-playbook runs
+ansible_admin_log_paths__to_merge:
+  /var/log/ansible:
+    owner: "root"
+    group: "ansible"
+    mode: "0755"
+    state: "directory"
+  /var/log/ansible/log:
+    owner: "root"
+    group: "ansible"
+    mode: "0664"
+    state: "touch"
+  /etc/logrotate.d/ansible:
+    content: |
+      /var/log/ansible/log {
+          compress
+          create 664 root ansible
+          daily
+          dateext
+          dateformat .%Y-%m-%d
+          dateyesterday
+          delaycompress
+          missingok
+          notifempty
+          rotate {{ ansible_admin_log_count | default('14') }}
+      }
+    state: "copy"
