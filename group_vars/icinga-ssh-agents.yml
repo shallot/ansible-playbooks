@@ -14,27 +14,3 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 ---
-
-# provision-icinga-ssh-agents.yml
-# yamllint disable rule:line-length
-# yamllint disable rule:quoted-strings
-# https://icinga.com/docs/icinga2/latest/doc/04-configuration/#servicesconf
-# https://gitlab.com/eyeo/devops/utilities/monitoring-plugins/-/blob/master/templates/config/services/{{ item.key }}.conf
-# https://www.monitoring-plugins.org/doc/man/check_by_ssh.html
-eyeo_icinga_ssh_agent_icinga_services:
-  needrestart:
-    name: "needrestart"
-    service_definition: |
-      {{ lookup('template', 'roles/monitoring-plugins/files/icinga-services/needrestart.conf') }}
-    options:
-      enable_flapping: "true"
-    assign:
-      - 'host.vars.ansible.os_family == "Debian"'
-# yamllint enable rule:line-length
-# yamllint enable rule:quoted-strings
-
-# provision-icinga-ssh-agents.yml
-eyeo_icinga_ssh_agent_monitoring_plugins:
-  needrestart:
-    package: "needrestart"
-    sudoers_src: "files/sudoers/needrestart"

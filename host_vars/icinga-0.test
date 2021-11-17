@@ -123,11 +123,11 @@ icinga_server_custom_monitoring_plugins:
 
 icinga_ssh_agent_custom_monitoring_plugins:
   "{{ icinga_ssh_agent_monitoring_plugins |
-      combine(eyeo_icinga_ssh_agent_monitoring_plugins) }}"
+      combine(eyeo_icinga_ssh_agent_monitoring_plugins | default({}) ) }}"
 
 icinga_ssh_agent_custom_icinga_services:
   "{{ icinga_ssh_agent_icinga_services |
-      combine(eyeo_icinga_ssh_agent_icinga_services) }}"
+      combine(eyeo_icinga_ssh_agent_icinga_services | default({}) ) }}"
 
 icinga_server_custom_icinga_users:
   "{{ eyeo_icinga_server_custom_icinga_users }}"
