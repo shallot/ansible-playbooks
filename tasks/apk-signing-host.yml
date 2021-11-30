@@ -45,3 +45,35 @@
     label: "{{ item.key | to_json }}"
   loop:
     "{{ apk_signing_users | mandatory | dict2items }}"
+
+# https://docs.ansible.com/ansible/latest/modules/file_module.html
+# yamllint disable rule:line-length
+- name:
+    "set_fact : {{ apk_signing_directory }}/{{ project.key }}.keystore.credentials"
+  set_fact:
+    apk_signing_hosts_per_project_paths__to_merge:
+      "{{ apk_signing_hosts_per_project_paths__to_merge
+        | default({})
+        | combine({
+          apk_signing_directory + '/' + project.key + '.keystore.credentials': {
+            'dest': apk_signing_directory + '/' + project.key + '.keystore.credentials',
+            'state': 'copy',
+            'mode': '0640',
+            'owner': 'root',
+            'group': apk_signing_group_name,
+            'content': content,
+            'validate': '/bin/sh -n %s',
+            }
+          })
+        }}"
+  vars:
+    content: |
+      APK_KEYSTORE_NAME={{ project.value.APK_KEYSTORE_NAME | mandatory }}
+      APK_KEY_ALIAS_NAME={{ project.value.APK_KEY_ALIAS_NAME | mandatory }}
+      APK_STOREPASS={{ project.value.APK_STOREPASS | mandatory }}
+      APK_KEYPASS={{ project.value.APK_KEYPASS | mandatory }}
+  loop_control:
+    loop_var: "project"
+  loop:
+    "{{ apk_signing_projects | dict2items }}"
+# yamllint enable rule:line-length

@@ -50,3 +50,10 @@
 
     - import_tasks:
         "tasks/apk-signing-host.yml"
+
+    # https://docs.ansible.com/ansible/latest/import_tasks_module.html
+    - import_tasks:
+        "tasks/paths.yml"
+      vars:
+        custom_paths_suffix:
+          "apk_signing_hosts_per_project_paths__to_merge"
