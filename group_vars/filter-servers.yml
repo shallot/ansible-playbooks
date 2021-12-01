@@ -43,7 +43,7 @@ filter_server_custom_cron_jobs__to_merge:
     user: "{{ filter_server_mirror_user }}"
     # yamllint disable rule:line-length
     job: >-
-      rsync -e "ssh -o CheckHostIP=no" -ltprz --delete {{ filter_origin_server_spec }}:. {{ filter_server_document_root_path }}/
+      rsync -e "ssh -o CheckHostIP=no" -ltprz --delete --max-delete={{ filter_origin_max_delete }} {{ filter_origin_server_spec }}:. {{ filter_server_document_root_path }}/
     # yamllint enable rule:line-length
 
 # roles/apache2/tasks/main.yml

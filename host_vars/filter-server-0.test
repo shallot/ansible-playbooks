@@ -25,6 +25,9 @@ filter_origin_server_spec:
 filter_server_mirror_cron_job_minute:
   0
 
+filter_origin_max_delete:
+  100
+
 filter_server_abuse_custom_apache_config: |
   {{ default_filter_server_abuse_custom_apache_config }}
 
