@@ -15,9 +15,11 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 SIGNER=`which jarsigner`
-CREDENTIALS_FILE="{{ aab_signing_group_credentials_source }}"
 
-test -r "$CREDENTIALS_FILE" || { echo "Credentials file $CREDENTIALS_FILE not readable" >&2; exit 1; }
+# Pass CREDENTIALS_FILE variable at command execution as a relative path
+test -n "$CREDENTIALS_FILE" || { echo "Missing environment variable CREDENTIALS_FILE" >&2; exit 1; }
+CREDENTIALS_FILE="{{ aab_signing_directory | mandatory }}/$CREDENTIALS_FILE.keystore.credentials"
+test -r "$CREDENTIALS_FILE" || { echo "Keystore credentials file $CREDENTIALS_FILE not readable in {{ aab_signing_directory }}" >&2; exit 1; }
 
 . $CREDENTIALS_FILE;
 

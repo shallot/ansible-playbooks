@@ -17,15 +17,20 @@
 
 aab_signing_group_name:
   "signers"
-aab_signing_directory:
-  "/srv/{{ aab_signing_group_name }}/exampleproject"
-aab_signing_group_credentials_source:
-  "{{ aab_signing_directory }}/keystore.credentials"
 
-APK_KEYSTORE_NAME: "test_name"
-APK_KEY_ALIAS_NAME: "alias_test_name"
-APK_STOREPASS: "test_store_password"
-APK_KEYPASS: "test_key_password"
+aab_signing_directory:
+  "/srv/{{ aab_signing_group_name }}"
+aab_signing_projects:
+  "exampleproject1":
+    APK_KEYSTORE_NAME: "test_name"
+    APK_KEY_ALIAS_NAME: "alias_test_name"
+    APK_STOREPASS: "test_store_password"
+    APK_KEYPASS: "test_key_password"
+  "exampleproject2":
+    APK_KEYSTORE_NAME: "test_name2"
+    APK_KEY_ALIAS_NAME: "alias_test_name2"
+    APK_STOREPASS: "test_store_password2"
+    APK_KEYPASS: "test_key_password2"
 
 aab_signing_custom_authorized_keys__to_merge:
   signer1:
@@ -33,13 +38,17 @@ aab_signing_custom_authorized_keys__to_merge:
     key: |
       ssh-rsa This-is-just-an-example-authorized-key
     key_options:
-      - command="/usr/local/bin/aab_signer"
+      # yamllint disable rule:line-length
+      - command="/usr/bin/env CREDENTIAL_FILE=exampleproject1 /usr/local/bin/aab_signer"
+      # yamllint enable rule:line-length
   signer2:
     user: "signer2"
     key: |
       ssh-rsa This-is-just-an-example-authorized-key
     key_options:
-      - command="/usr/local/bin/aab_signer"
+      # yamllint disable rule:line-length
+      - command="/usr/bin/env CREDENTIAL_FILE=exampleproject2 /usr/local/bin/aab_signer"
+      # yamllint enable rule:line-length
 
 aab_signing_users: &aab_signing_users
   "signer1":

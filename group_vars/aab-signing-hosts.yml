@@ -29,19 +29,6 @@ aab_signing_hosts_paths__to_merge:
     owner: "root"
     group: "{{ aab_signing_group_name | mandatory }}"
     mode: "0750"
-  "{{ aab_signing_group_credentials_source }}":
-    dest: "{{ aab_signing_group_credentials_source }}"
-    mode: "0640"
-    state: "copy"
-    content: |
-      APK_KEYSTORE_NAME={{ APK_KEYSTORE_NAME | mandatory }}
-      APK_KEY_ALIAS_NAME={{ APK_KEY_ALIAS_NAME | mandatory }}
-      APK_STOREPASS={{ APK_STOREPASS | mandatory }}
-      APK_KEYPASS={{ APK_KEYPASS | mandatory }}
-    validate:
-      "/bin/sh -n %s"
-    owner: "root"
-    group: "{{ aab_signing_group_name }}"
   /usr/local/bin/aab_signer:
     state: "template"
     src: "./files/aab_signer.j2"
