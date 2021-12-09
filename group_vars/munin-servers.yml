@@ -42,17 +42,52 @@ munin_server_custom_ssh_keys__to_merge:
     owner: "munin"
     group: "munin"
 
+# run update with 60s update_rate
+munin_update_schedule:
+  "* * * * *"
+# run limits less often, as this triggers notifications
+munin_limits_schedule:
+  "*/5 * * * *"
+# run html even less often, as this is resource-intensive yet often no-op
+munin_html_schedule:
+  "*/10 * * * *"
+
+munin_update_global_timeout:
+  "55"
+
+munin_update_rate_settings_bullseye: |
+  timeout_fetch_all_nodes 45
+  timeout_fetch_one_node 40
+
+# yamllint disable rule:line-length
+munin_update_rate_settings: |
+  update_rate 60 # seconds
+  ssh_options -o ChallengeResponseAuthentication=no -o StrictHostKeyChecking=no -o ConnectTimeout=5
+  {{ (ansible_distribution_version|int > 10)
+     | ternary(munin_update_rate_settings_bullseye, '')
+  }}
+# yamllint enable rule:line-length
+
+munin_update_rate_plugin_settings: |
+    munin_stats.update.warning 0:46
+    munin_stats.update.critical 0:56
+
 # tasks/paths.yml
 munin_server_config_custom_paths__to_merge:
   # NB: Debian package conffile we override
   /etc/cron.d/munin:
+    # yamllint disable rule:line-length
     content: |
       MAILTO=root
-      # match update_rate 60 in /etc/munin/munin-conf.d/aaa-munin.conf,
-      # but run limits less often and html even less often
-      * * * * *     munin /usr/share/munin/munin-update --timeout=55
-      */5 * * * *     munin /usr/share/munin/munin-limits
-      */10 * * * *    munin nice /usr/share/munin/munin-html
+      # this re-implements /usr/bin/munin-cron in a more fine-grained manner
+      {{ munin_update_schedule }}     munin /usr/share/munin/munin-update --timeout={{ munin_update_global_timeout }}
+      {{ munin_limits_schedule }}     munin /usr/share/munin/munin-limits
+      {{ munin_html_schedule }}    munin nice /usr/share/munin/munin-html
+
+      # remove stale generated html and graph files (e.g. disabled plugins or fields with volatile names)
+      27 03 * * *     munin htmldir=$({ cat /etc/munin/munin.conf /etc/munin/munin-conf.d/* 2>/dev/null || true; } | sed -nE 's/^\s*htmldir\s+(\S.*)$/\1/p' | tail -1); htmldir=${htmldir:-/var/cache/munin/www}; if [ -d "$htmldir" ]; then find "$htmldir/" -type f -name "*.html" -mtime +30 -delete; find "$htmldir/" -mindepth 1 -type d -empty -delete; fi
+      32 03 * * *     www-data cgitmpdir=$({ cat /etc/munin/munin.conf /etc/munin/munin-conf.d/* 2>/dev/null || true; } | sed -nE 's/^\s*cgitmpdir\s+(\S.*)$/\1/p' | tail -1); cgitmpdir=${cgitmpdir:-/var/lib/munin/cgi-tmp}; if [ -d "$cgitmpdir" ]; then find "$cgitmpdir/" -type f -mtime +1 -delete; find "$cgitmpdir/" -mindepth 1 -type d -empty -delete; fi
+    # yamllint enable rule:line-length
     mode: "0644"
     state: "copy"
   /etc/munin/munin-conf.d/aaa-munin.conf:
@@ -61,7 +96,9 @@ munin_server_config_custom_paths__to_merge:
       graph_strategy cgi
       munin_cgi_graph_jobs {{ munin_cgi_graph_jobs }}
       max_processes {{ munin_max_processes }}
-      update_rate 60 # seconds
+
+      {{ munin_update_rate_settings }}
+
       graph_data_size custom 1d, 5m for 1w, 15m for 1y, 1h for 5y
       contact.email.command mail -s "${var:group}/${var:host} ${var:graph_title}" {{ munin_contact_email }}
       contact.log.command tee -a /var/log/munin/alert.log >/dev/null
@@ -87,9 +124,8 @@ munin_server_self_definition_custom_paths__to_merge:
     content: |
       [{{ inventory_hostname }}]
         address ssh://munin-async@{{ inventory_hostname }}
-      # match update_rate 60 @ aaa-munin.conf
-        munin_stats.update.warning 0:51
-        munin_stats.update.critical 0:57
+      # match update_rate @ aaa-munin.conf
+        {{ munin_update_rate_plugin_settings | indent(2) }}
       # omit disabled graph
         munin_stats.graph.graph no
       # these notifications are annoying and repetitive
