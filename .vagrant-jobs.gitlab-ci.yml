@@ -34,8 +34,18 @@
       else
         vagrant box add --provider $VAGRANT_PROVIDER $VAGRANT_BOX
       fi
+      if ! vagrant destroy $TEST_HOST -f; then
+        if [ "$VAGRANT_PROVIDER" = "libvirt" ]; then
+          libvirt_vm=ansible-playbooks_$TEST_HOST
+          export LIBVIRT_DEFAULT_URI="qemu:///system"
+          virsh destroy $libvirt_vm || true
+          virsh undefine $libvirt_vm --remove-all-storage
+        else
+          echo "Aiee, $TEST_HOST could not be destroyed in $VAGRANT_PROVIDER"
+          exit 1
+        fi
+      fi
       set +x
-    - "vagrant destroy $TEST_HOST -f || true"
     - |
       if [ -n "$VAGRANT_BOX_NEEDS_CHECKED_OUT_BRANCH" ]; then
          echo "Box |$VAGRANT_BOX_NEEDS_CHECKED_OUT_BRANCH| needs a branch"
