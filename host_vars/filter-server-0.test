@@ -89,6 +89,12 @@ example_filter_server_apache2_sites__to_merge:
 apache2_logrotate_count:
   7
 
+# tasks/playbooks.yml
+provision_playbooks:
+  - "provision-apache2-geoip-servers.yml"
+  - "provision-custom-commands.yml"
+  - "provision-custom-shells.yml"
+
 # https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
 vagrant_groups:
   - "filter-servers"
@@ -103,6 +109,4 @@ vagrant_networks:
 # https://www.vagrantup.com/docs/provisioning/ansible.html
 vagrant_playbooks:
   - "provision-custom-systems.yml"
-  - "provision-apache2-geoip-servers.yml"
-  - "provision-custom-commands.yml"
-  - "provision-custom-shells.yml"
+  - "provision-playbooks.yml"
