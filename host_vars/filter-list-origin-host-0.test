@@ -28,17 +28,16 @@ filter_list_origin_mirror_ssh_key:
   "ssh-rsa Example-filter_list_origin_mirror_ssh_key"
 
 filter_list_origin_sitescripts_git_version:
-  "master"
+  "subscription-filesource"
 
-# disabled until all mirrors exist there
-# filter_list_origin_remote_git:
-#   "https://gitlab.com/eyeo/filterlists"
+filter_list_origin_remote_git:
+  "https://gitlab.com/eyeo/filterlists"
 # shallow clone on test, to save bandwidth and time
-# filter_list_origin_git_depth:
-#   1
+filter_list_origin_git_depth:
+  1
 
-filter_list_origin_remote_hg:
-  "https://hg.adblockplus.org"
+# filter_list_origin_remote_hg:
+#   "https://hg.adblockplus.org"
 
 filter_list_origin_repos:
   easylist:
