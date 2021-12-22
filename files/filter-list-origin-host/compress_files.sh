@@ -13,5 +13,8 @@ fi
 output="$2"
 
 for filename in $(find $input -maxdepth 1 -type f ! -name '*.gz'); do
+  if [ "$output" != "$input" ]; then
+    cp -auv $filename $output/
+  fi
   7za a -tgzip -y -mx=9 -bd -mpass=5 "$output/$(basename $filename).gz" "$filename"
 done

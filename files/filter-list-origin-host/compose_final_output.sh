@@ -6,14 +6,6 @@ finaldir={{ filter_list_origin_final_output }}
 rm -rf $prepdir
 mkdir $prepdir
 
-for subscription in {{ filter_list_origin_compress_subscriptions }}
-do
-  cp -a {{ filter_list_origin_inputs }}/$subscription/* $prepdir/
-done
-
-# removed because it was copying files without pre-processing -joy, 2021-12-13
-# cp -a {{ filter_list_origin_inputs }}/crumbsfilterlist/crumbs-privacy-friendly.txt $prepdir/
-
 # this comes from update_repos.sh + sitescripts.subscriptions.bin.updateSubscriptionDownloads
 cp -a {{ filter_list_origin_outputs }}/data/* $prepdir/
 
@@ -29,4 +21,4 @@ test ! -d $finaldir || mv $finaldir $finaldir.old
 # but rsync --max-delete=anything on filter-servers protects us from downtime here
 mv $prepdir $finaldir
 
-# $finaldir is referenced from /etc/ssh/sshd_config ForceCommand
+# $finaldir is referenced from ssh forced command
