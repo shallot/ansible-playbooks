@@ -37,4 +37,4 @@ eyeo_icinga_ssh_agent_icinga_services:
 eyeo_icinga_ssh_agent_monitoring_plugins:
   needrestart:
     package: "needrestart"
-    sudoers_src: "files/sudoers/needrestart"
+    sudoers_src: "templates/sudoers/needrestart"
