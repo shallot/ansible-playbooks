@@ -24,6 +24,7 @@
     custom_os_distribution: "{{ ansible_distribution | lower }}"
     custom_os_family: "{{ ansible_os_family | lower }}"
     custom_os_version: "{{ ansible_distribution_major_version }}"
+    discovered_cpu_type: "{{ ansible_processor[1] }}" # to get AuthenticAMD or GenuineIntel
 
 # https://docs.ansible.com/ansible/latest/user_guide/playbooks_blocks.html
 # https://docs.ansible.com/ansible/latest/modules/group_by_module.html
@@ -42,6 +43,9 @@
           - "os/{{ custom_os_family }}"
       when:
         - "custom_os_family != custom_os_distribution"
+
+    - group_by:
+        key: "processor/{{ discovered_cpu_type }}"
 
 # yamllint disable rule:comments-indentation
   # - name:
