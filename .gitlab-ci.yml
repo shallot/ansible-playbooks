@@ -168,6 +168,9 @@ gitlab-runner-0:
   extends: ".vagrantjob"
   variables:
     TEST_HOST: "gitlab-runner-0.test"
+    # https://gitlab.com/eyeo/devops/examples/ansible-role-example/-/settings/ci_cd
+    # https://gitlab.com/eyeo/devops/ansible-playbooks/-/settings/ci_cd
+    TEST_GITLAB_REGISTRATION_TOKEN: "$ANSIBLE_ROLE_EXAMPLE_GITLAB_TOKEN"
 
 icinga-0:
   extends: ".vagrantjob"

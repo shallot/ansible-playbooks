@@ -213,6 +213,11 @@ def fill_extra_vars(hostvars, ansible_extra_vars)
     'backup-hosts' => {
       'automated_backup_server_key' => '/opt/backup/keys/id_ed25519',
       'automated_backup_server_directory' => '/var/backups'
+    },
+    # host_vars/gitlab-runner-0.test
+    'gitlab-runners' => {
+      'TEST_GITLAB_REGISTRATION_TOKEN' =>
+        ENV.key?('TEST_GITLAB_REGISTRATION_TOKEN') ? ENV['TEST_GITLAB_REGISTRATION_TOKEN'] : '',
     }
   }
 

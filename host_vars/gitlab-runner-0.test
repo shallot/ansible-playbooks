@@ -15,6 +15,18 @@
 
 ---
 
+# roles/gitlab/runner/tasks/main.yml
+# https://gitlab.com/eyeo/devops/ansible-role-gitlab#synopsis
+gitlab_runners:
+  - parameters:
+      # .gitlab-ci.yml
+      registration-token: "{{ TEST_GITLAB_REGISTRATION_TOKEN }}"
+      name: "gitlab-runner@{{ ansible_fqdn }}"
+      url: "https://gitlab.com"
+      executor: "shell"
+      extra:
+        tag-list: "gitlab-runner-0.test"
+
 # https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
 vagrant_groups:
   - "gitlab-runners"
