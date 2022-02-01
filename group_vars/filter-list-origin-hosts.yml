@@ -156,20 +156,6 @@ filter_list_origin_custom_packages__to_merge:
   curl: "present"
   jq: "present"
 
-filter_list_origin_compress_subscriptions: >-
-  {%- for key, value in filter_list_origin_repos | dictsort -%}
-  {%-   if value and 'compress_all' in value -%}
-  {{ key }}
-  {%-   endif -%}
-  {%- endfor -%}
-
-filter_list_origin_gitlab_artifacts_subscriptions: >-
-  {%- for key, value in filter_list_origin_repos | dictsort -%}
-  {%-   if value and 'gitlab_artifacts' in value -%}
-  {{ key }}
-  {%-   endif -%}
-  {%- endfor -%}
-
 # NB: has its own logging inside the script
 filter_list_origin_update_subscription_command: >-
   {{ filter_list_origin_base_dir }}/update_subscription_downloads.sh
@@ -183,17 +169,33 @@ filter_list_origin_update_repos_command: >-
 filter_list_origin_gitlab_artifacts_command: >-
   savelog -c {{ filter_list_origin_save_logs }} -qnl
   {{ filter_list_origin_logs }}/fetch_gitlab_artifacts.log &&
-  for sub in {{ filter_list_origin_gitlab_artifacts_subscriptions }}; do
+  (
+  {%- set filter_list_origin_gitlab_artifact_repos=filter_list_origin_repos
+    | dict2items
+    | selectattr('value.gitlab_artifacts', 'defined')
+    | selectattr('value.gitlab_artifacts')
+    | selectattr('value.destination', 'defined')
+    | items2dict
+    -%}
+  {%- for key, value in filter_list_origin_gitlab_artifact_repos | dictsort -%}
   {{ filter_list_origin_base_dir }}/fetch_gitlab_artifacts.sh
-  {{ filter_list_origin_inputs }}/$sub
-  {{ filter_list_origin_outputs }}/gitlab_artifacts
-  ; done >
+  {{ filter_list_origin_inputs }}/{{ key }}
+  {{ filter_list_origin_outputs }}/gitlab_artifacts/{{ value.destination }}
+  {{- "" if loop.last else " && " -}}
+  {%- endfor -%}
+  ) >
   {{ filter_list_origin_logs }}/fetch_gitlab_artifacts.log
 
 filter_list_origin_compress_files_command: >-
   savelog -c {{ filter_list_origin_save_logs }} -qnl
   {{ filter_list_origin_logs }}/compress_files.log &&
-  for sub in {{ filter_list_origin_compress_subscriptions }}; do
+  for sub in
+  {%- for key, value in filter_list_origin_repos | dictsort -%}
+  {%-   if value and 'compress_all' in value and value.compress_all %}
+  {{ key }}
+  {%-   endif -%}
+  {%- endfor -%}
+  ; do
   {{ filter_list_origin_base_dir }}/compress_files.sh
   {{ filter_list_origin_inputs }}/$sub
   {{ filter_list_origin_outputs }}/gzip

@@ -100,6 +100,7 @@ filter_list_origin_repos:
     clone: true
     sitescripts: true
   filterlist-splitting:
+    destination: "aa-variants"
     gitlab_artifacts: true
     gitlab_project: "eyeo/monetization/filterlist-splitting"
     gitlab_ref: "main"
