@@ -38,12 +38,23 @@
   when:
     "apt_sources_list_stable.found"
 
+# https://docs.ansible.com/ansible/latest/modules/set_fact_module.html
+# custom_os_distribution: tasks/os/main.yml
+- name:
+    "set_fact : security_apt_regexp"
+  set_fact:
+    security_apt_regexp: "{{ security_apt_sites[custom_os_distribution] }}"
+  vars:
+    security_apt_sites:
+      debian: "security\\.debian\\.org"
+      ubuntu: "security\\.ubuntu\\.com"
+
 # https://docs.ansible.com/ansible/latest/collections/ansible/builtin/lineinfile_module.html
 - name:
     "apt : security source check"
   lineinfile:
     path: "/etc/apt/sources.list"
-    regexp: "security\\.debian\\.org"
+    regexp: "{{ security_apt_regexp }}"
     state: "absent"
   check_mode:
     true
@@ -55,7 +66,7 @@
 # https://docs.ansible.com/ansible/latest/modules/fail_module.html
 - fail:
     msg: >-
-      Couldn't find security.debian.org in apt sources.list file.
+      Couldn't find {{ security_apt_regexp }} in the apt sources.list file.
       Please add it and try again.
   when:
     - "not apt_sources_list_security.found"
