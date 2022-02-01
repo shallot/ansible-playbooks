@@ -6,10 +6,7 @@ if [ ! -d "$1" ]; then
 fi
 input="$1"
 
-if [ ! -d "$2" ]; then
-  echo "$2 not a directory, aiee" >&2
-  exit 1
-fi
+test -d "$2" || mkdir "$2"
 output="$2"
 
 for project_file in $(find $input -maxdepth 1 -type f); do
