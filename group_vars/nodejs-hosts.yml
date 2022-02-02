@@ -31,4 +31,4 @@ custom_nodejs_apt_repositories__to_merge:
 
 # tasks/packages.yml
 custom_nodejs_custom_packages__to_merge:
-  nodejs: "present"
+  nodejs: "{{ custom_nodejs_package_state | default('present') }}"
