@@ -21,7 +21,7 @@ custom_geoip_apache2_modules__to_merge:
     package: true
 
 # tasks/packages.yml
-custom_geoip_packages__to_merge:
+geoip_custom_packages__to_merge:
   wget: "present"
 
 custom_geoip_data_path:

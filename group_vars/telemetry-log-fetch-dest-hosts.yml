@@ -238,7 +238,7 @@ telemetry_log_fetch_prerequisites_custom_shells__to_merge:
 
 # tasks/packages.yml
 # the Google repo fails to verify HTTPS otherwise
-google_cloud_apt_packages__to_merge:
+google_cloud_apt_custom_packages__to_merge:
   ca-certificates: "present"
 
 # tasks/os/debian/common.yml
