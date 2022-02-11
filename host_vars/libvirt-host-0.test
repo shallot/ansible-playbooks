@@ -69,7 +69,9 @@ libvirt_guests:
   "guest2":
     name: "guest2-fancy-name"
     logical_volume_size: "3G"
-    debootstrap_distribution: "buster"
+    debootstrap_release: "buster"
+    debootstrap_mirror:
+      "http://ftp.de.debian.org/debian"
     debootstrap_packages:
       "{{ libvirt_guests_debootstrap_packages
         + ['joe', 'lsof'] }}"
