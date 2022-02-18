@@ -212,27 +212,32 @@ filter_list_origin_custom_cron_jobs__to_merge:
     name: "update_subscription"
     minute: "{{ filter_list_origin_update_subscription_cron_job_time }}"
     user: "{{ filter_list_origin_mirror_user }}"
-    job: "{{ filter_list_origin_update_subscription_command }}"
+    job: "{{ filter_list_origin_update_subscription_command
+           | replace('%', '\\%') }}"
   update_repos:
     name: "update_repos"
     minute: "{{ filter_list_origin_update_repos_cron_job_time }}"
     user: "{{ filter_list_origin_mirror_user }}"
-    job: "{{ filter_list_origin_update_repos_command }}"
+    job: "{{ filter_list_origin_update_repos_command
+           | replace('%', '\\%') }}"
   compress_files:
     name: "compress_files"
     minute: "{{ filter_list_origin_compress_files_cron_job_time }}"
     user: "{{ filter_list_origin_mirror_user }}"
-    job: "{{ filter_list_origin_compress_files_command }}"
+    job: "{{ filter_list_origin_compress_files_command
+           | replace('%', '\\%') }}"
   gitlab_artifacts:
     name: "gitlab_artifacts"
     minute: "{{ filter_list_origins_gitlab_artifacts_cron_job_time }}"
     user: "{{ filter_list_origin_mirror_user }}"
-    job: "{{ filter_list_origin_gitlab_artifacts_command }}"
+    job: "{{ filter_list_origin_gitlab_artifacts_command
+           | replace('%', '\\%') }}"
   output_final:
     name: "output_final"
     minute: "{{ filter_list_origin_output_final_cron_job_time }}"
     user: "{{ filter_list_origin_mirror_user }}"
-    job: "{{ filter_list_origin_output_final_command }}"
+    job: "{{ filter_list_origin_output_final_command
+           | replace('%', '\\%') }}"
 
 # tasks/shells.yml
 filter_list_origin_cron_custom_shells__to_merge:
