@@ -38,3 +38,9 @@ eyeo_icinga_ssh_agent_monitoring_plugins:
   needrestart:
     package: "needrestart"
     sudoers_src: "templates/sudoers/needrestart"
+  check_service:
+    dest: "{{ icinga_ssh_agent_plugin_directory }}"
+    group: "root"
+    owner: "root"
+    mode: "0775"
+    src: "files/plugins/check_service"

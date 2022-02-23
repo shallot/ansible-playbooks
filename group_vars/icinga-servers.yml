@@ -25,6 +25,17 @@ icinga_for_web_postgresql_hba_entries__to_merge:
     auth_method: "md5"
 
 # provision-icinga-servers.yml
+# yamllint disable rule:line-length
+eyeo_icinga_server_custom_icinga_services:
+  systemd_postgresql:
+    name: "systemd_postgresql"
+    service_definition: |
+      {{ lookup('template', 'roles/monitoring-plugins/files/icinga-services/systemd_postgresql.conf') }}
+    assign:
+      - "intersection([\"postgresql-servers\"], host.vars.ansible.groups)"
+# yamllint enable rule:line-length
+
+# provision-icinga-servers.yml
 eyeo_icinga_server_custom_icinga_users:
   noc:
     import:

@@ -70,13 +70,22 @@ icinga_server_https_service_group:
 icinga_server_custom_monitoring_plugins:
   "{{ icinga_server_monitoring_plugins }}"
 
+# icinga_ssh_agent_monitoring_plugins from
+# roles/icinga/ssh-agent/defaults/main.yml
 icinga_ssh_agent_custom_monitoring_plugins:
   "{{ icinga_ssh_agent_monitoring_plugins |
       combine(eyeo_icinga_ssh_agent_monitoring_plugins) }}"
 
+# icinga_ssh_agent_icinga_services from
+# roles/icinga/ssh-agent/defaults/main.yml
 icinga_ssh_agent_custom_icinga_services:
   "{{ icinga_ssh_agent_icinga_services |
       combine(eyeo_icinga_ssh_agent_icinga_services) }}"
+
+# icinga_server_services from roles/icinga/server/defaults/main.yml
+icinga_server_custom_icinga_services:
+  "{{ icinga_server_services |
+      combine(eyeo_icinga_server_custom_icinga_services) }}"
 
 icinga_server_custom_icinga_users:
   "{{ eyeo_icinga_server_custom_icinga_users }}"
