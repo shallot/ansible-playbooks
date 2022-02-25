@@ -150,6 +150,12 @@ host_specific_custom_ssh_keys__to_merge:
   example_key:
     dest: "/root/test-ssh-key-example_id_ed25519"
     type: "ed25519"
+    # regenerate is set to never, the module will fail if the key cannot be
+    #  read or the passphrase is not matching, and will NEVER
+    #  regenerate an existing key.
+    # Uncomment the following to regenerate:
+    #
+    # force: "yes"
     size: 521
 
 # tasks/authorized-keys.yml

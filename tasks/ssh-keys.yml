@@ -55,6 +55,7 @@
         seuser: "{{ ssh_key.value.seuser | default(omit) }}"
         size: "{{ ssh_key.value.size | default(omit) }}"
         state: "{{ ssh_key.value.state | default(omit) }}"
+        regenerate: "{{ ssh_key.value.state | default(\"never\") }}"
         type: "{{ ssh_key.value.type | default(omit) }}"
         unsafe_writes: "{{ ssh_key.value.unsafe_writes | default(omit) }}"
       when:
