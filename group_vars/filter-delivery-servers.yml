@@ -1,0 +1,247 @@
+# Copyright (c) 2022-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+# tasks/packages.yml
+filter_delivery_servers_custom_packages__to_merge:
+  rsync: "present"
+
+filter_delivery_username:
+  "www-data"
+filter_delivery_base_path:
+  "/var/www"
+filter_delivery_servers_document_root_path:
+  "{{ filter_delivery_base_path }}/{{ filter_delivery_domain }}"
+
+# provision-custom-paths.yml
+filter_delivery_servers_custom_paths__to_merge:
+  "{{ filter_delivery_base_path }}":
+    dest: "{{ filter_delivery_base_path }}"
+    state: "directory"
+    mode: "0775"
+    group: "{{ filter_delivery_username }}"
+  "{{ filter_delivery_servers_document_root_path }}":
+    dest: "{{ filter_delivery_servers_document_root_path }}"
+    state: "directory"
+    mode: "0755"
+    owner: "{{ filter_delivery_username }}"
+
+# roles/apache2/tasks/main.yml
+# provision-apache2-servers.yml
+filter_delivery_servers_apache2_modules__to_merge:
+  headers: &apache2_standard_module
+    package: false
+  rewrite:
+    *apache2_standard_module
+  brotli:
+    *apache2_standard_module
+
+# roles/apache2/tasks/main.yml
+filter_delivery_server_custom_apache_config: |
+  RewriteEngine On
+
+  {{ filter_delivery_server_prerequisite_custom_apache_config
+   | default(
+     default_filter_delivery_server_prerequisite_custom_apache_config
+  ) }}
+
+  {{ filter_delivery_server_gzip_custom_apache_config
+   | default(default_filter_delivery_server_gzip_custom_apache_config) }}
+
+  {{ filter_delivery_server_brotli_custom_apache_config
+   | default(default_filter_delivery_server_brotli_custom_apache_config) }}
+
+# yamllint disable rule:line-length
+default_filter_delivery_server_prerequisite_custom_apache_config: |
+  DocumentRoot {{ filter_delivery_servers_document_root_path }}
+
+  <Directory "{{ filter_delivery_servers_document_root_path }}">
+    AllowOverride FileInfo
+    Require all granted
+  </Directory>
+
+  AddDefaultCharset UTF-8
+
+  # Redirect trailing dot notations to FQDN,
+  # to prevent potential issues
+  RewriteCond %{HTTP_HOST} "^(.+)\.$" [NC]
+  RewriteRule "^(.*)" %{REQUEST_SCHEME}://%1$1 [R,L]
+
+  GeoIPEnable On
+  GeoIPDBFile {{ custom_geoip_data_path }}/{{ custom_geoip_data_country_ipv4 }} CheckCache
+  GeoIPDBFile {{ custom_geoip_data_path }}/{{ custom_geoip_data_country_ipv6 }} CheckCache
+
+  # Apply rewrite rules defined here AFTER the ones in .htaccess
+  # Inherit rewrite settings as otherwise, .htaccess overwrites rulesets specified
+  # in a directory declaration and compression rules wouldn't be applied anymore.
+  # https://httpd.apache.org/docs/2.4/mod/mod_rewrite.html#rewriteoptions
+  RewriteOptions Inherit
+
+# yamllint enable rule:line-length
+
+default_filter_delivery_server_gzip_custom_apache_config: |
+  # https://httpd.apache.org/docs/2.4/mod/mod_deflate.html#precompressed
+  # Serve gzip compressed files if they exist and the client accepts gzip.
+  RewriteCond "%{HTTP:Accept-encoding}" "gzip"
+  RewriteCond "%{DOCUMENT_ROOT}%{REQUEST_FILENAME}\.gz" -s
+  RewriteRule "^(.*)\.(json|tpl|txt)$" "$1\.$2\.gz" [QSA]
+
+  # Serve correct content types, and prevent mod_deflate double gzip.
+  RewriteRule "\.json\.gz$" "-" [T=application/json,E=no-gzip:1]
+  RewriteRule "\.tpl\.gz$" "-" [T=text/plain,E=no-gzip:1]
+  RewriteRule "\.txt\.gz$" "-" [T=text/plain,E=no-gzip:1]
+
+  <FilesMatch "(\.json\.gz|\.tpl\.gz|\.txt\.gz)$">
+    # Serve correct encoding type.
+    Header append Content-Encoding gzip
+    # Force proxies to cache gzipped &
+    # non-gzipped files separately.
+    Header append Vary Accept-Encoding
+  </FilesMatch>
+
+default_filter_delivery_server_brotli_custom_apache_config: |
+  # https://httpd.apache.org/docs/trunk/mod/mod_brotli.html#precompressed
+  # Serve brotli compressed files if they exist and the client accepts brotli.
+  RewriteCond "%{HTTP:Accept-encoding}" "br"
+  RewriteCond "%{DOCUMENT_ROOT}%{REQUEST_FILENAME}\.br" -s
+  RewriteRule "^(.*)\.(json|tpl|txt)$" "$1\.$2\.br" [QSA]
+
+  # Serve correct content types, and prevent double compression.
+  RewriteRule "\.json\.br" "-" [T=application/json,E=no-brotli:1]
+  RewriteRule "\.tpl\.br" "-" [T=text/plain,E=no-brotli:1]
+  RewriteRule "\.txt\.br" "-" [T=text/plain,E=no-brotli:1]
+
+  <FilesMatch "(\.json\.br|\.tpl\.br|\.txt\.br)$">
+    # Serve correct encoding type.
+    Header append Content-Encoding br
+    # Force proxies to cache brotli &
+    # nonbrotli files separately.
+    Header append Vary Accept-Encoding
+  </FilesMatch>
+
+# provision-custom-paths.yml
+filter_delivery_servers_sudoers_custom_paths__to_merge:
+  /etc/sudoers.d/deploy_eyeo_filter_delivery:
+    state: "copy"
+    mode: "0440"
+    # yamllint disable rule:line-length
+    content: |
+      Defaults:gitlab-runner env_keep += "CI_COMMIT_REF_SLUG"
+      gitlab-runner ALL=({{ filter_delivery_username }}) NOPASSWD: /usr/local/bin/deploy_eyeo_filter_delivery
+      Defaults:{{ filter_delivery_username }} env_keep += "CI_COMMIT_REF_SLUG"
+      {{ filter_delivery_username }} ALL=(root) NOPASSWD: /usr/local/sbin/deploy_vhost_eyeo_filter_delivery
+    # yamllint enable rule:line-length
+    validate:
+      "/usr/sbin/visudo --check --file=%s"
+  /etc/sudoers.d/undeploy_eyeo_filter_delivery:
+    state: "copy"
+    mode: "0440"
+    # yamllint disable rule:line-length
+    content: |
+      Defaults:gitlab-runner env_keep += "CI_COMMIT_REF_SLUG"
+      gitlab-runner ALL=({{ filter_delivery_username }}) NOPASSWD: /usr/local/bin/undeploy_eyeo_filter_delivery
+      {{ filter_delivery_username }} ALL=(root) NOPASSWD: /usr/local/sbin/undeploy_vhost_eyeo_filter_delivery
+    # yamllint enable rule:line-length
+    validate:
+      "/usr/sbin/visudo --check --file=%s"
+
+filter_delivery_servers_deploy_scripts_custom_paths__to_merge:
+  /usr/local/sbin/deploy_vhost_eyeo_filter_delivery:
+    state: "copy"
+    mode: "0744"
+    content: |
+      #!/bin/sh -ex
+      user=$1
+      DOMAIN=$2
+
+      if [ $CI_COMMIT_REF_SLUG != "main" ]; then
+
+        base_virtual_host_file=/etc/apache2/sites-available/000-$DOMAIN.conf
+
+        test -e "$base_virtual_host_file" || exit 5
+        sed -e s,$DOMAIN,$CI_COMMIT_REF_SLUG.$DOMAIN,g \
+            $base_virtual_host_file | \
+          tee /etc/apache2/sites-available/$CI_COMMIT_REF_SLUG.$DOMAIN.conf
+        a2ensite $CI_COMMIT_REF_SLUG.$DOMAIN.conf
+        service apache2 status
+        service apache2 reload
+      fi
+  /usr/local/bin/deploy_eyeo_filter_delivery:
+    state: "copy"
+    mode: "0744"
+    owner: "{{ filter_delivery_username }}"
+    # yamllint disable rule:line-length
+    content: |
+      #!/bin/sh -ex
+      DOMAIN="{{ filter_delivery_domain }}"
+      test -n "$DOMAIN" || exit 1
+      user="{{ filter_delivery_username }}"
+      id "$user" || exit 2
+      SOURCE_DIR=$1
+      test -d "$SOURCE_DIR" || exit 3
+      dest_dir="{{ filter_delivery_base_path }}"
+      test -d "$dest_dir" || exit 4
+      if [ "$CI_COMMIT_REF_SLUG" = "main" ]; then
+        final_dest_dir=$dest_dir/$DOMAIN
+      else
+        final_dest_dir=$dest_dir/$CI_COMMIT_REF_SLUG.$DOMAIN
+      fi
+
+      install -d -o $user $final_dest_dir
+      sudo /usr/local/sbin/deploy_vhost_eyeo_filter_delivery \
+        $user $DOMAIN
+
+      rsync -aHAX --del -vP --stats $SOURCE_DIR/ $final_dest_dir/
+
+    # yamllint enable rule:line-length
+  /usr/local/sbin/undeploy_vhost_eyeo_filter_delivery:
+    state: "copy"
+    mode: "0744"
+    content: |
+      #!/bin/sh -ex
+      final_dest_dir=$1
+      base_virtual_host_file=$2
+      base_virtual_host_file_short=$(basename $base_virtual_host_file)
+
+      a2dissite $base_virtual_host_file_short
+      service apache2 status
+      service apache2 reload
+      rm -v $base_virtual_host_file
+  /usr/local/bin/undeploy_eyeo_filter_delivery:
+    state: "copy"
+    mode: "0744"
+    owner: "{{ filter_delivery_username }}"
+    content: |
+      #!/bin/sh -ex
+      if [ "$CI_COMMIT_REF_SLUG" = "main" ]; then
+        echo "Can only remove staging system not production main"
+        exit 1
+      fi
+      DOMAIN="{{ filter_delivery_domain }}"
+      test -n "$DOMAIN" || exit 2
+      user="{{ filter_delivery_username }}"
+      id "$user" || exit 3
+      dest_dir="{{ filter_delivery_base_path }}"
+      test -d "$dest_dir" || exit 4
+      final_dest_dir=$dest_dir/$CI_COMMIT_REF_SLUG.$DOMAIN
+      base_virtual_host_file=/etc/apache2/sites-available/$CI_COMMIT_REF_SLUG.$DOMAIN.conf
+      test -e "$base_virtual_host_file" || exit 5
+
+      find $final_dest_dir -mindepth 1 -depth -print -delete
+      rmdir $final_dest_dir
+
+      sudo /usr/local/sbin/undeploy_vhost_eyeo_filter_delivery \
+        $final_dest_dir $base_virtual_host_file
