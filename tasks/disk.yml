@@ -62,8 +62,13 @@
     creates_string:
       "/dev/{{ item.value.vg }}/{{ item.value.name }}"
     lv_create:
-      "sudo lvcreate -n {{ item.value.name }} -l {{ item.value.extents }}
-       {{ item.value.vg }}"
+      "sudo lvcreate -n {{ item.value.name }}
+      {% if item.value.extents is defined -%}
+      -l {{ item.value.extents }}
+      {% elif item.value.size is defined -%}
+      -L {{ item.value.size }}
+      {% endif -%}
+      {{ item.value.vg }}"
     filesystem_create:
       "sudo mkfs.{{ item.value.filesystem | default('') }}
        /dev/{{ item.value.vg }}/{{ item.value.name }}"
