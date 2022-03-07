@@ -141,10 +141,6 @@ icinga_service_http_response_time_options:
   notes: |
     "Applied on icinga_http_response_time_check_group"
 
-# https://www.vagrantup.com/docs/vagrantfile/machine_settings.html
-vagrant_box:
-  "debian/buster64"
-
 # https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
 vagrant_groups:
   - "icinga-servers"

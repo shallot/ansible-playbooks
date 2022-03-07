@@ -22,7 +22,7 @@
     VAGRANT_PROVIDER: "libvirt"
     # FIXME pre-fetch the actual box from Vagrant config for the
     # specific test host, or default
-    VAGRANT_BOX: "debian/buster64"
+    VAGRANT_BOX: "debian/bullseye64"
   tags:
     - "eyeo-devops-ansible-playbooks-vagrant-1"
   before_script:
