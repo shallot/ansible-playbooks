@@ -62,13 +62,17 @@
     creates_string:
       "/dev/{{ item.value.vg }}/{{ item.value.name }}"
     lv_create:
+      # yamllint disable rule:line-length
       "sudo lvcreate -n {{ item.value.name }}
       {% if item.value.extents is defined -%}
       -l {{ item.value.extents }}
       {% elif item.value.size is defined -%}
       -L {{ item.value.size }}
+      {% else -%}
+      {{ undefined | mandatory('custom_disk_logical_volumes needs either size or extents for ' + item.value.name) }}
       {% endif -%}
       {{ item.value.vg }}"
+      # yamllint enable rule:line-length
     filesystem_create:
       "sudo mkfs.{{ item.value.filesystem | default('') }}
        /dev/{{ item.value.vg }}/{{ item.value.name }}"

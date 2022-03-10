@@ -51,6 +51,9 @@ custom_disk_logical_volumes:
     name: "lv2"
     size: "1M"
     vg: "vg02"
+  2_lv3:
+    name: "lv2"
+    vg: "vg02"
 
 # tasks/disk.yml
 custom_disk_filesystem:
