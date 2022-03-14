@@ -182,6 +182,11 @@ icinga-0:
   variables:
     TEST_HOST: "icinga-0.test"
 
+jirafeau-0:
+  extends: ".vagrantjob"
+  variables:
+    TEST_HOST: "jirafeau-server-0.test"
+
 lamp-server-0:
   extends: ".vagrantjob"
   variables:

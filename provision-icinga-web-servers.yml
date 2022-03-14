@@ -33,9 +33,11 @@
 
   tasks:
 
-    # https://docs.ansible.com/ansible/latest/include_tasks_module.html
-    - include_tasks:
-        "tasks/apache2-php-fpm.yml"
+    # https://docs.ansible.com/ansible/latest/import_tasks_module.html
+    - import_tasks:
+        "tasks/apache2.yml"
+      vars:
+        apache2_php_fpm_enabled: true
 
     # https://docs.ansible.com/ansible/latest/import_role_module.html
     - import_role:
