@@ -50,8 +50,9 @@
 - name:
     "pip : ansible"
   pip:
-    # 2.8 required for openssh_keypair module
-    name: "ansible==2.8.*"
+    # 2.10 required for community.crypto.openssh_keypair module
+    name: "ansible==2.10.*"
+    extra_args: "--no-cache-dir"
     virtualenv: "{{ custom_ansible_pip_virtualenv | default(omit) }}"
   become: &custom_ansible_become
     "{{ custom_ansible_pip_virtualenv is not defined }}"

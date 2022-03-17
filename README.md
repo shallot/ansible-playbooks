@@ -43,7 +43,7 @@ dependencies being available before working with the repository.
 Below please find a list of dependencies required to run the *Ansible* playbooks
 within this repository:
 
-- The [Ansible][ansible] software, version 2.8
+- The [Ansible][ansible] software, version 2.10
 - The [Git][git] software, for fetching dependencies
 - The [OpenSSH][openssh] client software
 
