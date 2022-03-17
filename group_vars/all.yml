@@ -17,6 +17,7 @@
 
 aa_default_custom_packages__to_merge:
   sudo: "present"
+  acl: "present" # required for ansible 2.10 tempfile permissions
 
 aa_default_sshd_config__to_merge:
   AllowAgentForwarding: "no"
