@@ -99,6 +99,11 @@ filter_list_origin_repos:
   crumbsfilterlist:
     clone: true
     sitescripts: true
+  crumbsfilterlist-artifacts:
+    destination: "crumbs"
+    gitlab_artifacts: true
+    gitlab_project: "eyeo/filterlists/crumbsfilterlist"
+    gitlab_ref: "master"
   filterlist-splitting:
     destination: "aa-variants"
     gitlab_artifacts: true
