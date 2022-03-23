@@ -22,7 +22,7 @@ aa_default_sshd_config__to_merge:
   AllowAgentForwarding: "no"
   AllowTcpForwarding: "no"
   PermitEmptyPasswords: "no"
-  PermitRootLogin: "without-password"
+  PermitRootLogin: "prohibit-password"
   PermitTTY: "yes"
   PermitTunnel: "no"
   PermitUserEnvironment: "no"
