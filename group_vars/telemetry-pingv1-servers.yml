@@ -160,6 +160,7 @@ default_apache2_sites__to_merge:
         SSLCertificateFile "{{ telemetry_pingv1_ssl_cert_file }}"
         SSLCertificateChainFile "{{ telemetry_pingv1_ssl_chain_file }}"
         SSLCertificateKeyFile "{{ telemetry_pingv1_ssl_key_file }}"
+        {{ ocsp_stapling_apache_config }}
       </VirtualHost>
       {% endif %}
     # yamllint enable rule:line-length
@@ -283,6 +284,7 @@ telemetry-pingv1_apache2_sites__to_merge:
         SSLCertificateFile "{{ telemetry_pingv1_ssl_cert_file }}"
         SSLCertificateChainFile "{{ telemetry_pingv1_ssl_chain_file }}"
         SSLCertificateKeyFile "{{ telemetry_pingv1_ssl_key_file }}"
+        {{ ocsp_stapling_apache_config }}
 
       </VirtualHost>
       {% endfor %}
