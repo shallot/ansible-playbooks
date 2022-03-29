@@ -46,13 +46,14 @@ custom_disk_logical_volumes:
     extents: "1"
     vg: "vg01"
     mountpoint: "/opt/lv1"
+    fstab_options:
+      - "noauto"
+      - "acl"
+    fstab_pass: 3
     filesystem: "{{ custom_disk_filesystem }}"
   2_lv2:
     name: "lv2"
     size: "1M"
-    vg: "vg02"
-  2_lv3:
-    name: "lv2"
     vg: "vg02"
 
 # tasks/disk.yml

@@ -105,8 +105,18 @@
       "sudo mkdir {{ item.value.mountpoint }}"
     record_mountpoint_fstab:
       "echo /dev/{{ item.value.vg }}/{{ item.value.name }}
-       {{ item.value.mountpoint }} {{ item.value.filesystem }} defaults 0 2 |
+       {{ item.value.mountpoint }} {{ item.value.filesystem }}
+       {{ fstab_options }} {{ item.value.fstab_dump | default('0') }}
+       {{ item.value.fstab_pass | default('2') }} |
        sudo tee -a /etc/fstab"
+    fstab_options: >-
+      {%- if item.value.fstab_options is defined -%}
+      {%- for option in item.value.fstab_options -%}
+      {{ option }}{{ "," if not loop.last else "" }}
+      {%- endfor -%}
+      {%- else -%}
+      defaults
+      {%- endif -%}
     mount:
       "sudo mount {{ item.value.mountpoint }}"
   when:
