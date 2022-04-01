@@ -37,6 +37,38 @@ icinga_web_server_ipv4_address:
 icinga_server_ip:
   "{{ inventory_hostname }}"
 
+icinga_web_api_users:
+  icingaweb2:
+    password: "changeme"
+    permissions:
+      - '"status/query"'
+      - '"actions/*"'
+      - '"objects/modify/*"'
+      - '"objects/query/*"'
+  test-signalilo-host:
+    password: "changeme"
+    permissions:
+      - '{% raw %}{
+          permission = "objects/query/*",
+          filter = {{ host.name == "test-signalilo-host" }}
+        }{% endraw %}'
+      - '{% raw %}{
+          permission = "objects/create/service",
+          filter = {{ host.name == "test-signalilo-host" }}
+        }{% endraw %}'
+      - '{% raw %}{
+          permission = "objects/modify/service",
+          filter = {{ host.name == "test-signalilo-host" }}
+        }{% endraw %}'
+      - '{% raw %}{
+          permission = "objects/delete/service",
+          filter = {{ host.name == "test-signalilo-host" }}
+        }{% endraw %}'
+      - '{% raw %}{
+          permission = "actions/process-check-result",
+          filter = {{ host.name == "test-signalilo-host" }}
+        }{% endraw %}'
+
 # roles/apache2/tasks/main.yml
 test_icinga_apache2_sites__to_merge:
   icingaweb2:
@@ -67,6 +99,14 @@ icinga_server_http_service_group:
 icinga_server_https_service_group:
   ['apache2-servers-https']
 
+icinga_server_custom_icinga_hosts:
+  test-signalilo-host:
+    configuration:
+      display_name: "\"Signalilo test-signalilo-host\""
+      check_command: "\"dummy\""
+      enable_passive_checks: 'false'
+      enable_perfdata: 'false'
+
 icinga_server_custom_monitoring_plugins:
   "{{ icinga_server_monitoring_plugins }}"
 
@@ -81,6 +121,17 @@ icinga_ssh_agent_custom_monitoring_plugins:
 icinga_ssh_agent_custom_icinga_services:
   "{{ icinga_ssh_agent_icinga_services |
       combine(eyeo_icinga_ssh_agent_icinga_services) }}"
+
+eyeo_icinga_server_custom_icinga_services:
+  signalilo_heartbeat:
+    name: "heartbeat"
+    # yamllint disable rule:line-length
+    service_definition: |
+      {{ lookup('file', "{{ icinga_monitoring_plugins_dir
+                              | default('.examples/monitoring-plugins') }}/files/icinga-services/signalilo_heartbeat.conf") }}
+    # yamllint enable rule:line-length
+    assign:
+      - 'host.name == "test-signalilo-host"'
 
 # icinga_server_services from roles/icinga/server/defaults/main.yml
 icinga_server_custom_icinga_services:
