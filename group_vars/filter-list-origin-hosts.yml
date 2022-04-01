@@ -173,6 +173,7 @@ filter_list_origin_gitlab_artifacts_command: >-
   {%- set filter_list_origin_gitlab_artifact_repos=filter_list_origin_repos
     | dict2items
     | selectattr('value.gitlab_artifacts', 'defined')
+    | selectattr('value.gitlab_artifacts', true)
     | selectattr('value.destination', 'defined')
     | list | items2dict -%}
   {%- for key, value in filter_list_origin_gitlab_artifact_repos | dictsort -%}
