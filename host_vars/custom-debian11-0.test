@@ -114,6 +114,23 @@ host_specific_custom_services__to_merge:
       [Install]
       WantedBy=multi-user.target
 
+# tasks/services.yml
+host_specific_custom_service_dropins__to_merge:
+  example_enabled_service:
+    dropin_name: "local-notifications"
+    service:
+      Service:
+        ExecStartPost: >-
+          /bin/sh -c "/bin/systemctl status example_enabled_service
+          | /bin/echo 'test'"
+  example_disabled_raw_service:
+    dropin_name: "local-notifications"
+    content: |
+      [Service]
+      ExecStartPost=/bin/sh -c '\
+           /bin/systemctl status example_disabled_raw_service \
+           | /bin/echo "test"'
+
 # provision-custom-systems.yml
 host_specific_sshd_config__to_merge:
   AllowAgentForwarding: "no"

@@ -24,6 +24,15 @@
     suffix: "{{ custom_services_suffix
               | default('custom_services__to_merge') }}"
 
+# action_plugins/merge_variable.py
+- name:
+    "merge_variable : custom_service_dropins"
+  merge_variable:
+    default: {}
+    name: "custom_service_dropins"
+    suffix: "{{ custom_service_dropins_suffix
+              | default('custom_service_dropins__to_merge') }}"
+
 - block:
 
     # https://docs.ansible.com/ansible/latest/modules/ini_file_module.html
@@ -66,9 +75,8 @@
         owner: "root"
       vars:
         service_file_name:
-          "{{ item.value.name
-            | default(item.key) }}.{{ item.value.type
-                                    | default('service') }}"
+          "{{ service_short_name }}.{{ item.value.type
+                                     | default('service') }}"
       loop:
         "{{ custom_services | dict2items }}"
       loop_control:
@@ -79,10 +87,86 @@
       when:
         "item.value.content is defined"
 
+    # https://docs.ansible.com/ansible/latest/modules/copy_module.html
+    - name:
+        "service : drop-ins : directory : dropin_file_directory"
+      file:
+        dest: "{{ dropin_file_directory }}"
+        state: "directory"
+        group: "root"
+        mode: "0755"
+        owner: "root"
+      loop:
+        "{{ custom_service_dropins | dict2items }}"
+      loop_control:
+        label: "{{ dropin_file_directory | to_json }}"
+      register:
+        "custom_service"
+      when:
+        "item.config is defined or
+         item.value.content is defined"
+
+    # https://docs.ansible.com/ansible/latest/modules/ini_file_module.html
+    # filter_plugins/ini_input_from_dict.py
+    - name:
+        "service : drop-ins : ini_file"
+      ini_file:
+        dest: "{{ dropin_file_directory }}/{{ dropin_file_name }}.conf"
+        group: "root"
+        mode: "0644"
+        option: "{{ item.option }}"
+        owner: "root"
+        section: "{{ item.section }}"
+        value: "{{ item.value }}"
+      vars:
+        dropin_file_name:
+          "{{ item.config.dropin_name }}"
+      loop:
+        "{{ custom_service_dropins | ini_input_from_dict }}"
+      loop_control:
+        label: "{{ [dropin_file_name, item.section, item.option, item.config]
+                 | to_json }}"
+      register:
+        "custom_service"
+      become:
+        true
+      when:
+        "item.config is defined"
+
+    # https://docs.ansible.com/ansible/latest/modules/copy_module.html
+    - name:
+        "service : drop-ins : copy : dropin_file_name"
+      copy:
+        content: "{{ item.value.content }}"
+        dest: "{{ dropin_file_directory }}/{{ dropin_file_name }}.conf"
+        group: "root"
+        mode: "0644"
+        owner: "root"
+      vars:
+        dropin_file_name:
+          "{{ item.value.dropin_name }}"
+      loop:
+        "{{ custom_service_dropins | dict2items }}"
+      loop_control:
+        label: "{{ [dropin_file_directory, dropin_file_name]
+                 | to_json }}"
+      register:
+        "custom_service"
+      when:
+        "item.value.content is defined"
+
   vars:
     service_file_directory:
       "{{ custom_systemd_service_location
         | default('/etc/systemd/system') }}"
+    service_short_name:
+      "{{ item.value.name
+        | default(item.ini_file)
+        | default(item.key) }}"
+    dropin_file_directory:
+      "{{ custom_systemd_service_dropin_location
+        | default(service_file_directory + '/' +
+                  service_short_name + '.service.d') }}"
   become:
     true
 
