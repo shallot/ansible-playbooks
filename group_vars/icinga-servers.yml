@@ -26,14 +26,200 @@ icinga_for_web_postgresql_hba_entries__to_merge:
 
 # provision-icinga-servers.yml
 # yamllint disable rule:line-length
+# yamllint disable rule:quoted-strings
+# https://icinga.com/docs/icinga2/latest/doc/04-configuration/#servicesconf
+# https://gitlab.com/eyeo/devops/utilities/monitoring-plugins/-/blob/master/templates/config/services/{{ item.key }}.conf
+# https://www.monitoring-plugins.org/doc/man/check_by_ssh.html
 eyeo_icinga_server_custom_icinga_services:
-  systemd_postgresql:
-    name: "systemd_postgresql"
+  bandwidth:
+    name:
+      "{{ icinga_service_bandwidth_name
+        | default('bandwidth') }}"
     service_definition: |
-      {{ lookup('template', 'roles/monitoring-plugins/files/icinga-services/systemd_postgresql.conf') }}
+      {{ lookup('template', "{{ icinga_monitoring_plugins_dir
+                              | default('.examples/monitoring-plugins') }}/files/icinga-services/bandwidth.conf") }}
+    options:
+      "{{ icinga_global_service_options |
+          combine(icinga_service_bandwidth_options | default({}) ) }}"
     assign:
-      - "intersection([\"postgresql-servers\"], host.vars.ansible.groups)"
+      "{{ icinga_service_bandwidth_assign
+        | default(['host.vars.ansible.os_family == \"Debian\"']) }}"
+    ignore:
+      "{{ icinga_service_bandwidth_ignore
+        | default([]) }}"
+  connections:
+    name:
+      "{{ icinga_service_connections_name
+        | default('connections') }}"
+    service_definition: |
+      {{ lookup('template', "{{ icinga_monitoring_plugins_dir
+                              | default('.examples/monitoring-plugins') }}/files/icinga-services/connections.conf") }}
+    options:
+      "{{ icinga_global_service_options |
+          combine(icinga_service_connections_options | default({}) ) }}"
+    assign:
+      "{{ icinga_service_connections_assign
+        | default(['host.vars.ansible.system == \"Linux\"']) }}"
+    ignore:
+      "{{ icinga_service_connections_ignore
+        | default([]) }}"
+  http_port:
+    name:
+      "{{ icinga_service_http_port_name
+        | default('http-port') }}"
+    service_definition: |
+      {{ lookup('template', "{{ icinga_monitoring_plugins_dir
+                              | default('.examples/monitoring-plugins') }}/files/icinga-services/port.conf") }}
+    options:
+      "{{ icinga_global_service_options |
+          combine(icinga_service_http_port_options | default({}) ) }}"
+    assign:
+      - "intersection({{ icinga_http_port_check_group
+                       | default(icinga_server_http_service_group)
+                       | to_json }},
+                      host.vars.ansible.groups)"
+    ignore:
+      "{{ icinga_service_http_port_ignore
+        | default([]) }}"
+  http_response_time:
+    name:
+      "{{ icinga_service_http_response_time_name
+        | default('http-response-time') }}"
+    service_definition: |
+      {{ lookup('template', '{{ icinga_server_base_dir }}/templates/config/services/response_time.conf' ) }}
+    options:
+      "{{ icinga_global_service_options |
+          combine(icinga_service_http_response_time_options | default({}) ) }}"
+    assign:
+      - "intersection({{ icinga_http_response_time_check_group
+                       | default(icinga_server_http_service_group)
+                       | to_json }},
+                      host.vars.ansible.groups)"
+    ignore:
+      "{{ icinga_service_http_response_time_ignore
+        | default([]) }}"
+  https_port:
+    name:
+      "{{ icinga_service_https_port_name
+        | default('https-port') }}"
+    service_definition: |
+      {{ lookup('template', "{{ icinga_monitoring_plugins_dir
+                              | default('.examples/monitoring-plugins') }}/files/icinga-services/port.conf",
+         template_vars=dict(monitoring_plugins_port=443) ) }}
+    options:
+      "{{ icinga_global_service_options |
+          combine(icinga_service_https_port_options | default({}) ) }}"
+    assign:
+      - "intersection({{ icinga_https_port_check_group
+                       | default(icinga_server_https_service_group)
+                       | to_json }},
+                      host.vars.ansible.groups)"
+    ignore:
+      "{{ icinga_service_https_port_ignore
+        | default([]) }}"
+  https_response_time:
+    name:
+      "{{ icinga_service_https_response_time_name
+        | default('https-response-time') }}"
+    service_definition: |
+      {{ lookup('template', '{{ icinga_server_base_dir }}/templates/config/services/response_time.conf',
+                 template_vars=dict(monitoring_plugins_response_time_ssl=1) ) }}
+    options:
+      "{{ icinga_global_service_options |
+          combine(icinga_service_https_response_time_options | default({}) ) }}"
+    assign:
+      - "intersection({{ icinga_https_response_time_check_group
+                       | default(icinga_server_https_service_group)
+                       | to_json }},
+                      host.vars.ansible.groups)"
+    ignore:
+      "{{ icinga_service_https_response_time_ignore
+        | default([]) }}"
+  memory:
+    name:
+      "{{ icinga_service_memory_name
+        | default('memory') }}"
+    service_definition: |
+      {{ lookup('template', "{{ icinga_monitoring_plugins_dir
+                              | default('.examples/monitoring-plugins') }}/files/icinga-services/memory.conf") }}
+    options:
+      "{{ icinga_global_service_options |
+          combine(icinga_service_memory_options | default({}) ) }}"
+    assign:
+      "{{ icinga_service_memory_assign
+        | default(['host.vars.ansible.system == \"Linux\"']) }}"
+    ignore:
+      "{{ icinga_service_memory_ignore
+        | default([]) }}"
+  raid:
+    name:
+      "{{ icinga_service_raid_name
+        | default('raid') }}"
+    service_definition: |
+      {{ lookup('template', "{{ icinga_monitoring_plugins_dir
+                              | default('.examples/monitoring-plugins') }}/files/icinga-services/raid.conf") }}
+    options:
+      "{{ icinga_global_service_options |
+          combine(icinga_service_raid_options | default({}) ) }}"
+    assign:
+      "{{ icinga_service_raid_assign
+        | default(['host.vars.ansible.system == \"Linux\"']) }}"
+    ignore:
+      "{{ icinga_service_raid_ignore
+        | default([]) }}"
+  ssl_cert:
+    name:
+      "{{ icinga_service_ssl_cert_name
+        | default('ssl-cert') }}"
+    service_definition: |
+      {{ lookup('template', '{{ icinga_server_base_dir }}/templates/config/services/ssl_cert.conf') }}
+    options:
+      "{{ icinga_global_service_options |
+          combine(icinga_service_ssl_cert_options | default({}) ) }}"
+    assign:
+      - "intersection({{ icinga_ssl_cert_check_group
+                       | default(icinga_server_https_service_group)
+                       | to_json }},
+                      host.vars.ansible.groups)"
+    ignore:
+      "{{ icinga_service_ssl_cert_ignore
+        | default([]) }}"
+  systemd_postgresql:
+    name:
+      "{{ icinga_service_systemd_postgresql_name
+        | default('systemd_postgresql') }}"
+    service_definition: |
+      {{ lookup('template', "{{ icinga_monitoring_plugins_dir
+                              | default('.examples/monitoring-plugins') }}/files/icinga-services/systemd_postgresql.conf") }}
+    options:
+      "{{ icinga_global_service_options |
+          combine(icinga_service_systemd_postgresql_options | default({}) ) }}"
+    assign:
+      - "intersection({{ icinga_systemd_postgresql_check_group
+                       | default([\"postgresql-servers\"])
+                       | to_json }},
+                      host.vars.ansible.groups)"
+    ignore:
+      "{{ icinga_service_systemd_postgresql_ignore
+        | default([]) }}"
+  zombie_procs:
+    name:
+      "{{ icinga_service_zombie_procs_name
+        | default('zombie-processes') }}"
+    service_definition: |
+      {{ lookup('template', "{{ icinga_monitoring_plugins_dir
+                              | default('.examples/monitoring-plugins') }}/files/icinga-services/zombie_procs.conf") }}
+    options:
+      "{{ icinga_global_service_options |
+          combine(icinga_service_zombie_procs_options | default({}) ) }}"
+    assign:
+      "{{ icinga_service_zombie_procs_assign
+        | default(['host.vars.ansible.system == \"Linux\"']) }}"
+    ignore:
+      "{{ icinga_service_zombie_procs_ignore
+        | default([]) }}"
 # yamllint enable rule:line-length
+# yamllint enable rule:quoted-strings
 
 # provision-icinga-servers.yml
 eyeo_icinga_server_custom_icinga_users:
