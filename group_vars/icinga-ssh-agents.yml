@@ -44,3 +44,4 @@ eyeo_icinga_ssh_agent_monitoring_plugins:
     owner: "root"
     mode: "0775"
     src: "files/plugins/check_service"
+    sudoers_src: "templates/sudoers/check_service"
