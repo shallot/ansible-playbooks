@@ -85,6 +85,9 @@ filter_server_custom_apache_config: |
   {{ filter_server_compliance_custom_apache_config
    | default(default_filter_server_compliance_custom_apache_config) }}
 
+  {{ filter_server_safari15_custom_apache_config
+   | default(default_filter_server_safari15_custom_apache_config) }}
+
 default_filter_server_abuse_custom_apache_config: |
   <Location "/easylistchina+easylist.txt">
     RewriteCond %{HTTP_USER_AGENT} "^(-)?$" [NC]
@@ -209,5 +212,17 @@ default_filter_server_compliance_custom_apache_config: |
   RewriteCond %{QUERY_STRING} (?:^|&)addonName=(?:adblockplus(?:chrome|firefox|opera|edge)?)(?:&|$)
   RewriteCond %{QUERY_STRING} (?:^|&)addonVersion=(?:3\.(?:11\.[4-9]|1[2-9])|[4-9])
   RewriteRule ^/abp\-filters\-anti\-cv\.txt /abp-filters-graph.txt [L]
+
+default_filter_server_safari15_custom_apache_config: |
+  RewriteCond %{QUERY_STRING} (?:^|&)application=ios(?:&|$)
+  RewriteCond %{QUERY_STRING} (?:^|&)applicationVersion=1[5-9]\.
+  RewriteRule ^ - [E=SAFARI15:true]
+
+  RewriteCond %{QUERY_STRING} (?:^|&)application=macos(?:&|$)
+  RewriteCond %{QUERY_STRING} (?:^|&)applicationVersion=1(?:0\.1[5-9]|[1-9])
+  RewriteRule ^ - [E=SAFARI15:true]
+
+  RewriteCond %{ENV:SAFARI15} =true
+  RewriteRule ^/(easylist.*)\.(json(?:\.\w+)?)$ /$1+safari15.$2 [L]
 
 # yamllint enable rule:line-length
