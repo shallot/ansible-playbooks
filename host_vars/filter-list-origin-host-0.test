@@ -109,6 +109,12 @@ filter_list_origin_repos:
     gitlab_artifacts: true
     gitlab_project: "eyeo/monetization/filterlist-splitting"
     gitlab_ref: "main"
+  v3-filterlists:
+    destination: "v3"
+    source: "filterlists-published/main/filterlists"
+    gstorage_artifacts: true
+    filter: "filterlists/v3"
+    diff_retention: "2"
 
 # cron job timings correlated with filter_server_mirror_cron_job_minute
 # this one takes ~0.2s
@@ -125,6 +131,9 @@ filter_list_origin_update_repos_cron_job_time:
 
 # this one can run in parallel with update_repos as it's orthogonal to it
 filter_list_origins_gitlab_artifacts_cron_job_time:
+  "9-59/10"
+
+filter_list_origins_gstorage_artifacts_cron_job_time:
   "9-59/10"
 
 # this one takes ~30s

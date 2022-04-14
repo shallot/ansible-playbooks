@@ -15,6 +15,9 @@ cp -a {{ filter_list_origin_outputs }}/gzip/* $prepdir/
 # this comes from fetch_gitlab_artifacts.sh
 cp -a {{ filter_list_origin_outputs }}/gitlab_artifacts/* $prepdir/
 
+# this comes from fetch_gstorage_artifacts.sh
+cp -a {{ filter_list_origin_outputs }}/gstorage_artifacts/* $prepdir/
+
 rm -rf $finaldir.old
 test ! -d $finaldir || mv $finaldir $finaldir.old
 # minimal race condition is here - this is where we don't want anyone reading from $finaldir
