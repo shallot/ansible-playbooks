@@ -203,7 +203,9 @@ default_filter_server_compliance_custom_apache_config: |
   RewriteCond %{ENV:GEOIP_COUNTRY_CODE} ^PL$ [OR]
   RewriteCond %{ENV:GEOIP_COUNTRY_CODE_V6} ^PL$ [OR]
   RewriteCond %{ENV:GEOIP_COUNTRY_CODE} ^ZA$ [OR]
-  RewriteCond %{ENV:GEOIP_COUNTRY_CODE_V6} ^ZA$
+  RewriteCond %{ENV:GEOIP_COUNTRY_CODE_V6} ^ZA$ [OR]
+  RewriteCond %{ENV:GEOIP_COUNTRY_CODE} ^IN$ [OR]
+  RewriteCond %{ENV:GEOIP_COUNTRY_CODE_V6} ^IN$
   RewriteCond %{QUERY_STRING} (?:^|&)addonName=(?:adblockplus(?:chrome|firefox|opera|edge)?)(?:&|$)
   RewriteCond %{QUERY_STRING} (?:^|&)addonVersion=(?:3\.(?:11\.[4-9]|1[2-9])|[4-9])
   RewriteRule ^/abp\-filters\-anti\-cv\.txt /abp-filters-graph.txt [L]
