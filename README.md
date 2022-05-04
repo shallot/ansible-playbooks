@@ -15,10 +15,9 @@ that populate the `roles/` directory therein:
 
     git submodule update --init
 
-Next the [Ansible][ansible] software and some auxiliaries need to be installed,
-a list of which can be found in the **Dependencies** section below.
-On supported systems, the `provision-localhost.yml` playbook can ensure the
-required dependencies to be available:
+Next the [Ansible][ansible] software and some auxiliaries need to be
+installed. On supported systems, the `provision-localhost.yml` playbook can
+ensure the required dependencies are available:
 
     ansible-playbook --ask-become-pass provision-localhost.yml
 
@@ -35,25 +34,24 @@ libvirt` to explicitly perform those, or run both the regular
 
 The analogous syntax should also work for `virtualbox`.
 
+## If bootstrap doesn't work well
+
 When the operating system is not supported, one needs to manually ensure the
 dependencies being available before working with the repository.
 
-## Dependencies
-
-Below please find a list of dependencies required to run the *Ansible* playbooks
-within this repository:
+If you can't run provision-localhost.yml on your system, you can manually
+install the following list of dependencies required to run the *Ansible*
+playbooks within this repository:
 
 - The [Ansible][ansible] software, version 2.10
 - The [Git][git] software, for fetching dependencies
 - The [OpenSSH][openssh] client software
-
-For development a few more tools are needed:
-
-- The [Vagrant][vagrant] software, for operating virtual environments
-- Software that provides Vagrant with virtual machines, such as:
-  - [libvirt][libvirt]
-  - [VirtualBox][virtualbox]
+- The [Vagrant][vagrant] software, for virtual environments in development
+  - Software that provides Vagrant with virtual machines, such as:
+    - [libvirt][libvirt]
+    - [VirtualBox][virtualbox]
 - The [virtualenv][virtualenv] software, for isolating *Python* packages
+  in development or in other specific use cases
 
 The lists above do not include the dependencies of the listed items themselves.
 
