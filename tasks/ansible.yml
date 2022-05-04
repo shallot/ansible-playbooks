@@ -54,5 +54,7 @@
     name: "ansible==2.10.*"
     extra_args: "--no-cache-dir"
     virtualenv: "{{ custom_ansible_pip_virtualenv | default(omit) }}"
+  environment:
+    ANSIBLE_SKIP_CONFLICT_CHECK: "1"
   become: &custom_ansible_become
     "{{ custom_ansible_pip_virtualenv is not defined }}"
