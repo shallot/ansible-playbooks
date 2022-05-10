@@ -83,7 +83,8 @@
       loop_control:
         label: "{{ item.key }}"
       notify:
-        "{{ item.value.notify | default(none) or omit }}"
+        "{{ item.value.notify | default(custom_paths_notify)
+          | default(none) or omit }}"
       when:
         "item.value.path is not defined or item.value.path != omit"
 
@@ -107,7 +108,8 @@
       loop_control:
         label: "{{ item.key }}"
       notify:
-        "{{ item.value.notify | default(none) or omit }}"
+        "{{ item.value.notify | default(custom_paths_notify)
+          | default(none) or omit }}"
       when:
         "item.value.dest is not defined or item.value.dest != omit"
 
@@ -127,7 +129,8 @@
       loop_control:
         label: "{{ item.key }}"
       notify:
-        "{{ item.value.notify | default(none) or omit }}"
+        "{{ item.value.notify | default(custom_paths_notify)
+          | default(none) or omit }}"
       when:
         "item.value.dest is not defined or item.value.dest != omit"
 

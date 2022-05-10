@@ -51,3 +51,12 @@
 # https://docs.ansible.com/ansible/latest/import_tasks_module.html
 - import_tasks:
     "apache2-logrotate.yml"
+
+# https://docs.ansible.com/ansible/latest/import_tasks_module.html
+- import_tasks:
+    "tasks/paths.yml"
+  vars:
+    custom_paths_suffix:
+      "apache2_auxiliary_paths__to_merge"
+    custom_paths_notify:
+      "service : apache2"

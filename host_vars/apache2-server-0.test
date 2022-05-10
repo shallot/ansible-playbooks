@@ -48,6 +48,21 @@ host_specific_apache2_sites__to_merge:
 
       </VirtualHost>
 
+apache2_auxiliary_paths__to_merge:
+  /etc/apache2/ssl:
+    mode: "0755"
+    state: "directory"
+  /etc/apache2/ssl/example.key:
+    mode: "0600"
+    state: "copy"
+    content: |
+      example key
+  /etc/apache2/ssl/example.crt:
+    mode: "0644"
+    state: "copy"
+    content: |
+      example certificate
+
 # tasks/apache2.yml
 apache2_logrotate_count:
   7
