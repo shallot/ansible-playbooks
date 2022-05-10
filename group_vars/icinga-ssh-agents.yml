@@ -44,3 +44,11 @@ eyeo_icinga_ssh_agent_monitoring_plugins:
     owner: "root"
     mode: "0775"
     src: "files/plugins/check_service"
+  check_http_codes:
+    package: "logtail"
+    dest: "{{ icinga_ssh_agent_plugin_directory }}"
+    group: "root"
+    owner: "root"
+    mode: "0775"
+    src: "files/plugins/check_http_codes"
+    sudoers_src: "templates/sudoers/check_http_codes"

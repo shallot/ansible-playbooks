@@ -66,6 +66,8 @@ icinga_server_http_service_group:
   ['apache2-servers']
 icinga_server_https_service_group:
   ['apache2-servers-https']
+icinga_server_http_codes_service_group:
+  ['apache2-servers']
 
 icinga_server_custom_monitoring_plugins:
   "{{ icinga_server_monitoring_plugins }}"
