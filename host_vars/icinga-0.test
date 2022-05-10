@@ -66,6 +66,8 @@ icinga_server_http_service_group:
   ['apache2-servers']
 icinga_server_https_service_group:
   ['apache2-servers-https']
+icinga_server_http_codes_service_group:
+  ['apache2-servers']
 
 icinga_server_custom_monitoring_plugins:
   "{{ icinga_server_monitoring_plugins }}"
@@ -126,6 +128,20 @@ test_icinga_host_vars__to_merge:
     {
       http_vhost = "example-2.test"
       http_header = "Accept-Encoding: gzip"
+    }
+  'http_codes["http_codes-on-vhost1"]': |
+    {
+      http_codes_logfile = "/var/log/apache2/icingaweb2-access.log"
+      http_codes_offsetfile = "/var/lib/nagios/icingaweb2-access.log.offset"
+      http_codes_warning = "3"
+      http_codes_critical = "5"
+    }
+  'http_codes["http_codes-on-vhost2"]': |
+    {
+      http_codes_logfile = "/var/log/apache2/access.log"
+      http_codes_offsetfile = "/var/lib/nagios/access.log.offset"
+      http_codes_warning = "3"
+      http_codes_critical = "5"
     }
 
 example_icinga_host_options__to_merge:
