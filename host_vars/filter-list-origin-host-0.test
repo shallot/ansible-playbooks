@@ -146,7 +146,7 @@ vagrant_box:
 
 # https://www.vagrantup.com/docs/providers/configuration
 vagrant_memory:
-  896
+  1024
 
 # https://www.vagrantup.com/intro/getting-started/networking.html
 vagrant_networks:
