@@ -1,0 +1,61 @@
+# Copyright (c) 2022-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+# action_plugins/merge_variable.py
+- name:
+    "merge_variable : custom_luks_keys"
+  merge_variable:
+    default: {}
+    name: "custom_luks_keys"
+    suffix: "{{ custom_luks_keys_suffix
+              | default('custom_luks_keys__to_merge') }}"
+
+# https://docs.ansible.com/ansible/latest/user_guide/playbooks_blocks.html
+- block:
+
+    # https://docs.ansible.com/ansible/latest/collections/community/crypto/luks_device_module.html
+    - name:
+        "luks_device : custom_luks_keys"
+      luks_device:
+        cipher: "{{ luks_key.value.cipher | default(omit) }}"
+        device: "{{ luks_key.value.device | mandatory }}"
+        # yamllint disable rule:line-length
+        force_remove_last_key: "{{ luks_key.value.force_remove_last_key | default(omit) }}"
+        # yamllint enable rule:line-length
+        hash: "{{ luks_key.value.hash | default(omit) }}"
+        keyfile: "{{ luks_key.value.keyfile | default(omit) }}"
+        keysize: "{{ luks_key.value.keysize | default(omit) }}"
+        label: "{{ luks_key.value.label | default(omit) }}"
+        name: "{{ luks_key.value.name | default(omit) }}"
+        new_keyfile: "{{ luks_key.value.new_keyfile | default(omit) }}"
+        new_passphrase: "{{ luks_key.value.new_passphrase | default(omit) }}"
+        passphrase: "{{ luks_key.value.passphrase | mandatory }}"
+        remove_keyfile: "{{ luks_key.value.remove_keyfile | default(omit) }}"
+        # yamllint disable rule:line-length
+        remove_passphrase: "{{ luks_key.value.remove_passphrase | default(omit) }}"
+        # yamllint enable rule:line-length
+        sector_size: "{{ luks_key.value.sector_size | default(omit) }}"
+        state: "{{ luks_key.value.state | default(omit) }}"
+        type: "{{ luks_key.value.type | default(omit) }}"
+        uuid: "{{ luks_key.value.uuid | default(omit) }}"
+      loop:
+        "{{ custom_luks_keys | dict2items | sort(attribute='key') }}"
+      loop_control:
+        loop_var: "luks_key"
+
+  become:
+    true
