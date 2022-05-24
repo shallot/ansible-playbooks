@@ -21,7 +21,7 @@ pre_seed_test_data_custom_shells__to_merge:
     cmd: |
       for i in $(seq 1 4); do
       test -s /tmp/file.$i ||
-      dd if=/dev/zero of=/tmp/file.$i bs=1M count=10;
+      dd if=/dev/zero of=/tmp/file.$i bs=1M count=30;
       sudo losetup /dev/loop$i ||
       sudo losetup loop$i /tmp/file.$i;
       done
@@ -60,9 +60,35 @@ custom_disk_logical_volumes:
 custom_disk_filesystem:
   "ext4"
 
+# tasks/luks-keys.yml
+test_key_custom_luks_keys__to_merge:
+  create-test-key:
+    device: "/dev/loop2"
+    cipher: "aes-xts-plain64"
+    hash: "sha512"
+    passphrase: "test123"
+    keysize: "512"
+  add-passphrase:
+    device: "/dev/loop2"
+    passphrase: "test123"
+    new_passphrase: "another-test"
+  test-open-device:
+    device: "/dev/loop2"
+    state: "opened"
+    name: "test-device-loop2"
+    passphrase: "test123"
+  test-close-device:
+    state: "closed"
+    name: "test-device-loop2"
+  test-remove-passphrase:
+    device: "/dev/loop2"
+    passphrase: "another-test"
+    remove_passphrase: "test123"
+
 # https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
 vagrant_groups:
   - "custom-disk-hosts"
+  - "luks-keys-hosts"
 
 # https://www.vagrantup.com/intro/getting-started/networking.html
 vagrant_networks:
@@ -73,3 +99,4 @@ vagrant_networks:
 vagrant_playbooks:
   - "provision-custom-systems.yml"
   - "provision-custom-disk-hosts.yml"
+  - "provision-luks-keys.yml"
