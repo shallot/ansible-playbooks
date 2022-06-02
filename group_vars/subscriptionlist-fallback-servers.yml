@@ -1,0 +1,63 @@
+# Copyright (c) 2022-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+# tasks/paths.yml
+subscriptionlist_fallback_custom_paths__to_merge:
+  "{{ subscriptionlist_checkout }}":
+    dest: "{{ subscriptionlist_checkout }}"
+    state: "directory"
+    owner: "{{ subscriptionlist_username }}"
+    mode: "0755"
+
+# tasks/git.yml
+subscriptionlist_fallback_git_checkouts__to_merge:
+  subscriptionlist:
+    repo: "{{ subscriptionlist_repo }}"
+    dest: "{{ subscriptionlist_checkout }}"
+    user: "{{ subscriptionlist_username }}"
+    to_update: "true"
+
+# tasks/cron-jobs.yml
+subscriptionlist_fallback_custom_cron_jobs__to_merge:
+  update_subscriptionlist:
+    name: "update_subscriptionlist"
+    job: "git -C {{ subscriptionlist_checkout }} pull --quiet"
+    user: "{{ subscriptionlist_username }}"
+    state: "present"
+    minute: "{{ subscriptionlist_update_minute }}"
+
+# roles/eyeo/sitescripts/tasks/main.yml
+subscriptionlist_fallback_sitescripts_ini_settings__to_merge:
+  - section: "multiplexer"
+    key: "sitescripts.subscriptions.web.fallback"
+    value: ""
+  - section: "subscriptions"
+    key: "repository"
+    value: "{{ subscriptionlist_checkout }}"
+
+# roles/apache2/tasks/main.yml
+# provision-apache2-servers.yml
+subscriptionlist_fallback_apache2_modules__to_merge:
+  proxy_fcgi: &apache2_standard_module
+    package: false
+
+# yamllint disable rule:line-length
+subscriptionlist_fallback_apache_config: |
+  <Location /getSubscription>
+    SetHandler "proxy:unix:{{ sitescripts_multiplexer_socket_path }}|fcgi://localhost/"
+  </Location>
+# yamllint enable rule:line-length
