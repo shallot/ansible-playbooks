@@ -23,8 +23,24 @@ filter_delivery_username:
   "www-data"
 filter_delivery_base_path:
   "/var/www"
+filter_delivery_log_base_path:
+  "/var/log/eyeo-apache2"
+filter_delivery_logrotate_base:
+  "/etc/logrotate.d/local-eyeo-apache2"
 filter_delivery_servers_document_root_path:
   "{{ filter_delivery_base_path }}/{{ filter_delivery_domain }}"
+
+# provision-custom-paths.yml
+# Overwrite eyeo-apache2 logrotate file, so it does not get generated
+# and doesn't intervene with the rotation.
+eyeo_apache2_overwrite_custom_paths__to_merge:
+  "/etc/eyeo-apache2-logrotate.conf":
+    dest: "{{ (ansible_distribution == 'Debian' and
+               ansible_distribution_version|int < 10)
+            | ternary('/etc/eyeo-apache2-logrotate.conf',
+                      '/etc/logrotate.d/local-eyeo-apache2')
+            }}"
+    state: "absent"
 
 # provision-custom-paths.yml
 filter_delivery_servers_custom_paths__to_merge:
@@ -38,6 +54,41 @@ filter_delivery_servers_custom_paths__to_merge:
     state: "directory"
     mode: "0755"
     owner: "{{ filter_delivery_username }}"
+  "{{ filter_delivery_log_base_path }}/{{ filter_delivery_domain }}":
+    dest: "{{ filter_delivery_log_base_path }}/{{ filter_delivery_domain }}"
+    state: "directory"
+    mode: "0755"
+    group: "adm"
+  "{{ filter_delivery_logrotate_base }}-{{ filter_delivery_domain }}":
+    dest: "{{ filter_delivery_logrotate_base }}-{{ filter_delivery_domain }}"
+    state: "copy"
+    # yamllint disable rule:line-length
+    content: |
+      {{ filter_delivery_log_base_path }}/{{ filter_delivery_domain }}/*.log {
+        daily
+        missingok
+        rotate {{ apache2_logrotate_count | default('14') }}
+        dateext
+        dateyesterday
+        dateformat .%Y-%m-%d-%s
+        compress
+        delaycompress
+        notifempty
+        create 640 root adm
+        sharedscripts
+        postrotate
+                if invoke-rc.d apache2 status > {{ filter_delivery_log_base_path }}/apache2-status.log 2>&1; then \
+                    invoke-rc.d apache2 reload > {{ filter_delivery_log_base_path }}/apache2-reload.log 2>&1; \
+                fi;
+        endscript
+        prerotate
+                if [ -d /etc/logrotate.d/httpd-prerotate ]; then \
+                        run-parts /etc/logrotate.d/httpd-prerotate; \
+                fi; \
+        endscript
+      }
+    # yamllint enable rule:line-length
+    mode: "0644"
 
 # roles/apache2/tasks/main.yml
 # provision-apache2-servers.yml
@@ -127,6 +178,9 @@ default_filter_delivery_server_keepalive_custom_apache_config: |
 default_filter_delivery_server_prerequisite_custom_apache_config: |
   DocumentRoot {{ filter_delivery_servers_document_root_path }}
   AddDefaultCharset UTF-8
+
+  ErrorLog {{ filter_delivery_log_base_path }}/{{ filter_delivery_domain }}/error.log
+  CustomLog {{ filter_delivery_log_base_path }}/{{ filter_delivery_domain }}/access.log eyeo-combined-filename
 
   <Directory "{{ filter_delivery_servers_document_root_path }}">
     Options -Indexes
@@ -360,6 +414,8 @@ filter_delivery_servers_deploy_scripts_custom_paths__to_merge:
       if [ $CI_COMMIT_REF_SLUG != "main" ]; then
 
         base_virtual_host_file=/etc/apache2/sites-available/000-$DOMAIN.conf
+        install -d -o root -g adm \
+           {{ filter_delivery_log_base_path }}/$CI_COMMIT_REF_SLUG.$DOMAIN
 
         test -e "$base_virtual_host_file" || exit 5
         sed -e s,$DOMAIN,$CI_COMMIT_REF_SLUG.$DOMAIN,g \
@@ -369,6 +425,15 @@ filter_delivery_servers_deploy_scripts_custom_paths__to_merge:
         service apache2 status
         service apache2 reload
       fi
+
+      sed -e s,$DOMAIN,$CI_COMMIT_REF_SLUG.$DOMAIN,g \
+          {{ filter_delivery_logrotate_base }}-{{ filter_delivery_domain }} | \
+        tee {{ filter_delivery_logrotate_base }}-$CI_COMMIT_REF_SLUG.$DOMAIN
+
+      # Rotate apache log files to have fresh logs after each deployment.
+      /usr/sbin/logrotate -v -f \
+        {{ filter_delivery_logrotate_base }}-$CI_COMMIT_REF_SLUG.$DOMAIN
+
   /usr/local/bin/deploy_eyeo_filter_delivery:
     state: "copy"
     mode: "0744"
@@ -405,11 +470,14 @@ filter_delivery_servers_deploy_scripts_custom_paths__to_merge:
       final_dest_dir=$1
       base_virtual_host_file=$2
       base_virtual_host_file_short=$(basename $base_virtual_host_file)
+      DOMAIN=$3
 
       a2dissite $base_virtual_host_file_short
       service apache2 status
       service apache2 reload
       rm -v $base_virtual_host_file
+      rm -v -r {{ filter_delivery_log_base_path }}/$CI_COMMIT_REF_SLUG.$DOMAIN
+      rm -v {{ filter_delivery_logrotate_base }}-$CI_COMMIT_REF_SLUG.$DOMAIN
   /usr/local/bin/undeploy_eyeo_filter_delivery:
     state: "copy"
     mode: "0744"
@@ -434,4 +502,4 @@ filter_delivery_servers_deploy_scripts_custom_paths__to_merge:
       rmdir $final_dest_dir
 
       sudo /usr/local/sbin/undeploy_vhost_eyeo_filter_delivery \
-        $final_dest_dir $base_virtual_host_file
+        $final_dest_dir $base_virtual_host_file $DOMAIN
