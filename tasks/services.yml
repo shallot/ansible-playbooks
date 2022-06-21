@@ -58,7 +58,7 @@
         label: "{{ [service_file_name, item.section, item.option, item.config]
                  | to_json }}"
       register:
-        "custom_service"
+        "custom_service_ini"
       become:
         true
       when:
@@ -83,7 +83,7 @@
         label: "{{ [service_file_name, item.value.content | default('')]
                  | to_json }}"
       register:
-        "custom_service"
+        "custom_service_copy"
       when:
         "item.value.content is defined"
 
@@ -101,7 +101,7 @@
       loop_control:
         label: "{{ dropin_file_directory | to_json }}"
       register:
-        "custom_service"
+        "custom_dropin_dir"
       when:
         "item.config is defined or
          item.value.content is defined"
@@ -127,7 +127,7 @@
         label: "{{ [dropin_file_name, item.section, item.option, item.config]
                  | to_json }}"
       register:
-        "custom_service"
+        "custom_dropin_ini"
       become:
         true
       when:
@@ -151,7 +151,7 @@
         label: "{{ [dropin_file_directory, dropin_file_name]
                  | to_json }}"
       register:
-        "custom_service"
+        "custom_dropin_copy"
       when:
         "item.value.content is defined"
 
@@ -176,7 +176,11 @@
   systemd:
     daemon_reload: true
   when:
-    "custom_service.changed"
+    "(custom_service_ini.changed or
+      custom_service_copy.changed or
+      custom_dropin_dir.changed or
+      custom_dropin_ini.changed or
+      custom_dropin_copy.changed)"
   become:
     true
 
