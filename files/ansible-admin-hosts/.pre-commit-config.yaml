@@ -1,0 +1,10 @@
+---
+
+# Update the rev variable with the release version of yamllint that you want
+# You can pass your custom .yamllint with args attribute.
+repos:
+  - repo: "https://github.com/adrienverge/yamllint.git"
+    rev: "v1.15.0"
+    hooks:
+      - id: "yamllint"
+        args: [-c=.yamllint.yml]

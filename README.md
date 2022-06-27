@@ -68,3 +68,9 @@ The lists above do not include the dependencies of the listed items themselves.
 [vagrant]:    https://www.vagrantup.com/
 [virtualbox]: https://www.virtualbox.org/
 [virtualenv]: https://virtualenv.pypa.io/
+
+## Installing pre-commit on admin hosts.
+
+In order to install and configure pre-commit for the invetory repository on
+the admin hosts pre-commit has to be installed by hand and the created hook
+files committed to the repository.

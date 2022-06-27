@@ -50,19 +50,35 @@ ansible_admin_users__to_merge:
   "{{ custom_ansible_user.name }}":
     "{{ custom_ansible_user }}"
 
+ansible_admin_inventory_path:
+  "{{ custom_ansible_user.home }}/inventory"
+
 # tasks/ansible-admin.yml
 ansible_admin_paths__to_merge:
-  "{{ custom_ansible_user.home }}/inventory":
+  "{{ ansible_admin_inventory_path }}":
     state: "link"
     dest: "/etc/ansible"
-    src: "{{ custom_ansible_user.home }}/inventory"
+    src: "{{ ansible_admin_inventory_path }}"
+  "{{ ansible_admin_inventory_path }}/.yamllint.yml":
+    state: "copy"
+    dest: "{{ ansible_admin_inventory_path }}/.yamllint.yml"
+    src: ".yamllint.yml"
+    owner: "{{ custom_ansible_user.name }}"
+  "{{ ansible_admin_inventory_path }}/.pre-commit-config.yaml":
+    state: "copy"
+    dest: "{{ ansible_admin_inventory_path }}/.pre-commit-config.yaml"
+    src: "files/ansible-admin-hosts/.pre-commit-config.yaml"
+    owner: "{{ custom_ansible_user.name }}"
 
 # tasks/ansible-admin.yml
 ansible_admin_commands__to_merge:
-  git_checkout_inventory:
-    cmd: "git init '{{ custom_ansible_user.home }}/inventory'"
-    creates: "{{ custom_ansible_user.home }}/inventory/.git"
+  aa_git_checkout_inventory:
+    cmd: "git init '{{ ansible_admin_inventory_path }}'"
+    creates: "{{ ansible_admin_inventory_path }}/.git"
     become_user: "{{ custom_ansible_user.name }}"
+  ab_pre_commit_install:
+    cmd: "pip3 install pre-commit"
+    creates: "/usr/local/bin/pre-commit"
 
 # When users are able to access confidential files in the Ansible inventory
 # their home directory shall not be accessible to other users, in order to
@@ -101,3 +117,7 @@ ansible_admin_log_paths__to_merge:
           rotate {{ ansible_admin_log_count | default('14') }}
       }
     state: "copy"
+
+# tasks/packages
+admin_ansible_custom_packages__to_merge:
+  python3-pip: "present"
