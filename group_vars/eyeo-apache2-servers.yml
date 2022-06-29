@@ -75,6 +75,12 @@ eyeo_apache2_conf__to_merge:
       LogFormat "%h %l %u %t \"%r\" %>s %O \"%{Referer}i\" \"%{User-Agent}i\" \"%{X-Forwarded-For}i\" %{REQUEST_SCHEME}x \"%{Accept-Language}i\" \"%{Host}i\" \"%{X-Client-ID}i\"" eyeo-combined
     # yamllint enable rule:line-length
     enabled: true
+  local-eyeo-combined-filename-logformat:
+    # yamllint disable rule:line-length
+    configuration: |
+      LogFormat "%h %l %u %t \"%r\" %>s %O \"%{Referer}i\" \"%{User-Agent}i\" \"%{X-Forwarded-For}i\" %{REQUEST_SCHEME}x \"%{Accept-Language}i\" \"%{Host}i\" \"%{X-Client-ID}i\" \"%f\"" eyeo-combined-filename
+    # yamllint enable rule:line-length
+    enabled: true
 
 # prerequisite for LogFormat %{...}x
 # roles/apache2/defaults/main.yml
