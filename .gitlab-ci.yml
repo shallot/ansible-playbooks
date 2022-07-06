@@ -18,7 +18,8 @@
 # https://docs.gitlab.com/ee/ci/yaml/#stages
 stages:
   - "test"
-  - "vagrant"
+  - "vagrant-shortlived"
+  - "vagrant-persistent"
 
 # Use `gitlab-runner exec docker rubocop` to execute in development
 rubocop:
@@ -49,221 +50,520 @@ yamllint:
 include:
   local: ".vagrant-jobs.gitlab-ci.yml"
 
-aab-signing-0:
-  extends: ".vagrantjob"
+# vagrant-runner-0 intentionally skipped as it can't have a vagrant/libvirt job
+
+aab-signing-0-shortlived:
+  extends:
+    - ".vagrantshortlivedjob"
   variables:
     TEST_HOST: "aab-signing-0.test"
 
-adblockplus-donate-server-0:
-  extends: ".vagrantjob"
+aab-signing-0-persistent:
+  extends:
+    - ".vagrantpersistentjob"
+  variables:
+    TEST_HOST: "aab-signing-0.test"
+
+adblockplus-donate-server-0-shortlived:
+  extends:
+    - ".vagrantshortlivedjob"
   variables:
     TEST_HOST: "adblockplus-donate-server-0.test"
 
-adblockplus-publish-host-0:
-  extends: ".vagrantjob"
+adblockplus-donate-server-0-persistent:
+  extends:
+    - ".vagrantpersistentjob"
+  variables:
+    TEST_HOST: "adblockplus-donate-server-0.test"
+
+adblockplus-publish-host-0-shortlived:
+  extends:
+    - ".vagrantshortlivedjob"
   variables:
     TEST_HOST: "adblockplus-publish-host-0.test"
 
-admin-0:
-  extends: ".vagrantjob"
+adblockplus-publish-host-0-persistent:
+  extends:
+    - ".vagrantpersistentjob"
+  variables:
+    TEST_HOST: "adblockplus-publish-host-0.test"
+
+admin-0-shortlived:
+  extends:
+    - ".vagrantshortlivedjob"
   variables:
     TEST_HOST: "admin-0.test"
     VAGRANT_BOX_NEEDS_CHECKED_OUT_BRANCH: "admin-0.test"
 
-apache2-geoip-0:
-  extends: ".vagrantjob"
+admin-0-persistent:
+  extends:
+    - ".vagrantpersistentjob"
+  variables:
+    TEST_HOST: "admin-0.test"
+    VAGRANT_BOX_NEEDS_CHECKED_OUT_BRANCH: "admin-0.test"
+
+apache2-geoip-0-shortlived:
+  extends:
+    - ".vagrantshortlivedjob"
   variables:
     TEST_HOST: "apache2-geoip-0.test"
 
-apache2-server-0:
-  extends: ".vagrantjob"
+apache2-geoip-0-persistent:
+  extends:
+    - ".vagrantpersistentjob"
+  variables:
+    TEST_HOST: "apache2-geoip-0.test"
+
+apache2-server-0-shortlived:
+  extends:
+    - ".vagrantshortlivedjob"
   variables:
     TEST_HOST: "apache2-server-0.test"
 
-apache2-mimeo-server-0:
-  extends: ".vagrantjob"
+apache2-server-0-persistent:
+  extends:
+    - ".vagrantpersistentjob"
+  variables:
+    TEST_HOST: "apache2-server-0.test"
+
+apache2-mimeo-server-0-shortlived:
+  extends:
+    - ".vagrantshortlivedjob"
   variables:
     TEST_HOST: "apache2-mimeo-server-0.test"
 
-apache2-modsecurity-server-0:
-  extends: ".vagrantjob"
+apache2-mimeo-server-0-persistent:
+  extends:
+    - ".vagrantpersistentjob"
+  variables:
+    TEST_HOST: "apache2-mimeo-server-0.test"
+
+apache2-modsecurity-server-0-shortlived:
+  extends:
+    - ".vagrantshortlivedjob"
   variables:
     TEST_HOST: "apache2-modsecurity-server-0.test"
 
-apk-signing-0:
-  extends: ".vagrantjob"
+apache2-modsecurity-server-0-persistent:
+  extends:
+    - ".vagrantpersistentjob"
+  variables:
+    TEST_HOST: "apache2-modsecurity-server-0.test"
+
+apk-signing-0-shortlived:
+  extends:
+    - ".vagrantshortlivedjob"
   variables:
     TEST_HOST: "apk-signing-0.test"
 
-backup-client-0.test:
-  extends: ".vagrantjob"
+apk-signing-0-persistent:
+  extends:
+    - ".vagrantpersistentjob"
+  variables:
+    TEST_HOST: "apk-signing-0.test"
+
+backup-client-0-shortlived:
+  extends:
+    - ".vagrantshortlivedjob"
   variables:
     TEST_HOST: "backup-client-0.test"
   # requires persistent backup-server-0.test to complete
   allow_failure: true
 
-backup-server-0.test:
-  extends: ".vagrantjob"
+backup-client-0-persistent:
+  extends:
+    - ".vagrantpersistentjob"
+  variables:
+    TEST_HOST: "backup-client-0.test"
+  # requires persistent backup-server-0.test to complete
+  allow_failure: true
+
+backup-server-0-shortlived:
+  extends:
+    - ".vagrantshortlivedjob"
   variables:
     TEST_HOST: "backup-server-0.test"
 
-crumbs-filter-server-0:
-  extends: ".vagrantjob"
+backup-server-0-persistent:
+  extends:
+    - ".vagrantpersistentjob"
+  variables:
+    TEST_HOST: "backup-server-0.test"
+
+crumbs-filter-server-0-shortlived:
+  extends:
+    - ".vagrantshortlivedjob"
   variables:
     TEST_HOST: "crumbs-filter-server-0.test"
 
-crumbs-web-server-0:
-  extends: ".vagrantjob"
+crumbs-filter-server-0-persistent:
+  extends:
+    - ".vagrantpersistentjob"
+  variables:
+    TEST_HOST: "crumbs-filter-server-0.test"
+
+crumbs-web-server-0-shortlived:
+  extends:
+    - ".vagrantshortlivedjob"
   variables:
     TEST_HOST: "crumbs-web-server-0.test"
 
-custom-centos7-0:
-  extends: ".vagrantjob"
+crumbs-web-server-0-persistent:
+  extends:
+    - ".vagrantpersistentjob"
+  variables:
+    TEST_HOST: "crumbs-web-server-0.test"
+
+custom-centos7-0-shortlived:
+  extends:
+    - ".vagrantshortlivedjob"
   variables:
     TEST_HOST: "custom-centos7-0.test"
 
-custom-commands-shells-0:
-  extends: ".vagrantjob"
+custom-centos7-0-persistent:
+  extends:
+    - ".vagrantpersistentjob"
+  variables:
+    TEST_HOST: "custom-centos7-0.test"
+
+custom-commands-shells-0-shortlived:
+  extends:
+    - ".vagrantshortlivedjob"
   variables:
     TEST_HOST: "custom-commands-shells-0.test"
 
-custom-debian11-0:
-  extends: ".vagrantjob"
+custom-commands-shells-0-persistent:
+  extends:
+    - ".vagrantpersistentjob"
+  variables:
+    TEST_HOST: "custom-commands-shells-0.test"
+
+custom-debian11-0-shortlived:
+  extends:
+    - ".vagrantshortlivedjob"
   variables:
     TEST_HOST: "custom-debian11-0.test"
 
-custom-disk-0:
-  extends: ".vagrantjob"
+custom-debian11-0-persistent:
+  extends:
+    - ".vagrantpersistentjob"
+  variables:
+    TEST_HOST: "custom-debian11-0.test"
+
+custom-disk-0-shortlived:
+  extends:
+    - ".vagrantshortlivedjob"
   variables:
     TEST_HOST: "custom-disk-0.test"
 
-custom-paths-0:
-  extends: ".vagrantjob"
+custom-disk-0-persistent:
+  extends:
+    - ".vagrantpersistentjob"
+  variables:
+    TEST_HOST: "custom-disk-0.test"
+
+custom-paths-0-shortlived:
+  extends:
+    - ".vagrantshortlivedjob"
   variables:
     TEST_HOST: "custom-paths-0.test"
 
-docker-0:
-  extends: ".vagrantjob"
+custom-paths-0-persistent:
+  extends:
+    - ".vagrantpersistentjob"
+  variables:
+    TEST_HOST: "custom-paths-0.test"
+
+docker-0-shortlived:
+  extends:
+    - ".vagrantshortlivedjob"
   variables:
     TEST_HOST: "docker-0.test"
 
-docker-gitlab-runner-0:
-  extends: ".vagrantjob"
+docker-0-persistent:
+  extends:
+    - ".vagrantpersistentjob"
+  variables:
+    TEST_HOST: "docker-0.test"
+
+docker-gitlab-runner-0-shortlived:
+  extends:
+    - ".vagrantshortlivedjob"
   variables:
     TEST_HOST: "docker-gitlab-runner-0.test"
 
-eramba-server-0:
-  extends: ".vagrantjob"
+docker-gitlab-runner-0-persistent:
+  extends:
+    - ".vagrantpersistentjob"
+  variables:
+    TEST_HOST: "docker-gitlab-runner-0.test"
+
+eramba-server-0-shortlived:
+  extends:
+    - ".vagrantshortlivedjob"
   variables:
     TEST_HOST: "eramba-server-0.test"
   # requires proprietary binary blob to complete
   allow_failure: true
 
-eyeo-cms-web-server-0:
-  extends: ".vagrantjob"
+eramba-server-0-persistent:
+  extends:
+    - ".vagrantpersistentjob"
+  variables:
+    TEST_HOST: "eramba-server-0.test"
+  # requires proprietary binary blob to complete
+  allow_failure: true
+
+eyeo-cms-web-server-0-shortlived:
+  extends:
+    - ".vagrantshortlivedjob"
   variables:
     TEST_HOST: "eyeo-cms-web-server-0.test"
   # requires finished migration to python3 for sitescripts
   allow_failure: true
 
-filter-delivery-0:
-  extends: ".vagrantjob"
+eyeo-cms-web-server-0-persistent:
+  extends:
+    - ".vagrantpersistentjob"
+  variables:
+    TEST_HOST: "eyeo-cms-web-server-0.test"
+  # requires finished migration to python3 for sitescripts
+  allow_failure: true
+
+filter-delivery-0-shortlived:
+  extends:
+    - ".vagrantshortlivedjob"
   variables:
     TEST_HOST: "filter-delivery-0.test"
 
-filter-list-origin-host-0:
-  extends: ".vagrantjob"
+filter-delivery-0-persistent:
+  extends:
+    - ".vagrantpersistentjob"
+  variables:
+    TEST_HOST: "filter-delivery-0.test"
+
+filter-list-origin-host-0-shortlived:
+  extends:
+    - ".vagrantshortlivedjob"
   variables:
     TEST_HOST: "filter-list-origin-host-0.test"
 
-filter-server-0:
-  extends: ".vagrantjob"
+filter-list-origin-host-0-persistent:
+  extends:
+    - ".vagrantpersistentjob"
+  variables:
+    TEST_HOST: "filter-list-origin-host-0.test"
+
+filter-server-0-shortlived:
+  extends:
+    - ".vagrantshortlivedjob"
   variables:
     TEST_HOST: "filter-server-0.test"
 
-gitlab-runner-0:
-  extends: ".vagrantjob"
+filter-server-0-persistent:
+  extends:
+    - ".vagrantpersistentjob"
+  variables:
+    TEST_HOST: "filter-server-0.test"
+
+gitlab-runner-0-shortlived:
+  extends:
+    - ".vagrantshortlivedjob"
   variables:
     TEST_HOST: "gitlab-runner-0.test"
     # https://gitlab.com/eyeo/devops/examples/ansible-role-example/-/settings/ci_cd
     # https://gitlab.com/eyeo/devops/ansible-playbooks/-/settings/ci_cd
     TEST_GITLAB_REGISTRATION_TOKEN: "$ANSIBLE_ROLE_EXAMPLE_GITLAB_TOKEN"
 
-icinga-0:
-  extends: ".vagrantjob"
+gitlab-runner-0-persistent:
+  extends:
+    - ".vagrantpersistentjob"
+  variables:
+    TEST_HOST: "gitlab-runner-0.test"
+    # https://gitlab.com/eyeo/devops/examples/ansible-role-example/-/settings/ci_cd
+    # https://gitlab.com/eyeo/devops/ansible-playbooks/-/settings/ci_cd
+    TEST_GITLAB_REGISTRATION_TOKEN: "$ANSIBLE_ROLE_EXAMPLE_GITLAB_TOKEN"
+
+icinga-0-shortlived:
+  extends:
+    - ".vagrantshortlivedjob"
   variables:
     TEST_HOST: "icinga-0.test"
 
-jirafeau-0:
-  extends: ".vagrantjob"
+icinga-0-persistent:
+  extends:
+    - ".vagrantpersistentjob"
+  variables:
+    TEST_HOST: "icinga-0.test"
+
+jirafeau-0-shortlived:
+  extends:
+    - ".vagrantshortlivedjob"
   variables:
     TEST_HOST: "jirafeau-server-0.test"
 
-lamp-server-0:
-  extends: ".vagrantjob"
+jirafeau-0-persistent:
+  extends:
+    - ".vagrantpersistentjob"
+  variables:
+    TEST_HOST: "jirafeau-server-0.test"
+
+lamp-server-0-shortlived:
+  extends:
+    - ".vagrantshortlivedjob"
   variables:
     TEST_HOST: "lamp-server-0.test"
 
-libvirt-host-0:
-  extends: ".vagrantjob"
+lamp-server-0-persistent:
+  extends:
+    - ".vagrantpersistentjob"
+  variables:
+    TEST_HOST: "lamp-server-0.test"
+
+libvirt-host-0-shortlived:
+  extends:
+    - ".vagrantshortlivedjob"
   variables:
     TEST_HOST: "libvirt-host-0.test"
   # requires nested virtualization to complete
   allow_failure: true
 
-mattermost-server-0:
-  extends: ".vagrantjob"
+libvirt-host-0-persistent:
+  extends:
+    - ".vagrantpersistentjob"
+  variables:
+    TEST_HOST: "libvirt-host-0.test"
+  # requires nested virtualization to complete
+  allow_failure: true
+
+mattermost-server-0-shortlived:
+  extends:
+    - ".vagrantshortlivedjob"
   variables:
     TEST_HOST: "mattermost-server-0.test"
 
-munin-0:
-  extends: ".vagrantjob"
+mattermost-server-0-persistent:
+  extends:
+    - ".vagrantpersistentjob"
+  variables:
+    TEST_HOST: "mattermost-server-0.test"
+
+munin-0-shortlived:
+  extends:
+    - ".vagrantshortlivedjob"
   variables:
     TEST_HOST: "munin-0.test"
 
-munin-node-0:
-  extends: ".vagrantjob"
+munin-0-persistent:
+  extends:
+    - ".vagrantpersistentjob"
+  variables:
+    TEST_HOST: "munin-0.test"
+
+munin-node-0-shortlived:
+  extends:
+    - ".vagrantshortlivedjob"
   variables:
     TEST_HOST: "munin-node-0.test"
 
-mysql-0:
-  extends: ".vagrantjob"
+munin-node-0-persistent:
+  extends:
+    - ".vagrantpersistentjob"
+  variables:
+    TEST_HOST: "munin-node-0.test"
+
+mysql-0-shortlived:
+  extends:
+    - ".vagrantshortlivedjob"
   variables:
     TEST_HOST: "mysql-0.test"
 
-mumble-0:
-  extends: ".vagrantjob"
+mysql-0-persistent:
+  extends:
+    - ".vagrantpersistentjob"
+  variables:
+    TEST_HOST: "mysql-0.test"
+
+mumble-0-shortlived:
+  extends:
+    - ".vagrantshortlivedjob"
   variables:
     TEST_HOST: "mumble-0.test"
 
-postfix-0:
-  extends: ".vagrantjob"
+mumble-0-persistent:
+  extends:
+    - ".vagrantpersistentjob"
+  variables:
+    TEST_HOST: "mumble-0.test"
+
+postfix-0-shortlived:
+  extends:
+    - ".vagrantshortlivedjob"
   variables:
     TEST_HOST: "postfix-0.test"
 
-postgresql-0:
-  extends: ".vagrantjob"
+postfix-0-persistent:
+  extends:
+    - ".vagrantpersistentjob"
+  variables:
+    TEST_HOST: "postfix-0.test"
+
+postgresql-0-shortlived:
+  extends:
+    - ".vagrantshortlivedjob"
   variables:
     TEST_HOST: "postgresql-0.test"
 
-public-git-web-server-0:
-  extends: ".vagrantjob"
+postgresql-0-persistent:
+  extends:
+    - ".vagrantpersistentjob"
+  variables:
+    TEST_HOST: "postgresql-0.test"
+
+public-git-web-server-0-shortlived:
+  extends:
+    - ".vagrantshortlivedjob"
   variables:
     TEST_HOST: "public-git-web-server-0.test"
 
-telemetry-log-fetch-dest-host-0:
-  extends: ".vagrantjob"
+public-git-web-server-0-persistent:
+  extends:
+    - ".vagrantpersistentjob"
+  variables:
+    TEST_HOST: "public-git-web-server-0.test"
+
+telemetry-log-fetch-dest-host-0-shortlived:
+  extends:
+    - ".vagrantshortlivedjob"
   variables:
     TEST_HOST: "telemetry-log-fetch-dest-host-0.test"
 
-telemetry-pingv1-server-0:
-  extends: ".vagrantjob"
+telemetry-log-fetch-dest-host-0-persistent:
+  extends:
+    - ".vagrantpersistentjob"
+  variables:
+    TEST_HOST: "telemetry-log-fetch-dest-host-0.test"
+
+telemetry-pingv1-server-0-shortlived:
+  extends:
+    - ".vagrantshortlivedjob"
   variables:
     TEST_HOST: "telemetry-pingv1-server-0.test"
 
-tmate-0:
-  extends: ".vagrantjob"
+telemetry-pingv1-server-0-persistent:
+  extends:
+    - ".vagrantpersistentjob"
+  variables:
+    TEST_HOST: "telemetry-pingv1-server-0.test"
+
+tmate-0-shortlived:
+  extends:
+    - ".vagrantshortlivedjob"
   variables:
     TEST_HOST: "tmate-0.test"
 
-# vagrant-runner-0 intentionally skipped as it can't have a vagrant/libvirt job
+tmate-0-persistent:
+  extends:
+    - ".vagrantpersistentjob"
+  variables:
+    TEST_HOST: "tmate-0.test"
