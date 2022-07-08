@@ -90,6 +90,9 @@ filter_server_custom_apache_config: |
   {{ filter_server_compliance_custom_apache_config
    | default(default_filter_server_compliance_custom_apache_config) }}
 
+  {{ filter_server_v3_diff_compliance_custom_apache_config
+   | default(default_filter_server_v3_diff_compliance_custom_apache_config) }}
+
   {{ filter_server_safari15_custom_apache_config
    | default(default_filter_server_safari15_custom_apache_config) }}
 
@@ -259,5 +262,28 @@ default_filter_server_obsolete_custom_apache_config: |
   RewriteRule ^/advblock\.((?:tpl|txt)(?:\.\w+)?) /ruadlist.$1 [R=302,L]
 
   RewriteRule ^/Liste_AR\.((?:tpl|txt)(?:\.\w+)?) /liste_ar.$1 [R=302,L]
+
+default_filter_server_v3_diff_compliance_custom_apache_config: |
+  # Manifest v3 filter list diffs
+  # Rewrite rules to handle v3 filter list diffs.
+
+  # Applied when easylistchina or easylistchina+easylist diffs are requested from China.
+  RewriteCond %{ENV:GEOIP_COUNTRY_CODE} ^CN$ [OR]
+  RewriteCond %{ENV:GEOIP_COUNTRY_CODE_V6} ^CN$
+  RewriteRule ^/v3/diff/easylistchina(\+easylist)?/(.+) /v3/diff/easylistchina+easylistchina_compliance$1/$2 [L]
+
+  # Applied when ABP filters diffs are requested from Germany.
+  RewriteCond %{ENV:GEOIP_COUNTRY_CODE} ^DE$ [OR]
+  RewriteCond %{ENV:GEOIP_COUNTRY_CODE_V6} ^DE$
+  RewriteRule ^/v3/diff/abp\-filters\-anti\-cv/(.+) /v3/diff/abp-filters-ger/$1 [L]
+
+  # Applied when ABP filters diffs are requested from Poland, South Africa or India.
+  RewriteCond %{ENV:GEOIP_COUNTRY_CODE} ^PL$ [OR]
+  RewriteCond %{ENV:GEOIP_COUNTRY_CODE_V6} ^PL$ [OR]
+  RewriteCond %{ENV:GEOIP_COUNTRY_CODE} ^ZA$ [OR]
+  RewriteCond %{ENV:GEOIP_COUNTRY_CODE_V6} ^ZA$ [OR]
+  RewriteCond %{ENV:GEOIP_COUNTRY_CODE} ^IN$ [OR]
+  RewriteCond %{ENV:GEOIP_COUNTRY_CODE_V6} ^IN$
+  RewriteRule ^/v3/diff/abp\-filters\-anti\-cv/(.+) /v3/diff/abp-filters-graph/$1 [L]
 
 # yamllint enable rule:line-length
