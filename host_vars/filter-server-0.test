@@ -96,6 +96,7 @@ apache2_logrotate_count:
 vagrant_groups:
   - "filter-servers"
   - "apache2-servers"
+  - "eyeo-apache2-servers"
   - "apache2-geoip-servers"
 
 # https://www.vagrantup.com/intro/getting-started/networking.html
