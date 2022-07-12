@@ -45,7 +45,9 @@ eyeo_icinga_ssh_agent_monitoring_plugins:
     mode: "0775"
     src: "files/plugins/check_service"
   check_http_codes:
-    package: "logtail"
+    package:
+      - "logtail"
+      - "python3-dotenv"
     dest: "{{ icinga_ssh_agent_plugin_directory }}"
     group: "root"
     owner: "root"
