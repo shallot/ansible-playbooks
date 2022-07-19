@@ -100,6 +100,13 @@ filter_list_origin_update_repos_custom_paths__to_merge:
     owner: "{{ filter_list_origin_mirror_user }}"
     group: "{{ filter_list_origin_mirror_user }}"
     mode: "0755"
+  "{{ filter_list_origin_base_dir }}/compound_webroot_structure.sh":
+    dest: "{{ filter_list_origin_base_dir }}/compound_webroot_structure.sh"
+    src: "files/filter-list-origin-host/compound_webroot_structure.sh"
+    state: "template"
+    owner: "{{ filter_list_origin_mirror_user }}"
+    group: "{{ filter_list_origin_mirror_user }}"
+    mode: "0755"
   "{{ filter_list_origin_base_dir }}/compress_files.sh":
     dest: "{{ filter_list_origin_base_dir }}/compress_files.sh"
     src: "files/filter-list-origin-host/compress_files.sh"
@@ -214,10 +221,12 @@ filter_list_origin_gstorage_artifacts_command: >-
     | dictsort -%}
   {{ filter_list_origin_base_dir }}/fetch_gstorage_artifacts.sh
   {{ filter_list_origin_inputs }}/{{ value.destination }}
-  {{ filter_list_origin_outputs }}/gstorage_artifacts/{{ value.destination }}
+  {{ filter_list_origin_outputs }}/gstorage_artifacts
   {{ value.source }}
   {{ value.filter | default("") }}
   {{ value.diff_retention | default("") }}
+  {{ value.manifest | default("") }}
+  "{{ value.includes | default(["*","*/"]) | join("\r") }}"
   {{- "" if loop.last else " && " -}}
   {%- endfor -%}
   ) >
@@ -242,7 +251,8 @@ filter_list_origin_compress_files_command: >-
 filter_list_origin_output_final_command: >-
   savelog -c {{ filter_list_origin_save_logs }} -qnl
   {{ filter_list_origin_logs }}/compose_final_output.log &&
-  {{ filter_list_origin_base_dir }}/compose_final_output.sh >
+  {{ filter_list_origin_base_dir }}/compose_final_output.sh
+  {{ webroot_compound_link_globs | default("") | join(" ") }} >
   {{ filter_list_origin_logs }}/compose_final_output.log
 
 # tasks/cron-jobs.yml
