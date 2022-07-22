@@ -72,11 +72,11 @@ filter_server_custom_apache_config: |
   {{ filter_server_prerequisite_custom_apache_config
    | default(default_filter_server_prerequisite_custom_apache_config) }}
 
-  {{ filter_server_skip_mod_deflate_config
-   | default(default_filter_server_skip_mod_deflate_config) }}
-
   {{ filter_server_skip_mod_brotli_config
    | default(default_filter_server_skip_mod_brotli_config) }}
+
+  {{ filter_server_skip_mod_deflate_config
+   | default(default_filter_server_skip_mod_deflate_config) }}
 
   {{ filter_server_elem_hide_custom_apache_config
    | default(default_filter_server_elem_hide_custom_apache_config) }}
@@ -143,9 +143,9 @@ default_filter_server_skip_mod_deflate_config: |
   RewriteRule "^(.*)\.(json|tpl|txt)$" "$1\.$2\.gz" [QSA]
 
   # Serve correct content types, and prevent mod_deflate double gzip.
-  RewriteRule "\.json\.gz$" "-" [T=application/json,E=no-gzip:1]
-  RewriteRule "\.tpl\.gz$" "-" [T=text/plain,E=no-gzip:1]
-  RewriteRule "\.txt\.gz$" "-" [T=text/plain,E=no-gzip:1]
+  RewriteRule "\.json\.gz$" "-" [T=application/json,E=no-brotli:1,E=no-gzip:1]
+  RewriteRule "\.tpl\.gz$" "-" [T=text/plain,E=no-brotli:1,E=no-gzip:1]
+  RewriteRule "\.txt\.gz$" "-" [T=text/plain,E=no-brotli:1,E=no-gzip:1]
 
   <FilesMatch "(\.json\.gz|\.tpl\.gz|\.txt\.gz)$">
     # Serve correct encoding type.
@@ -163,9 +163,9 @@ default_filter_server_skip_mod_brotli_config: |
   RewriteRule "^(.*)\.(json|tpl|txt)$" "$1\.$2\.br" [QSA]
 
   # Serve correct content types, and prevent double compression.
-  RewriteRule "\.json\.br$" "-" [T=application/json,E=no-brotli:1]
-  RewriteRule "\.tpl\.br$" "-" [T=text/plain,E=no-brotli:1]
-  RewriteRule "\.txt\.br$" "-" [T=text/plain,E=no-brotli:1]
+  RewriteRule "\.json\.br$" "-" [T=application/json,E=no-brotli:1,E=no-gzip:1]
+  RewriteRule "\.tpl\.br$" "-" [T=text/plain,E=no-brotli:1,E=no-gzip:1]
+  RewriteRule "\.txt\.br$" "-" [T=text/plain,E=no-brotli:1,E=no-gzip:1]
 
   <FilesMatch "(\.json\.br|\.tpl\.br|\.txt\.br)$">
     # Serve correct encoding type.
@@ -173,6 +173,8 @@ default_filter_server_skip_mod_brotli_config: |
     # Force proxies to cache brotli &
     # nonbrotli files separately.
     Header append Vary Accept-Encoding
+    # Remove br language, set by mods-enabled/mime.conf
+    RemoveLanguage .br
   </FilesMatch>
 
 default_filter_server_mobile_anticv_custom_apache_config: |
