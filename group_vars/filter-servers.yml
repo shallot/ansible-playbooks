@@ -93,6 +93,9 @@ filter_server_custom_apache_config: |
   {{ filter_server_safari15_custom_apache_config
    | default(default_filter_server_safari15_custom_apache_config) }}
 
+  {{ filter_server_obsolete_custom_apache_config
+   | default(default_filter_server_obsolete_custom_apache_config )}}
+
 default_filter_server_abuse_custom_apache_config: |
   <Location "/easylistchina+easylist.txt">
     RewriteCond %{HTTP_USER_AGENT} "^(-)?$" [NC]
@@ -249,5 +252,10 @@ default_filter_server_safari15_custom_apache_config: |
 
   RewriteCond %{ENV:SAFARI15} =true
   RewriteRule ^/(easylist.*)\.(json(?:\.\w+)?)$ /$1+safari15.$2 [L]
+
+default_filter_server_obsolete_custom_apache_config: |
+  RewriteRule ^/advblock\.((?:tpl|txt)(?:\.\w+)?) /ruadlist.$1 [R=302,L]
+
+  RewriteRule ^/Liste_AR\.((?:tpl|txt)(?:\.\w+)?) /liste_ar.$1 [R=302,L]
 
 # yamllint enable rule:line-length
