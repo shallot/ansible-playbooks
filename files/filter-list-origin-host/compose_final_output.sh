@@ -8,12 +8,6 @@ link_globs=$@
 rm -rf $prepdir
 mkdir $prepdir
 
-# this comes from update_repos.sh + sitescripts.subscriptions.bin.updateSubscriptionDownloads
-cp -a {{ filter_list_origin_outputs }}/data/. $prepdir/
-
-# this comes from update_repos.sh + compress_files.sh
-cp -a {{ filter_list_origin_outputs }}/gzip/. $prepdir/
-
 # this comes from fetch_gitlab_artifacts.sh
 cp -a {{ filter_list_origin_outputs }}/gitlab_artifacts/. $prepdir/
 

@@ -79,20 +79,6 @@ filter_list_origin_custom_authorized_keys__to_merge:
 
 # tasks/paths.yml
 filter_list_origin_update_repos_custom_paths__to_merge:
-  "{{ filter_list_origin_base_dir }}/update_subscription_downloads.sh":
-    dest: "{{ filter_list_origin_base_dir }}/update_subscription_downloads.sh"
-    src: "files/filter-list-origin-host/update_subscription_downloads.sh"
-    state: "template"
-    owner: "{{ filter_list_origin_mirror_user }}"
-    group: "{{ filter_list_origin_mirror_user }}"
-    mode: "0755"
-  "{{ filter_list_origin_base_dir }}/update_repos.sh":
-    dest: "{{ filter_list_origin_base_dir }}/update_repos.sh"
-    src: "files/filter-list-origin-host/update_repos.sh"
-    state: "template"
-    owner: "{{ filter_list_origin_mirror_user }}"
-    group: "{{ filter_list_origin_mirror_user }}"
-    mode: "0755"
   "{{ filter_list_origin_base_dir }}/compose_final_output.sh":
     dest: "{{ filter_list_origin_base_dir }}/compose_final_output.sh"
     src: "files/filter-list-origin-host/compose_final_output.sh"
@@ -143,11 +129,6 @@ filter_list_origin_update_repos_custom_paths__to_merge:
     state: "directory"
     owner: "{{ filter_list_origin_mirror_user }}"
     group: "{{ filter_list_origin_mirror_user }}"
-  "{{ filter_list_origin_outputs }}/gzip":
-    dest: "{{ filter_list_origin_outputs }}/gzip"
-    state: "directory"
-    owner: "{{ filter_list_origin_mirror_user }}"
-    group: "{{ filter_list_origin_mirror_user }}"
   "{{ filter_list_origin_outputs }}/gitlab_artifacts":
     dest: "{{ filter_list_origin_outputs }}/gitlab_artifacts"
     state: "directory"
@@ -159,31 +140,14 @@ filter_list_origin_update_repos_custom_paths__to_merge:
     owner: "{{ filter_list_origin_mirror_user }}"
     group: "{{ filter_list_origin_mirror_user }}"
 
-# roles/eyeo/sitescripts/tasks/main.yml
-filter_list_origin_preamble_sitescripts_ini_settings__to_merge:
-  - section: "DEFAULT"
-    key: "root"
-    value: "{{ filter_list_origin_inputs }}"
-  - section: "subscriptionDownloads"
-    key: "outdir"
-    value: "{{ filter_list_origin_outputs }}"
-
 # tasks/packages.yml
 filter_list_origin_custom_packages__to_merge:
   p7zip-full: "present"
-  mercurial: "present"
   curl: "present"
   jq: "present"
-
-# NB: has its own logging inside the script
-filter_list_origin_update_subscription_command: >-
-  {{ filter_list_origin_base_dir }}/update_subscription_downloads.sh
-
-filter_list_origin_update_repos_command: >-
-  savelog -c {{ filter_list_origin_save_logs }} -qnl
-  {{ filter_list_origin_logs }}/update_repos.log &&
-  {{ filter_list_origin_base_dir }}/update_repos.sh >
-  {{ filter_list_origin_logs }}/update_repos.log
+  git: "present"
+  rsync: "present"
+  wget: "present"
 
 filter_list_origin_gitlab_artifacts_command: >-
   savelog -c {{ filter_list_origin_save_logs }} -qnl
@@ -232,22 +196,6 @@ filter_list_origin_gstorage_artifacts_command: >-
   ) >
   {{ filter_list_origin_logs }}/fetch_gstorage_artifacts.log
 
-filter_list_origin_compress_files_command: >-
-  savelog -c {{ filter_list_origin_save_logs }} -qnl
-  {{ filter_list_origin_logs }}/compress_files.log &&
-  for sub in
-  {%- for key, value in filter_list_origin_repos | dictsort -%}
-  {%-   if value and 'compress_all' in value and value.compress_all %}
-  {{ key }}
-  {%-   endif -%}
-  {%- endfor -%}
-  ; do
-  {{ filter_list_origin_base_dir }}/compress_files.sh
-  {{ filter_list_origin_inputs }}/$sub
-  {{ filter_list_origin_outputs }}/gzip
-  ; done >
-  {{ filter_list_origin_logs }}/compress_files.log
-
 filter_list_origin_output_final_command: >-
   savelog -c {{ filter_list_origin_save_logs }} -qnl
   {{ filter_list_origin_logs }}/compose_final_output.log &&
@@ -257,24 +205,6 @@ filter_list_origin_output_final_command: >-
 
 # tasks/cron-jobs.yml
 filter_list_origin_custom_cron_jobs__to_merge:
-  update_subscription:
-    name: "update_subscription"
-    minute: "{{ filter_list_origin_update_subscription_cron_job_time }}"
-    user: "{{ filter_list_origin_mirror_user }}"
-    job: "{{ filter_list_origin_update_subscription_command
-           | replace('%', '\\%') }}"
-  update_repos:
-    name: "update_repos"
-    minute: "{{ filter_list_origin_update_repos_cron_job_time }}"
-    user: "{{ filter_list_origin_mirror_user }}"
-    job: "{{ filter_list_origin_update_repos_command
-           | replace('%', '\\%') }}"
-  compress_files:
-    name: "compress_files"
-    minute: "{{ filter_list_origin_compress_files_cron_job_time }}"
-    user: "{{ filter_list_origin_mirror_user }}"
-    job: "{{ filter_list_origin_compress_files_command
-           | replace('%', '\\%') }}"
   gitlab_artifacts:
     name: "gitlab_artifacts"
     minute: "{{ filter_list_origins_gitlab_artifacts_cron_job_time }}"
@@ -296,21 +226,12 @@ filter_list_origin_custom_cron_jobs__to_merge:
 
 # tasks/shells.yml
 filter_list_origin_cron_custom_shells__to_merge:
-  filter_list_origin_1_first_update_subscription:
-    cmd: "{{ filter_list_origin_update_subscription_command }}"
-    become_user: "{{ filter_list_origin_mirror_user }}"
-  filter_list_origin_2_first_update_repos:
-    cmd: "{{ filter_list_origin_update_repos_command }}"
-    become_user: "{{ filter_list_origin_mirror_user }}"
-  filter_list_origin_2_first_gitlab_artifacts:
+  filter_list_origin_1_first_gitlab_artifacts:
     cmd: "{{ filter_list_origin_gitlab_artifacts_command }}"
     become_user: "{{ filter_list_origin_mirror_user }}"
-  filter_list_origin_2_first_gstorage_artifacts:
+  filter_list_origin_1_first_gstorage_artifacts:
     cmd: "{{ filter_list_origin_gstorage_artifacts_command }}"
     become_user: "{{ filter_list_origin_mirror_user }}"
-  filter_list_origin_3_first_compress_files:
-    cmd: "{{ filter_list_origin_compress_files_command }}"
-    become_user: "{{ filter_list_origin_mirror_user }}"
-  filter_list_origin_4_first_output_final:
+  filter_list_origin_2_first_output_final:
     cmd: "{{ filter_list_origin_output_final_command }}"
     become_user: "{{ filter_list_origin_mirror_user }}"

@@ -31,26 +31,6 @@
     - import_tasks:
         "tasks/paths.yml"
 
-    # https://docs.ansible.com/ansible/latest/include_tasks_module.html
-    - include_tasks:
-        "tasks/sitescripts.yml"
-      vars:
-        sitescripts_git_version:
-          "{{ filter_list_origin_sitescripts_git_version
-            | default('master') }}"
-
-    # https://docs.ansible.com/ansible/latest/include_tasks_module.html
-    - include_tasks:
-        "tasks/filter-list-origin-host-hg.yml"
-      when:
-        "filter_list_origin_remote_hg is defined"
-
-    # https://docs.ansible.com/ansible/latest/include_tasks_module.html
-    - include_tasks:
-        "tasks/git.yml"
-      when:
-        "filter_list_origin_remote_git is defined"
-
     # https://docs.ansible.com/ansible/latest/import_tasks_module.html
     - import_tasks:
         "tasks/cron-jobs.yml"

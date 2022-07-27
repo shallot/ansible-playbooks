@@ -33,77 +33,7 @@ filter_list_origin_mirror_user:
 filter_list_origin_base_dir:
   "/home/{{ filter_list_origin_mirror_user }}"
 
-sitescripts_system_username:
-  "sitescripts"
-
-filter_list_origin_sitescripts_git_version:
-  "master"
-
-# disabled until all mirrors exist there
-# filter_list_origin_remote_git:
-#   "https://gitlab.com/eyeo/filterlists"
-# shallow clone on test, to save bandwidth and time
-# filter_list_origin_git_depth:
-#   1
-
-filter_list_origin_remote_hg:
-  "https://hg.adblockplus.org"
-
 filter_list_origin_repos:
-  easylist:
-    clone: true
-    sitescripts: true
-  easylistgermany:
-    clone: true
-    sitescripts: true
-  easylistitaly:
-    clone: true
-    sitescripts: true
-  easylistchina:
-    clone: true
-    sitescripts: true
-  easylistcombinations:
-    clone: true
-    sitescripts: true
-  easylistspanish:
-    clone: true
-    sitescripts: true
-  ruadlist:
-    clone: true
-    sitescripts: true
-  listefr:
-    clone: true
-    sitescripts: true
-  easylistdutch:
-    clone: true
-    sitescripts: true
-  antiadblockfilters:
-    clone: true
-    sitescripts: true
-  listear:
-    clone: true
-    sitescripts: true
-  customfilterlists:
-    clone: true
-    sitescripts: true
-  abpvn:
-    clone: true
-    sitescripts: true
-  exceptionrules:
-    clone: true
-    sitescripts: true
-  contentblockerlists:
-    clone: true
-    sitescripts: false
-    compress_all: true
-  crumbsfilterlist:
-    clone: true
-    sitescripts: true
-  crumbsfilterlist-artifacts:
-    destination: "crumbs"
-    gitlab_artifacts: true
-    gitlab_project: "eyeo/filterlists/crumbsfilterlist"
-    gitlab_ref: "master"
   filterlist-splitting:
     destination: "aa-variants"
     gitlab_artifacts: true
@@ -135,14 +65,6 @@ webroot_compound_link_globs:
 filter_list_origin_output_final_cron_job_time:
   "8-58/10"
 
-# this one takes 4+ minutes
-filter_list_origin_update_subscription_cron_job_time:
-  "4-54/10"
-
-# this one takes a couple of minutes as well, but less without hgrc 7za calls
-filter_list_origin_update_repos_cron_job_time:
-  "9-59/10"
-
 # this one can run in parallel with update_repos as it's orthogonal to it
 filter_list_origins_gitlab_artifacts_cron_job_time:
   "9-59/10"
@@ -166,7 +88,7 @@ vagrant_groups:
 
 # https://www.vagrantup.com/docs/vagrantfile/machine_settings.html
 vagrant_box:
-  "debian/stretch64"
+  "debian/bullseye64"
 
 # https://www.vagrantup.com/docs/providers/configuration
 vagrant_memory:
