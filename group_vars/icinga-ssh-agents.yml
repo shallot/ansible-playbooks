@@ -42,6 +42,12 @@ eyeo_icinga_ssh_agent_monitoring_plugins:
     dest: "{{ icinga_ssh_agent_plugin_directory }}"
     group: "root"
     owner: "root"
-    mode: "0775"
+    mode: "0755"
     src: "files/plugins/check_service"
+  check_service_wrapper:
+    dest: "{{ icinga_ssh_agent_plugin_directory }}"
+    group: "root"
+    owner: "root"
+    mode: "0755"
+    src: "files/plugins/check_service_wrapper"
     sudoers_src: "templates/sudoers/check_service"
