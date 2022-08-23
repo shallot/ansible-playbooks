@@ -107,6 +107,11 @@ backup-server-0.test:
   variables:
     TEST_HOST: "backup-server-0.test"
 
+crumbs-filter-server-0:
+  extends: ".vagrantjob"
+  variables:
+    TEST_HOST: "crumbs-filter-server-0.test"
+
 crumbs-web-server-0:
   extends: ".vagrantjob"
   variables:
