@@ -59,4 +59,9 @@ default_crumbs_filter_server_privacy_custom_apache_config: |
   RewriteCond %{ENV:GEOIP_COUNTRY_CODE} ^DE$ [OR]
   RewriteCond %{ENV:GEOIP_COUNTRY_CODE_V6} ^DE$
   RewriteRule ^/crumbs-privacy-friendly.txt /crumbs-privacy-friendly-germany.txt [R=302,L]
+
+  # Applied when CRUMBS privacy friendly diffs are requested from Germany.
+  RewriteCond %{ENV:GEOIP_COUNTRY_CODE} ^DE$ [OR]
+  RewriteCond %{ENV:GEOIP_COUNTRY_CODE_V6} ^DE$
+  RewriteRule ^/v3/diff/crumbs\-privacy\-friendly/(.+) /v3/diff/crumbs-privacy-friendly-germany/$1 [L]
 # yamllint enable rule:line-length
