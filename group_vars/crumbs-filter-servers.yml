@@ -34,6 +34,9 @@ crumbs_filter_server_custom_apache_config: |
   {{ filter_server_skip_mod_deflate_config
    | default(default_filter_server_skip_mod_deflate_config) }}
 
+  {{ crumbs_filter_server_header_custom_apache_config
+   | default(default_crumbs_filter_server_header_custom_apache_config) }}
+
   {{ crumbs_filter_server_test_custom_apache_config
    | default(default_crumbs_filter_server_test_custom_apache_config) }}
 
@@ -65,3 +68,9 @@ default_crumbs_filter_server_privacy_custom_apache_config: |
   RewriteCond %{ENV:GEOIP_COUNTRY_CODE_V6} ^DE$
   RewriteRule ^/v3/diff/crumbs\-privacy\-friendly/(.+) /v3/diff/crumbs-privacy-friendly-germany/$1 [L]
 # yamllint enable rule:line-length
+
+default_crumbs_filter_server_header_custom_apache_config: |
+  <FilesMatch "(crumbs_abb\.json|crumbs_extension\.json)">
+    # Append Crumbs CC header
+    Header append X-Crumbs-Country-Code "expr=%{ENV:GEOIP_COUNTRY_CODE}"
+  </FilesMatch>
