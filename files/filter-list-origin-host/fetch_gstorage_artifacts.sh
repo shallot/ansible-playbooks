@@ -31,9 +31,10 @@ test -d $fetch_dir || mkdir $fetch_dir
 
 # Disable progress bar with --no-verbose basic information still
 # gets printed out
-wget --no-verbose https://storage.googleapis.com/$src.tar.gz \
-  -O $download_dir/$project.tar.gz && \
-  tar zxvf $download_dir/$project.tar.gz -C $extract_dir/ \
+download_message=$(wget https://storage.googleapis.com/$src.tar.gz \
+  -O $download_dir/$project.tar.gz 2>&1) || { echo "$download_message" >&2; exit 1; }
+
+tar zxvf $download_dir/$project.tar.gz -C $extract_dir/ \
   --strip-components=$filter_len $filter
 
 # Only the v3 subdirectory has a index.json in it right now.
@@ -47,7 +48,7 @@ done
 # Pull manifest, if defined, and run sanity check
 if [ ! -z $manifest ]; then
   if [ ! -d $input/$manifest_short ]; then
-    git clone $manifest $input/$manifest_short
+    git clone $manifest.git $input/$manifest_short
   fi
 
   git -C $input/$manifest_short pull --ff-only
