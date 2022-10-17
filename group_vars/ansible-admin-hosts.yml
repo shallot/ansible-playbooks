@@ -17,7 +17,8 @@
 
 # provision-custom-systems.yml
 ansible_admin_sshd_config__to_merge:
-  AllowAgentForwarding: "yes"
+  All:
+    AllowAgentForwarding: "yes"
 
 # tasks/ansible-admin.yml
 ansible_admin_packages__to_merge:

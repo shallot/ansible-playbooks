@@ -20,10 +20,11 @@ aa_default_custom_packages__to_merge:
   acl: "present" # required for ansible 2.10 tempfile permissions
 
 aa_default_sshd_config__to_merge:
-  AllowAgentForwarding: "no"
-  AllowTcpForwarding: "no"
-  PermitEmptyPasswords: "no"
-  PermitRootLogin: "without-password"
-  PermitTTY: "yes"
-  PermitTunnel: "no"
-  PermitUserEnvironment: "no"
+  All:
+    AllowAgentForwarding: "no"
+    AllowTcpForwarding: "no"
+    PermitEmptyPasswords: "no"
+    PermitRootLogin: "without-password"
+    PermitTTY: "yes"
+    PermitTunnel: "no"
+    PermitUserEnvironment: "no"

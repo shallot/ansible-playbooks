@@ -133,8 +133,17 @@ host_specific_custom_service_dropins__to_merge:
 
 # provision-custom-systems.yml
 host_specific_sshd_config__to_merge:
-  AllowAgentForwarding: "no"
-  AllowTcpForwarding: "no"
+  global:
+    MaxStartups: 100
+    MaxSessions: 100
+    Protocol: 2
+  "Group adm":
+    AllowAgentForwarding: "no"
+    AllowTcpForwarding: "no"
+    PermitEmptyPasswords: "no"
+    PermitRootLogin: "without-password"
+    PermitTTY: "yes"
+    PermitTunnel: "no"
 
 # tasks/ssh-keys.yml
 host_specific_custom_ssh_keys__to_merge:

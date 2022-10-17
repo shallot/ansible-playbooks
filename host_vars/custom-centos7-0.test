@@ -26,8 +26,9 @@ host_specific_custom_users__to_merge:
 
 # provision-custom-systems.yml
 host_specific_sshd_config__to_merge:
-  AllowAgentForwarding: "no"
-  AllowTcpForwarding: "no"
+  All:
+    AllowAgentForwarding: "no"
+    AllowTcpForwarding: "no"
 
 # https://www.vagrantup.com/docs/vagrantfile/machine_settings.html
 vagrant_box:
