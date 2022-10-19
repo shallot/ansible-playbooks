@@ -163,6 +163,8 @@ eyeo-cms-web-server-0:
   extends: ".vagrantjob"
   variables:
     TEST_HOST: "eyeo-cms-web-server-0.test"
+  # requires finished migration to python3 for sitescripts
+  allow_failure: true
 
 filter-delivery-0:
   extends: ".vagrantjob"
