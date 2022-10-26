@@ -22,6 +22,7 @@
   merge_variable:
     name: "openssh_server_configuration"
     suffix: "sshd_config__to_merge"
+    recursive: true
 
 # https://docs.ansible.com/ansible/latest/import_role_module.html
 # https://gitlab.com/eyeo/devops/ansible-role-openssh

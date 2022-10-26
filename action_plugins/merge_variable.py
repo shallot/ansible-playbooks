@@ -43,6 +43,8 @@ class ActionModule(ansible.plugins.action.ActionBase):
         name = self.__get_identifier('name')
         suffix = self.__get_identifier('suffix')
 
+        recursive = self.__get_option('recursive')
+
         default = self.__get_default(name, task_vars)
         expected_type = type(default)
         values = self.__get_values(suffix, task_vars, expected_type)
@@ -52,7 +54,7 @@ class ActionModule(ansible.plugins.action.ActionBase):
         elif issubclass(expected_type, list):
             merged = merge_lists(values)
         elif issubclass(expected_type, dict):
-            merged = merge_dicts(values)
+            merged = merge_dicts(values, recursive)
         else:
             message = 'Cannot merge variables of type {}'.format(expected_type)
             raise ansible.errors.AnsibleError(message)
@@ -98,13 +100,30 @@ class ActionModule(ansible.plugins.action.ActionBase):
 
         return values
 
+    def __get_option(self, option):
+        """Fetch a optional task parameter. defaults to 'None'."""
+        option = self._task.args.get(option)
 
-def merge_dicts(dictionaries):
+        return option
+
+
+def merge_dicts(dictionaries, recursive):
     """Merge the given dictionaries into a single one."""
     result = {}
 
-    for item in dictionaries:
-        result.update(item)
+    if recursive is True:
+      for to_merge in dictionaries:
+        for key, value in to_merge.items():
+          if (key in result and isinstance(result[key], dict)
+            and isinstance(to_merge[key], dict)):
+
+            to_merge[key] = merge_dicts([result[key], to_merge[key]], recursive)
+
+          result[key] = to_merge[key]
+
+    else:
+      for item in dictionaries:
+          result.update(item)
 
     return result
 
