@@ -97,7 +97,10 @@ filter_server_custom_apache_config: |
    | default(default_filter_server_safari15_custom_apache_config) }}
 
   {{ filter_server_obsolete_custom_apache_config
-   | default(default_filter_server_obsolete_custom_apache_config )}}
+   | default(default_filter_server_obsolete_custom_apache_config) }}
+
+  {{ filter_server_a_b_testing_custom_apache_config
+   | default(default_filter_server_a_b_testing_custom_apache_config) }}
 
 default_filter_server_abuse_custom_apache_config: |
   <Location "/easylistchina+easylist.txt">
@@ -285,5 +288,11 @@ default_filter_server_v3_diff_compliance_custom_apache_config: |
   RewriteCond %{ENV:GEOIP_COUNTRY_CODE} ^IN$ [OR]
   RewriteCond %{ENV:GEOIP_COUNTRY_CODE_V6} ^IN$
   RewriteRule ^/v3/diff/abp\-filters\-anti\-cv/(.+) /v3/diff/abp-filters-graph/$1 [L]
+
+default_filter_server_a_b_testing_custom_apache_config: |
+  # Rewrite rules for A/B testing, see https://jira.eyeo.com/browse/KRK-18
+  RewriteCond %{QUERY_STRING} (?:^|&)experiment_id=KRK-18 [NC]
+  RewriteCond %{QUERY_STRING} (?:^|&)variant_id=mini [NC]
+  RewriteRule ^/exceptionrules\.((?:txt)(?:\.gz)?) /aa-variants/aa_google.$1 [L]
 
 # yamllint enable rule:line-length
