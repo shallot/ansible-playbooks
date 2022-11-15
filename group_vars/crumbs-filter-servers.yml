@@ -73,4 +73,5 @@ default_crumbs_filter_server_header_custom_apache_config: |
   <FilesMatch "(crumbs_abb\.json|crumbs_extension\.json)">
     # Append Crumbs CC header
     Header append X-Crumbs-Country-Code "expr=%{ENV:GEOIP_COUNTRY_CODE}"
+    Header append X-Crumbs-Language-Code "expr=%{HTTP:Accept-Language}"
   </FilesMatch>
