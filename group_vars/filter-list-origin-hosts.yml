@@ -28,6 +28,8 @@ filter_list_origin_inputs:
     }}"
 filter_list_origin_outputs:
   "{{ filter_list_origin_base_dir }}/generated"
+filter_list_origin_archive:
+  "{{ filter_list_origin_base_dir }}/archive"
 filter_list_origin_final_output:
   "{{ filter_list_origin_base_dir }}/final_output"
 
@@ -79,6 +81,13 @@ filter_list_origin_custom_authorized_keys__to_merge:
 
 # tasks/paths.yml
 filter_list_origin_update_repos_custom_paths__to_merge:
+  "{{ filter_list_origin_base_dir }}/rotate-final-output":
+    dest: "{{ filter_list_origin_base_dir }}/rotate-final-output"
+    src: "files/filter-list-origin-host/rotate-final-output"
+    state: "template"
+    owner: "{{ filter_list_origin_mirror_user }}"
+    group: "{{ filter_list_origin_mirror_user }}"
+    mode: "0644"
   "{{ filter_list_origin_base_dir }}/compose_final_output.sh":
     dest: "{{ filter_list_origin_base_dir }}/compose_final_output.sh"
     src: "files/filter-list-origin-host/compose_final_output.sh"
@@ -126,6 +135,11 @@ filter_list_origin_update_repos_custom_paths__to_merge:
     group: "{{ filter_list_origin_mirror_user }}"
   "{{ filter_list_origin_outputs }}":
     dest: "{{ filter_list_origin_outputs }}"
+    state: "directory"
+    owner: "{{ filter_list_origin_mirror_user }}"
+    group: "{{ filter_list_origin_mirror_user }}"
+  "{{ filter_list_origin_archive }}":
+    dest: "{{ filter_list_origin_archive }}"
     state: "directory"
     owner: "{{ filter_list_origin_mirror_user }}"
     group: "{{ filter_list_origin_mirror_user }}"

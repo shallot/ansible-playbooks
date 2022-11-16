@@ -82,6 +82,10 @@ filter_list_origin_compress_files_cron_job_time:
 filter_list_origin_save_logs:
   "{{ ( (60 / 10) * 24 * 30 ) | int }}"
 
+# Retain old final_output directories for x revisions
+filter_list_origin_final_output_retention:
+  "3" # Retains 3 copies * 10 minutes
+
 # https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
 vagrant_groups:
   - "filter-list-origin-hosts"

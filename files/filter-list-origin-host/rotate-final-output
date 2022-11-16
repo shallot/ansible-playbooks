@@ -1,0 +1,5 @@
+{{ filter_list_origin_archive }}/final_output_old.tar {
+  missingok
+  rotate {{ filter_list_origin_final_output_retention }}
+  nocreate
+}
