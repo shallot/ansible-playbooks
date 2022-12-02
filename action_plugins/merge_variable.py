@@ -20,10 +20,16 @@ at https://github.com/leapfrogonline/ansible-merge-vars and distributed
 at https://pypi.org/project/ansible-merge-vars/
 """
 
+import json
 import ansible.errors
 import ansible.plugins.action
 import ansible.utils.vars
 
+try:
+    from __main__ import display
+except ImportError:
+    from ansible.utils.display import Display
+    display = Display()
 
 # https://docs.ansible.com/ansible/latest/dev_guide/developing_plugins.html#action-plugins
 class ActionModule(ansible.plugins.action.ActionBase):
@@ -63,6 +69,8 @@ class ActionModule(ansible.plugins.action.ActionBase):
             'ansible_facts': {name: merged},
             'changed': False,
         }
+
+        display.v(json.dumps(result, indent=2))
 
         return result
 
