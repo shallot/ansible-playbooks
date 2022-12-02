@@ -147,6 +147,7 @@ Vagrant.configure('2') do |vagrant|
           ansible.raw_arguments = [
             '--diff'
           ]
+          ansible.verbose = 'v'
         end
 
       end
