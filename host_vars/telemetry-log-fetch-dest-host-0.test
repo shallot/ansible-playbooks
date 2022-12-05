@@ -35,7 +35,7 @@ telemetry_log_fetch_server_key: |
   ssh-rsa example-server-key...
 
 telemetry_log_gcloud_sdk_key_id:
-  "836F4BEB"
+  "13EDEF05"
 telemetry_log_gcloud_service_user:
   "example-user"
 telemetry_log_gcloud_project_name:
