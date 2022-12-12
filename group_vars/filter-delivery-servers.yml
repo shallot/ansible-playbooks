@@ -104,11 +104,6 @@ filter_delivery_servers_apache2_modules__to_merge:
 filter_delivery_server_custom_apache_config: |
   RewriteEngine On
 
-  {{ filter_delivery_server_abuse_custom_apache_config
-   | default(
-     default_filter_delivery_server_abuse_custom_apache_config
-  ) }}
-
   {{ filter_delivery_server_prerequisite_custom_apache_config
    | default(
      default_filter_delivery_server_prerequisite_custom_apache_config
@@ -168,12 +163,6 @@ filter_delivery_server_custom_apache_config: |
    | default(
     default_filter_delivery_server_a_b_testing_custom_apache_config
   ) }}
-
-default_filter_delivery_server_abuse_custom_apache_config: |
-  <Location "/easylistchina+easylist.txt">
-    RewriteCond %{HTTP_USER_AGENT} "^(-)?$" [NC]
-    RewriteRule "^/(.*)" "-" [R=400,L]
-  </Location>
 
 default_filter_delivery_server_keepalive_custom_apache_config: |
   KeepAlive On
