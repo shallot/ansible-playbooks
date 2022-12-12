@@ -31,14 +31,6 @@ filter_server_mirror_cron_job_minute:
 filter_origin_max_delete:
   100
 
-filter_server_abuse_custom_apache_config: |
-  {{ default_filter_server_abuse_custom_apache_config }}
-
-  <Location /easylist.txt>
-    RewriteCond %{HTTP_USER_AGENT} "evil-bot-that-deserves-nothing" [NC]
-    RewriteRule "^" "-" [R=400,L]
-  </Location>
-
 # group_vars/apache2-geoip-servers.yml
 custom_geoip_email_notification_address:
   "root"
