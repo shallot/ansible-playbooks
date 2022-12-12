@@ -29,8 +29,8 @@ mv $prepdir $finaldir
 # $finaldir is referenced from ssh forced command
 
 test -d $olddir && tar --remove-files -vcf \
-   {{ filter_list_origin_archive }}/final_output_old.tar $olddir
+   {{ filter_list_origin_archive }}/final_output_old.tar $olddir 2>&1
 
 # Delete old versions of final_output
-/usr/sbin/logrotate -f -v -s {{ filter_list_origin_archive }}/status \
+/usr/sbin/logrotate -f -s {{ filter_list_origin_archive }}/status \
     {{ filter_list_origin_base_dir }}/rotate-final-output
