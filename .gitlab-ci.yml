@@ -150,6 +150,18 @@ apache2-modsecurity-server-0-persistent:
   variables:
     TEST_HOST: "apache2-modsecurity-server-0.test"
 
+apache2-sitescripts-server-0-shortlived:
+  extends:
+    - ".vagrantshortlivedjob"
+  variables:
+    TEST_HOST: "apache2-sitescripts-server-0.test"
+
+apache2-sitescripts-server-0-persistent:
+  extends:
+    - ".vagrantpersistentjob"
+  variables:
+    TEST_HOST: "apache2-sitescripts-server-0.test"
+
 apk-signing-0-shortlived:
   extends:
     - ".vagrantshortlivedjob"
@@ -319,16 +331,12 @@ eyeo-cms-web-server-0-shortlived:
     - ".vagrantshortlivedjob"
   variables:
     TEST_HOST: "eyeo-cms-web-server-0.test"
-  # requires finished migration to python3 for sitescripts
-  allow_failure: true
 
 eyeo-cms-web-server-0-persistent:
   extends:
     - ".vagrantpersistentjob"
   variables:
     TEST_HOST: "eyeo-cms-web-server-0.test"
-  # requires finished migration to python3 for sitescripts
-  allow_failure: true
 
 filter-delivery-0-shortlived:
   extends:
