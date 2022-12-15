@@ -23,6 +23,9 @@ test ! -d $finaldir || mv $finaldir $olddir
 # but rsync --max-delete=anything on filter-servers protects us from downtime here
 mv $prepdir $finaldir
 
+# print changes of this iteration
+test -d $olddir && diff -qur $finaldir $olddir
+
 # $finaldir is referenced from ssh forced command
 
 test -d $olddir && tar --remove-files -vcf \
