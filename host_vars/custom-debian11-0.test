@@ -157,6 +157,21 @@ host_specific_custom_ssh_keys__to_merge:
     #
     # force: "yes"
     size: 521
+  example_unchanged_key:
+    dest: "/root/test-ssh-key-example_id_ed25519"
+    type: "rsa"
+    # force: "yes" ## if uncommented, key will be rsa 4096
+    size: 4096
+  example_2_key:
+    dest: "/root/test-ssh-key-example_id_rsa_4096"
+    type: "ed25519"
+    size: 521
+  example_2_changed_key:
+    dest: "/root/test-ssh-key-example_id_rsa_4096"
+    type: "rsa"
+    force: "yes" ## if commented, key will remain ed25519
+    size: 4096
+## change force: "yes" orders and reprovision to test
 
 # tasks/authorized-keys.yml
 host_specific_custom_authorized_keys__to_merge:
