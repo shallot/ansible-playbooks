@@ -34,11 +34,6 @@ filter_list_origin_base_dir:
   "/home/{{ filter_list_origin_mirror_user }}"
 
 filter_list_origin_repos:
-  filterlist-splitting:
-    destination: "aa-variants"
-    gitlab_artifacts: true
-    gitlab_project: "eyeo/monetization/filterlist-splitting"
-    gitlab_ref: "main"
   filterlists:
     destination: "filterlists"
     source: "filterlists-published/main/filterlists"
@@ -47,7 +42,7 @@ filter_list_origin_repos:
     diff_retention: "2"
     manifest: "https://gitlab.com/eyeo/filters/filterlists-delivery-manifest"
     includes:
-      - "aa/***"
+      - "aa-variants/***"
       - "content-blocker/***"
       - "crumbs/***"
       - "default/***"
@@ -55,6 +50,7 @@ filter_list_origin_repos:
       - "v3/***"
 
 webroot_compound_link_globs:
+  - "aa-variants"
   - "default"
   - "crumbs"
   - "content-blocker"

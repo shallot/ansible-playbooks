@@ -9,9 +9,6 @@ link_globs=$@
 rm -rf $prepdir
 mkdir $prepdir
 
-# this comes from fetch_gitlab_artifacts.sh
-cp -a {{ filter_list_origin_outputs }}/gitlab_artifacts/. $prepdir/
-
 # this comes from fetch_gstorage_artifacts.sh
 cp -a {{ filter_list_origin_outputs }}/gstorage_artifacts/. $prepdir/
 
