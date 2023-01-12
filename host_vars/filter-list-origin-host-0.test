@@ -48,6 +48,8 @@ filter_list_origin_repos:
       - "default/***"
       - "msie/***"
       - "v3/***"
+      - "minified/***"
+      - ".htaccess"
 
 webroot_compound_link_globs:
   - "aa-variants"
@@ -55,6 +57,7 @@ webroot_compound_link_globs:
   - "crumbs"
   - "content-blocker"
   - "msie"
+  - "minified"
 
 # cron job timings correlated with filter_server_mirror_cron_job_minute
 # this one takes ~0.2s
