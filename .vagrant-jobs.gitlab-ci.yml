@@ -28,12 +28,8 @@
   before_script:
     - |
       set -x
-      if vagrant box list | grep -q $VAGRANT_BOX; then
-        vagrant box update --box $VAGRANT_BOX
-        vagrant box prune
-      else
+      vagrant box list | grep -q $VAGRANT_BOX || \
         vagrant box add --provider $VAGRANT_PROVIDER $VAGRANT_BOX
-      fi
       if ! vagrant destroy $TEST_HOST -f; then
         if [ "$VAGRANT_PROVIDER" = "libvirt" ]; then
           libvirt_vm=ansible-playbooks_$TEST_HOST
