@@ -576,6 +576,18 @@ telemetry-pingv1-server-0-persistent:
   variables:
     TEST_HOST: "telemetry-pingv1-server-0.test"
 
+testpages-server-0-shortlived:
+  extends:
+    - ".vagrantshortlivedjob"
+  variables:
+    TEST_HOST: "testpages-server-0.test"
+
+testpages-server-0-persistent:
+  extends:
+    - ".vagrantpersistentjob"
+  variables:
+    TEST_HOST: "testpages-server-0.test"
+
 tmate-0-shortlived:
   extends:
     - ".vagrantshortlivedjob"

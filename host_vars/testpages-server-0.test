@@ -1,0 +1,208 @@
+# Copyright (c) 2023-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+# group_vars/testpages-servers.yml
+testpages_version:
+  "master"
+
+testpages_primary_domain:
+  "testpages.adblockplus.org"
+
+testpages_secondary_domain:
+  "abptestpages.org"
+
+testpages_secondary_subdomain:
+  "subdomain.abptestpages.org"
+
+# roles/eyeo/sitescripts/tasks/main.yml
+sitescripts_git_version:
+  "python3"
+
+# tasks/packages.yml
+testpages_custom_packages__to_merge:
+  ssl-cert: "present" # just for snakeoil certificates
+
+# roles/apache2/tasks/main.yml
+# provision-eyeo-cms-web-servers.yml
+# yamllint disable rule:line-length
+test_testpages_apache2_sites__to_merge:
+  "{{ testpages_primary_domain }}":
+    name: "{{ testpages_primary_domain }}"
+    enabled_site_name: "000-{{ testpages_primary_domain }}"
+    configuration: |
+      <VirtualHost *:80>
+
+        {{ eyeo_cms_shared_apache_config_preamble
+         | replace("_SITE_NAME_", testpages_primary_domain)
+         | indent(2) }}
+
+        ServerAlias *.{{ testpages_primary_domain }}
+
+        RewriteCond %{HTTP_HOST} ^{{ testpages_primary_domain }}
+        RewriteRule ^/(.*)$ https://{{ testpages_primary_domain }}/$1 [R,L]
+
+      </VirtualHost>
+
+      # HTTPS vhost config is squashed into the same file because
+      # the per-branch vhost copier just knows about this one file
+      # A wildcard SSL certificate is the prerequisite for this to
+      # actually work, as are references to differently named symlinks,
+      # to avoid the sed -e s,$DOMAIN,..., match in tasks/eyeo-cms.yml
+      <VirtualHost *:443>
+
+        {{ eyeo_cms_shared_apache_config
+         | replace("_SITE_NAME_", testpages_primary_domain)
+         | indent(2) }}
+
+        {{ testpages_sitescripts_extra_apache_config
+         | indent(2) }}
+
+        ServerAlias *.{{ testpages_primary_domain }}
+
+        SSLEngine on
+        # TODO: actually generate something self-signed instead of
+        # piggybacking on snakeoil
+        SSLCertificateFile /etc/ssl/certs/ssl-cert-snakeoil.pem
+        SSLCertificateKeyFile /etc/ssl/private/ssl-cert-snakeoil.key
+
+        {{ ocsp_stapling_apache_config }}
+
+      </VirtualHost>
+    eyeo_cms_web_required:
+      true
+  "{{ testpages_secondary_domain }}":
+    name: "{{ testpages_secondary_domain }}"
+    configuration: |
+      <VirtualHost *:80>
+
+        {{ eyeo_cms_shared_apache_config_preamble
+         | replace("_SITE_NAME_", testpages_secondary_domain)
+         | indent(2) }}
+
+        ServerAlias *.{{ testpages_secondary_domain }}
+
+        RewriteCond %{HTTP_HOST} ^(.+\.)?{{ testpages_secondary_domain }}
+        RewriteRule ^/(.*)$ https://%1{{ testpages_secondary_domain }}/$1 [R,L]
+
+      </VirtualHost>
+
+      # HTTPS vhost config is squashed into the same file because
+      # the per-branch vhost copier just knows about this one file
+      # A wildcard SSL certificate is the prerequisite for this to
+      # actually work, as are references to differently named symlinks,
+      # to avoid the sed -e s,$DOMAIN,..., match in tasks/eyeo-cms.yml
+      <VirtualHost *:443>
+
+        {{ eyeo_cms_shared_apache_config
+         | replace("_SITE_NAME_", testpages_secondary_domain)
+         | indent(2) }}
+
+        {{ testpages_sitescripts_extra_apache_config
+         | indent(2) }}
+
+        ServerAlias *.{{ testpages_secondary_domain }}
+
+        SSLEngine on
+        # TODO: actually generate something self-signed instead of
+        # piggybacking on snakeoil
+        SSLCertificateFile /etc/ssl/certs/ssl-cert-snakeoil.pem
+        SSLCertificateKeyFile /etc/ssl/private/ssl-cert-snakeoil.key
+
+        {{ ocsp_stapling_apache_config }}
+
+      </VirtualHost>
+    eyeo_cms_web_required:
+      true
+  "{{ testpages_secondary_subdomain }}":
+    name: "{{ testpages_secondary_subdomain }}"
+    enabled_site_name: "001-{{ testpages_secondary_subdomain }}"
+    configuration: |
+      <VirtualHost *:80>
+
+        {{ eyeo_cms_shared_apache_config_preamble
+         | replace("_SITE_NAME_", testpages_secondary_subdomain)
+         | indent(2) }}
+
+        ServerAlias *.{{ testpages_secondary_subdomain }}
+
+        RewriteCond %{HTTP_HOST} ^(.+\.)?{{ testpages_secondary_subdomain }}
+        RewriteRule ^/(.*)$ https://%1{{ testpages_secondary_subdomain }}/$1 [R,L]
+
+      </VirtualHost>
+  "{{ testpages_secondary_subdomain }}-ssl":
+    name: "{{ testpages_secondary_subdomain }}-ssl"
+    enabled_site_name: "001-{{ testpages_secondary_subdomain }}-ssl"
+    configuration: |
+      <VirtualHost *:443>
+
+        {{ eyeo_cms_shared_apache_config
+         | replace("_SITE_NAME_", testpages_secondary_subdomain)
+         | indent(2) }}
+
+        {{ testpages_sitescripts_extra_apache_config
+         | indent(2) }}
+
+        ServerAlias *.{{ testpages_secondary_subdomain }}
+
+        SSLEngine on
+        # TODO: actually generate something self-signed instead of
+        # piggybacking on snakeoil
+        SSLCertificateFile /etc/ssl/certs/ssl-cert-snakeoil.pem
+        SSLCertificateKeyFile /etc/ssl/private/ssl-cert-snakeoil.key
+
+        {{ ocsp_stapling_apache_config }}
+
+      </VirtualHost>
+# yamllint enable rule:line-length
+
+# roles/gitlab/runner/tasks/main.yml
+# https://gitlab.com/eyeo/developer-experience/testpages.adblockplus.org/-/settings/ci_cd
+# gitlab_runners:
+#  - parameters:
+#      registration-token: "<value obtained from gitlab project instance>"
+#      name: "gitlab-runner@{{ ansible_fqdn }}"
+#      url: "https://gitlab.com"
+#      executor: "shell"
+#      extra:
+#        tag-list: "eyeo_cms_web_server_{{ inventory_hostname }}"
+
+# https://www.vagrantup.com/docs/vagrantfile/machine_settings.html
+vagrant_box:
+  "debian/bullseye64"
+
+# https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
+vagrant_groups:
+  - "testpages-servers"
+  - "eyeo-cms-web-servers"
+  - "eyeo-apache2-servers"
+  - "apache2-servers"
+  - "gitlab-runners"
+
+# https://docs.ansible.com/ansible/latest/user_guide/playbooks_tags.html
+vagrant_tags:
+  - "generate_content"
+
+# https://www.vagrantup.com/intro/getting-started/networking.html
+vagrant_networks:
+  - private_network:
+      ip: "10.8.100.160"
+
+# https://www.vagrantup.com/docs/provisioning/ansible.html
+vagrant_playbooks:
+  - "provision-custom-systems.yml"
+  - "provision-eyeo-cms-web-servers.yml"
+  - "provision-custom-commands.yml"

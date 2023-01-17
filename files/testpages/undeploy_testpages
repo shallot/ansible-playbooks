@@ -1,0 +1,35 @@
+#!/bin/sh -ex
+# modeled after ansible-playbooks tasks/eyeo-cms.yml undeploy_eyeo_cms_web_*
+
+if [ "$CI_COMMIT_REF_SLUG" = "master" ]; then
+  echo "Can only remove staging system not production master"
+  exit 1
+fi
+DOMAIN="{{ secondary_testpages_domain }}"
+SUBDOMAIN="{{ secondary_testpages_subdomain }}"
+test -n "$DOMAIN" || exit 2
+user="www"
+id "$user" || exit 3
+dest_dir="/var/www"
+test -d "$dest_dir" || exit 4
+final_dest_dir=$dest_dir/$CI_COMMIT_REF_SLUG.$DOMAIN
+base_virtual_host_file=/etc/apache2/sites-available/$CI_COMMIT_REF_SLUG.$DOMAIN.conf
+test -e "$base_virtual_host_file" || exit 5
+base_virtual_host_file_ssl=/etc/apache2/sites-available/$DOMAIN-ssl.conf
+subdomain_virtual_host_file=/etc/apache2/sites-available/$SUBDOMAIN.conf
+subdomain_virtual_host_file_ssl=/etc/apache2/sites-available/$SUBDOMAIN-ssl.conf
+sudo a2dissite $CI_COMMIT_REF_SLUG.$DOMAIN.conf
+if [ -e $base_virtual_host_file_ssl ]; then
+sudo a2dissite $CI_COMMIT_REF_SLUG.$DOMAIN-ssl.conf
+fi
+sudo a2dissite $CI_COMMIT_REF_SLUG.$SUBDOMAIN.conf
+sudo a2dissite $CI_COMMIT_REF_SLUG.$SUBDOMAIN-ssl.conf
+sudo service apache2 status
+sudo service apache2 reload
+sudo rm -v $base_virtual_host_file
+if [ -e $base_virtual_host_file_ssl ]; then
+sudo rm -v $base_virtual_host_file_ssl
+fi
+sudo rm -v $subdomain_virtual_host_file
+sudo rm -v $subdomain_virtual_host_file_ssl
+sudo rm -rv $final_dest_dir
