@@ -61,12 +61,16 @@ private_filter_server_apache2_sites__to_merge:
       <VirtualHost *:80>
         ServerName filter-server.crumbs.org
 
-        {{ crumbs_filter_server_custom_apache_config | indent(2) }}
+        DocumentRoot "/var/www/easylist"
 
-        # Enable GeoIP test
-        <LocationMatch "/GeoIPv*">
-          Require all granted
-        </LocationMatch>
+         <Directory /var/www/easylist>
+           Options -Indexes
+           AllowOverride All
+           Order allow,deny
+           Allow from all
+        </Directory>
+
+        {{ crumbs_filter_server_custom_apache_config | indent(2) }}
 
       </VirtualHost>
     # yamllint enable rule:line-length
