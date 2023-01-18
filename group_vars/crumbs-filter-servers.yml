@@ -15,6 +15,7 @@
 
 ---
 
+# yamllint disable rule:line-length
 crumbs_filter_server_custom_apache_config: |
   RewriteEngine On
 
@@ -29,6 +30,11 @@ crumbs_filter_server_custom_apache_config: |
 
   {{ crumbs_filter_server_header_custom_apache_config
    | default(default_crumbs_filter_server_header_custom_apache_config) }}
+
+  # Previously here listed rewrite rules have been moved to {{ filter_server_document_root_path }}/.htaccess
+  # due to the responsibility shift to FLOPS
+
+# yamllint enable rule:line-length
 
 default_crumbs_filter_server_header_custom_apache_config: |
   <FilesMatch "(crumbs_abb\.json|crumbs_extension\.json)">

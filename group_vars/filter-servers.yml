@@ -75,6 +75,9 @@ filter_server_custom_apache_config: |
   {{ filter_server_skip_mod_deflate_config
    | default(default_filter_server_skip_mod_deflate_config) }}
 
+  # Previously here listed rewrite rules have been moved to {{ filter_server_document_root_path }}/.htaccess
+  # due to the responsibility shift to FLOPS
+
 default_filter_server_keepalive_custom_apache_config: |
   KeepAlive On
   KeepAliveTimeout 0
