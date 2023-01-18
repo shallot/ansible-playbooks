@@ -84,6 +84,14 @@ default_filter_server_keepalive_custom_apache_config: |
 
 default_filter_server_prerequisite_custom_apache_config: |
   DocumentRoot {{ filter_server_document_root_path }}
+
+   <Directory {{ filter_server_document_root_path }}>
+     Options -Indexes
+     AllowOverride All
+     Order allow,deny
+     Allow from all
+  </Directory>
+
   AddDefaultCharset UTF-8
 
   RewriteCond %{HTTP_HOST} "^(.+)\.$" [NC]
