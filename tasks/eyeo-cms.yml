@@ -27,7 +27,7 @@
         eyeo_cms_site_hostnames:
           "{{ eyeo_cms_site_hostnames
             | default([])
-            + [ item.key ]
+            + [ item.value.name | default(item.key) ]
             }}"
       when:
         "item.value.eyeo_cms_web_required | default(false)"
