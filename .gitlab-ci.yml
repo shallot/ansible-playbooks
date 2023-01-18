@@ -187,8 +187,6 @@ backup-client-0-persistent:
     - ".vagrantpersistentjob"
   variables:
     TEST_HOST: "backup-client-0.test"
-  # requires persistent backup-server-0.test to complete
-  allow_failure: true
 
 backup-server-0-shortlived:
   extends:
