@@ -1,30 +1,65 @@
 #!/bin/sh -ex
 # modeled after ansible-playbooks tasks/eyeo-cms.yml deploy_eyeo_cms_web_*
 
-DOMAIN="{{ secondary_testpages_domain }}"
-SUBDOMAIN="{{ secondary_testpages_subdomain }}"
+DOMAIN="{{ testpages_secondary_domain }}"
+SUBDOMAIN="{{ testpages_secondary_subdomain }}"
 test -n "$DOMAIN" || exit 1
-test -n "$SUBDOMAIN" || exit 1
-user="www"
-id "$user" || exit 2
-SOURCE_DIR=$1
-test -d "$SOURCE_DIR" || exit 3
-dest_dir="/var/www"
-test -d "$dest_dir" || exit 4
-if [ "$CI_COMMIT_REF_SLUG" = "master" ]; then
-  final_dest_dir=$dest_dir/$DOMAIN
+test -n "$SUBDOMAIN" || exit 2
+
+user="{{ testpages_endpoints_user }}"
+id "$user" || exit 3
+
+CMS_CONTENT_SOURCE_DIR=$1
+test -d "$CMS_CONTENT_SOURCE_DIR" || exit 4
+
+# NB: we don't update /opt/cms here because an earlier part of either Ansible
+# provision or an earlier job in the CI does that
+
+ENDPOINTS_CONTENT_SOURCE_DIR=$2
+test -d "$ENDPOINTS_CONTENT_SOURCE_DIR" || exit 5
+
+dest_dir_cms="{{ eyeo_cms_content_output_dir }}"
+test -d "$dest_dir_cms" || exit 6
+
+dest_dir_nodejs="{{ testpages_endpoints_dest_dir }}"
+test -d "$dest_dir_nodejs" || exit 7
+
+if [ "$CI_COMMIT_REF_SLUG" = "" ]; then
+  echo "Assuming we are not being run from Gitlab CI for testpages but in Ansible CI"
+elif [ "$CI_COMMIT_REF_SLUG" = "master" ]; then
+  final_dest_dir_cms=$dest_dir_cms/$DOMAIN
 else
-  final_dest_dir=$dest_dir/$CI_COMMIT_REF_SLUG.$DOMAIN
+  final_dest_dir_cms=$dest_dir_cms/$CI_COMMIT_REF_SLUG.$DOMAIN
 fi
-sudo install -d -o $user $final_dest_dir
-sudo -u $user rsync -aHAX --del -vP --stats $SOURCE_DIR/ $final_dest_dir/
+
+if [ -n "$final_dest_dir_cms" ]; then
+  sudo install -d -o $user $final_dest_dir_cms
+  sudo -u $user rsync -aHAX --del -v --stats \
+                      $CMS_CONTENT_SOURCE_DIR/ \
+                      $final_dest_dir_cms/
+else
+  echo "The final dest dir for CMS output is undefined, assuming you handled it already"
+fi
+
+# NB: we should switch to npm ci but it didn't work 2023-02-01
+cd $ENDPOINTS_CONTENT_SOURCE_DIR && npm install
+
+# NB: this is based on the status of project dir 2023-01-24
+# if new dependencies get added, they should be added here subsequently
+sudo -u $user rsync -aHAX --del -v --stats \
+                    $ENDPOINTS_CONTENT_SOURCE_DIR/endpoints \
+                    $ENDPOINTS_CONTENT_SOURCE_DIR/node_modules \
+                    $ENDPOINTS_CONTENT_SOURCE_DIR/package.json \
+                    $dest_dir_nodejs/
+
 # NB: this per-branch logic doesn't actually work
-if [ $CI_COMMIT_REF_SLUG != "master" ]; then
+if [ "$CI_COMMIT_REF_SLUG" != "master" ]; then
+  # NB: we do not yet account for different ports for endpoints servers per-branch
   base_virtual_host_file=/etc/apache2/sites-available/$DOMAIN.conf
   base_virtual_host_file_ssl=/etc/apache2/sites-available/$DOMAIN-ssl.conf
   subdomain_virtual_host_file=/etc/apache2/sites-available/$SUBDOMAIN.conf
   subdomain_virtual_host_file_ssl=/etc/apache2/sites-available/$SUBDOMAIN-ssl.conf
-  test -e "$base_virtual_host_file" || exit 5
+  test -e "$base_virtual_host_file" || exit 8
   sed -e s,$DOMAIN,$CI_COMMIT_REF_SLUG.$DOMAIN,g \
       $base_virtual_host_file | \
     sudo tee /etc/apache2/sites-available/$CI_COMMIT_REF_SLUG.$DOMAIN.conf

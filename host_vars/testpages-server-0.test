@@ -15,9 +15,20 @@
 
 ---
 
+# tasks/eyeo-cms.yml
 # group_vars/testpages-servers.yml
+# files/testpages/deploy_testpages
+eyeo_cms_content_output_dir:
+  "/var/www"
+eyeo_cms_system_username:
+  "www"
+
+# group_vars/testpages-servers.yml
+testpages_endpoints_user:
+  "{{ eyeo_cms_system_username }}"
+
 testpages_version:
-  "master"
+  "express-sitekey"
 
 testpages_primary_domain:
   "testpages.adblockplus.org"
@@ -28,13 +39,20 @@ testpages_secondary_domain:
 testpages_secondary_subdomain:
   "subdomain.abptestpages.org"
 
-# roles/eyeo/sitescripts/tasks/main.yml
-sitescripts_git_version:
-  "python3"
+# group_vars/nodejs-hosts.yml
+custom_nodejs_major_version:
+  "16.x"
+
+testpages_endpoints_service_enabled: true
+testpages_endpoints_service_state: "started"
 
 # tasks/packages.yml
 testpages_custom_packages__to_merge:
   ssl-cert: "present" # just for snakeoil certificates
+
+# this used to be testpages_sitescripts_extra_apache_config
+testpages_backend_api_extra_apache_config:
+  "{{ testpages_endpoints_extra_apache_config }}"
 
 # roles/apache2/tasks/main.yml
 # provision-eyeo-cms-web-servers.yml
@@ -68,7 +86,7 @@ test_testpages_apache2_sites__to_merge:
          | replace("_SITE_NAME_", testpages_primary_domain)
          | indent(2) }}
 
-        {{ testpages_sitescripts_extra_apache_config
+        {{ testpages_backend_api_extra_apache_config
          | indent(2) }}
 
         ServerAlias *.{{ testpages_primary_domain }}
@@ -111,7 +129,7 @@ test_testpages_apache2_sites__to_merge:
          | replace("_SITE_NAME_", testpages_secondary_domain)
          | indent(2) }}
 
-        {{ testpages_sitescripts_extra_apache_config
+        {{ testpages_backend_api_extra_apache_config
          | indent(2) }}
 
         ServerAlias *.{{ testpages_secondary_domain }}
@@ -153,7 +171,7 @@ test_testpages_apache2_sites__to_merge:
          | replace("_SITE_NAME_", testpages_secondary_subdomain)
          | indent(2) }}
 
-        {{ testpages_sitescripts_extra_apache_config
+        {{ testpages_backend_api_extra_apache_config
          | indent(2) }}
 
         ServerAlias *.{{ testpages_secondary_subdomain }}
@@ -188,13 +206,30 @@ vagrant_box:
 vagrant_groups:
   - "testpages-servers"
   - "eyeo-cms-web-servers"
+  - "nodejs-hosts"
   - "eyeo-apache2-servers"
   - "apache2-servers"
   - "gitlab-runners"
 
+# https://www.vagrantup.com/docs/providers/configuration
+vagrant_memory:
+  "1024"
+
 # https://docs.ansible.com/ansible/latest/user_guide/playbooks_tags.html
 vagrant_tags:
   - "generate_content"
+
+# roles/eyeo/cms/tasks/generate_content.yml
+cms_content_site_url:
+  "https://10.8.100.160"
+
+testpages_deploy_custom_commands__to_merge:
+  2_populate_testpages_endpoints:
+    cmd: |
+      env CI_COMMIT_REF_SLUG=""
+      /usr/local/sbin/deploy_testpages
+        .
+        /home/www/web.abptestpages.org
 
 # https://www.vagrantup.com/intro/getting-started/networking.html
 vagrant_networks:
@@ -204,5 +239,4 @@ vagrant_networks:
 # https://www.vagrantup.com/docs/provisioning/ansible.html
 vagrant_playbooks:
   - "provision-custom-systems.yml"
-  - "provision-eyeo-cms-web-servers.yml"
-  - "provision-custom-commands.yml"
+  - "provision-testpages-servers.yml"

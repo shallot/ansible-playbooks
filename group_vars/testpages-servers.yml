@@ -39,40 +39,56 @@ testpages_apache2_modules__to_merge:
 # rebuilds through virtual host settings, and there's no need for a third
 # build just because of the subdomain
 # tasks/commands.yml
-testpages_subdomain_custom_commands__to_merge:
-  prepare_subdomain_document_root:
-    cmd: "ln -s {{ testpages_secondary_domain }}
-                /var/www/{{ testpages_secondary_subdomain }}"
-    creates: "/var/www/{{ testpages_secondary_subdomain }}"
-
-# roles/eyeo/sitescripts/tasks/main.yml
-testpages_sitescripts_ini_settings__to_merge:
-  - section: "multiplexer"
-    key: "sitescripts.testpages.web.sitekey_frame"
-    value: ""
-  - section: "testpages"
-    key: "sitekeyFrameTemplate"
-    value: "/var/www/{{ testpages_secondary_domain }}/sitekey_frame.tmpl"
-  - section: "testpages"
-    key: "sitekeyPath"
-    value: "/var/www/{{ testpages_secondary_domain }}/site.key"
-
-# tasks/paths.yml
-# sitescripts/testpages/web/sitekey_frame.py imports M2Crypto
-testpages_sitekey_frame_custom_packages__to_merge:
-  python3-m2crypto: "present"
-
 # yamllint disable rule:line-length
-testpages_sitescripts_extra_apache_config: |
-  # this part is supported by sitescripts-multiplexer
-  <Location /sitekey-frame>
-    ProxyFCGISetEnvIf "reqenv('PATH_INFO') !~ m|/sitekey-frame|" PATH_INFO "/sitekey-frame"
-    SetHandler "proxy:unix:{{ sitescripts_multiplexer_socket_path }}|fcgi://localhost/"
-  </Location>
+testpages_subdomain_custom_commands__to_merge:
+  1_prepare_subdomain_document_root:
+    cmd: "ln -s {{ testpages_secondary_domain }}
+                {{ eyeo_cms_content_output_dir }}/{{ testpages_secondary_subdomain }}"
+    creates: "{{ eyeo_cms_content_output_dir }}/{{ testpages_secondary_subdomain }}"
 # yamllint enable rule:line-length
 
+# TODO: fully parametrize port 4000, match it to an environment file
+# endpoints/start.js const HTTP_PORT = 4000;
+testpages_endpoints_server_port:
+  "4000"
+
+testpages_endpoints_base_url:
+  "/sitekey-frame"
+
+# yamllint disable rule:line-length
+testpages_endpoints_extra_apache_config: |
+  ProxyPass /server-status !
+  ProxyPreserveHost On
+  ProxyPass {{ testpages_endpoints_base_url }} "http://localhost:{{ testpages_endpoints_server_port }}{{ testpages_endpoints_base_url }}"
+  ProxyPassReverse {{ testpages_endpoints_base_url }} "http://localhost:{{ testpages_endpoints_server_port }}{{ testpages_endpoints_base_url }}"
+# yamllint enable rule:line-length
+
+testpages_endpoints_dest_dir:
+  "/srv/testpages-endpoints"
+
+# tasks/services.yml
+testpages_endpoints_custom_services__to_merge:
+  # TODO: add EnvironmentFile: "{{ testpages_endpoints_dir }}/server.env"
+  # NB: WorkingDirectory assumed for master branch
+  testpages-endpoints:
+    enabled: "{{ testpages_endpoints_service_enabled }}"
+    state: "{{ testpages_endpoints_service_state }}"
+    service:
+      Unit:
+        Description: "Run Testpages Endpoints server"
+        After: "network.target"
+      Service:
+        Type: "simple"
+        User: "{{ testpages_endpoints_user }}"
+        WorkingDirectory: "{{ testpages_endpoints_dest_dir }}"
+        # package.json start-endpoints
+        ExecStart: "/usr/bin/npm run start-endpoints"
+        Restart: "on-failure"
+      Install:
+        WantedBy: "multi-user.target"
+
 # task/paths.yml
-testpages_deploy_custom_paths__to_merge:
+testpages_endpoints_prerequisite_paths__to_merge:
   /etc/sudoers.d/deploy_testpages:
     state: "copy"
     mode: "0440"
@@ -83,10 +99,15 @@ testpages_deploy_custom_paths__to_merge:
     validate:
       "/usr/sbin/visudo --check --file=%s"
   /usr/local/sbin/deploy_testpages:
-    state: "copy"
+    state: "template"
     mode: "0755"
     src: "files/testpages/deploy_testpages"
   /usr/local/sbin/undeploy_testpages:
-    state: "copy"
+    state: "template"
     mode: "0755"
     src: "files/testpages/undeploy_testpages"
+  "{{ testpages_endpoints_dest_dir }}":
+    dest: "{{ testpages_endpoints_dest_dir }}"
+    state: "directory"
+    mode: "0755"
+    owner: "{{ testpages_endpoints_user }}"
