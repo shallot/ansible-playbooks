@@ -15,27 +15,21 @@
 
 ---
 
-# https://docs.ansible.com/ansible/latest/user_guide/playbooks_blocks.html
-- block:
-
-    # https://docs.ansible.com/ansible/latest/modules/set_fact_module.html
-    - name:
-        "set_fact : eyeo_cms_site_hostnames"
-      loop_control:
-        label: "{{ item.key }}"
-      set_fact:
-        eyeo_cms_site_hostnames:
-          "{{ eyeo_cms_site_hostnames
-            | default([])
-            + [ item.value.name | default(item.key) ]
-            }}"
-      when:
-        "item.value.eyeo_cms_web_required | default(false)"
-      loop:
-        "{{ apache2_sites | dict2items }}"
-
+# https://docs.ansible.com/ansible/latest/modules/set_fact_module.html
+- name:
+    "set_fact : eyeo_cms_site_hostnames"
+  loop_control:
+    label: "{{ item.key }}"
+  set_fact:
+    eyeo_cms_site_hostnames:
+      "{{ eyeo_cms_site_hostnames
+        | default([])
+        + [ item.value.name | default(item.key) ]
+        }}"
   when:
-    "eyeo_cms_site_hostnames is not defined"
+    "item.value.eyeo_cms_web_required | default(false)"
+  loop:
+    "{{ apache2_sites | dict2items }}"
 
 # https://docs.ansible.com/ansible/latest/modules/fail_module.html
 - fail:
