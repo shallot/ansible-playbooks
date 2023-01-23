@@ -55,6 +55,24 @@ playbooks within this repository:
 
 The lists above do not include the dependencies of the listed items themselves.
 
+### Install on macOS
+
+Complementary to the previous list, the following commands should help getting
+the right setup on macOS:
+
+```shell
+# Install pip
+python3 -m ensurepip
+# Install Ansible: a specific version (2.10.x) is required
+pip install 'ansible==2.10.*'
+sudo mkdir /var/log/ansible/
+sudo chown <your_username> /var/log/ansible/
+# Install Vagrant
+brew install hashicorp/tap/hashicorp-vagrant
+# Configure VirtualBox (previously installed)
+sudo mkdir /etc/vbox
+echo '* 10.0.0.0/8 192.168.0.0/16\n* 2001::/64' | sudo tee /etc/vbox/networks.conf
+```
 
 [ansible]:    https://docs.ansible.com/ansible/latest/index.html
 [clone]:      https://git-scm.com/docs/git-clone
