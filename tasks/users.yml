@@ -45,6 +45,7 @@
     ssh_key_bits: "{{ item.value['ssh_key_bits'] | default(omit) }}"
     ssh_key_comment: "{{ item.value['ssh_key_comment'] | default(omit) }}"
     state: "{{ item.value['state'] | default('present') }}"
+    system: "{{ item.value['system'] | default(omit) }}"
     uid: "{{ item.value['uid'] | default(omit) }}"
   loop:
     "{{ custom_users | dict2items }}"
