@@ -1,0 +1,102 @@
+# Copyright (c) 2023-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+mimir_server_custom_users__to_merge:
+  mimir:
+    name: "mimir"
+    comment: "Mimir user"
+    home: "/var/lib/mimir"
+    system: true
+
+mimir_server_config_custom_paths__to_merge:
+  /etc/mimir:
+    state: "directory"
+    mode: "0775"
+    owner: "mimir"
+  /etc/mimir/config.yaml:
+    src: "files/prometheus/mimir_config.yaml"
+    state: "copy"
+    mode: "0664"
+    owner: "mimir"
+  /etc/default/mimir:
+    src: "files/prometheus/mimir_default"
+    state: "copy"
+    mode: "0664"
+  /var/lib/mimir:
+    state: "directory"
+    mode: "0775"
+    owner: "mimir"
+  /var/lib/mimir/tsdb:
+    state: "directory"
+    mode: "0775"
+    owner: "mimir"
+  /var/lib/mimir/data/tsdb:
+    state: "directory"
+    mode: "0775"
+    owner: "mimir"
+  /var/lib/mimir/tsdb-sync:
+    state: "directory"
+    mode: "0775"
+    owner: "mimir"
+  /var/lib/mimir/compactor:
+    state: "directory"
+    mode: "0775"
+    owner: "mimir"
+  /var/lib/mimir/rules:
+    state: "directory"
+    mode: "0775"
+    owner: "mimir"
+
+mimir_server_custom_shells__to_merge:
+  alertmanager_web_interface_get:
+    # yamllint disable rule:line-length
+    cmd: |
+      wget https://github.com/grafana/mimir/releases/download/mimir-2.5.0/mimir-2.5.0_amd64.deb
+      dpkg -i mimir-2.5.0_amd64.deb
+      chown -R mimir:mimir /var/lib/mimir/
+      systemctl enable mimir
+      systemctl start mimir
+    creates: "/usr/local/bin/mimir"
+    executable: "/bin/bash"
+    # yamllint enable rule:line-length
+
+# mimir_server_custom_services__to_merge:
+#   mimir:
+#     enabled: true
+#     state: "started"
+
+# roles/apache2/tasks/main.yml
+# provision-apache2-servers.yml
+mimir_apache2_modules__to_merge:
+  proxy_http:
+    &apache2_standard_module
+
+# roles/apache2/tasks/main.yml
+# https://docs.mattermost.com/install/config-apache2.html
+mimir_apache2_sites__to_merge:
+  mimir-reverse-proxy:
+    configuration: |
+      <VirtualHost *:80>
+        ServerName mimir-reverse-proxy
+        ErrorLog ${APACHE_LOG_DIR}/mimir-reverse-proxy-error.log
+        CustomLog ${APACHE_LOG_DIR}/mimir-reverse-proxy-access.log combined
+        <Location />
+          Require all granted
+          ProxyPass http://127.0.0.1:9009/
+          ProxyPassReverse http://127.0.0.1:9009/
+          ProxyPassReverseCookieDomain 127.0.0.1 mimir-reverse-proxy
+        </Location>
+      </VirtualHost>

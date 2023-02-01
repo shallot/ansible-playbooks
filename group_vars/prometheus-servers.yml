@@ -1,0 +1,254 @@
+# Copyright (c) 2023-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+alertmanager_hosts: ["127.0.0.1:9093"]
+mimir_hosts: ["127.0.0.1:9009"]
+prometheus_url: "prometheus-reverse-proxy"
+
+# yamllint disable rule:line-length
+prometheus_default_args: "--storage.tsdb.path=/var/lib/prometheus --web.console.templates=/etc/prometheus/consoles --web.console.libraries=/etc/prometheus/console_libraries --web.listen-address=127.0.0.1:9090"
+# yamllint enable rule:line-length
+
+# tasks/packages.yml
+prometheus_server_custom_packages__to_merge:
+  wget: "present"
+  vim: "present"
+
+prometheus_server_custom_users__to_merge:
+  prometheus:
+    name: "prometheus"
+    comment: "Prometheus user"
+    home: "/var/lib/prometheus"
+    system: true
+
+prometheus_server_custom_paths__to_merge:
+  /var/lib/prometheus:
+    state: "directory"
+    mode: "0775"
+    owner: "prometheus"
+  /etc/prometheus:
+    state: "directory"
+    mode: "0775"
+  /etc/prometheus/files_sd:
+    state: "directory"
+    mode: "0775"
+  /etc/prometheus/files_sd/node_exporter:
+    state: "directory"
+    mode: "0775"
+  /etc/prometheus/rules:
+    state: "directory"
+    mode: "0775"
+  /etc/prometheus/rules.d:
+    state: "directory"
+    mode: "0775"
+
+# tasks/commands.yml
+prometheu_server_custom_shells__to_merge:
+  prometheus_server_package_get:
+    # yamllint disable rule:line-length
+    cmd: |
+      wget https://github.com/prometheus/prometheus/releases/download/v{{ prometheus_version }}/prometheus-{{ prometheus_version }}.linux-amd64.tar.gz \
+        -O /tmp/prometheus-{{ prometheus_version }}.linux-amd64.tar.gz
+      tar zxf /tmp/prometheus-{{ prometheus_version }}.linux-amd64.tar.gz -C /tmp/
+      mv /tmp/prometheus-{{ prometheus_version }}.linux-amd64/prometheus /usr/local/bin/
+      mv /tmp/prometheus-{{ prometheus_version }}.linux-amd64/promtool /usr/local/bin/
+      mv /tmp/prometheus-{{ prometheus_version }}.linux-amd64/prometheus.yml /etc/prometheus/prometheus.yml.default
+      mv /tmp/prometheus-{{ prometheus_version }}.linux-amd64/* /etc/prometheus
+      chmod 775 /usr/local/bin/prometheus
+      chmod 775 /usr/local/bin/promtool
+    creates: "/usr/local/bin/prometheus"
+    executable: "/bin/bash"
+    # yamllint enable rule:line-length
+
+# tasks/paths.yml
+prometheus_server_config_custom_paths__to_merge:
+  /etc/prometheus/prometheus.yml:
+    src: "files/prometheus/prometheus.yml.j2"
+    state: "template"
+    mode: "0664"
+  /etc/prometheus/files_sd/node_exporter/targets.yml:
+    src: "files/prometheus/node_exporter_targets.yml"
+    state: "copy"
+    mode: "0664"
+  /etc/default/prometheus:
+    # yamllint disable rule:line-length
+    content: |
+      # Set the command-line arguments to pass to the server.
+      ARGS="{{ prometheus_default_args }}"
+      # Prometheus supports the following options:
+      #  --config.file="/etc/prometheus/prometheus.yml"
+      # Prometheus configuration file path.
+      #  --web.listen-address="0.0.0.0:9090"
+      #                             Address to listen on for UI, API, and telemetry.
+      #  --web.read-timeout=5m      Maximum duration before timing out read of the
+      #                             request, and closing idle connections.
+      #  --web.max-connections=512  Maximum number of simultaneous connections.
+      #  --web.external-url=<URL>   The URL under which Prometheus is externally
+      #                             reachable (for example, if Prometheus is served
+      #                             via a reverse proxy). Used for generating
+      #                             relative and absolute links back to Prometheus
+      #                             itself. If the URL has a path portion, it will
+      #                             be used to prefix all HTTP endpoints served by
+      #                             Prometheus. If omitted, relevant URL components
+      #                             will be derived automatically.
+      #  --web.route-prefix=<path>  Prefix for the internal routes of web endpoints.
+      #                             Defaults to path of --web.external-url.
+      #  --web.local-assets="/usr/share/prometheus/web/"
+      #                             Path to static asset/templates directory.
+      #  --web.user-assets=<path>   Path to user asset directory, available at
+      #                             /user.
+      #  --web.enable-lifecycle     Enable shutdown and reload via HTTP request.
+      #  --web.enable-admin-api     Enable API endpoints for admin control actions.
+      #  --web.console.templates="/etc/prometheus/consoles"
+      #                             Path to the console template directory,
+      #                             available at /consoles.
+      #  --web.console.libraries="/etc/prometheus/console_libraries"
+      #                             Path to the console library directory.
+      #  --web.page-title="Prometheus Time Series Collection and Processing Server"
+      #                             Document title of Prometheus instance.
+      #  --web.cors.origin=".*"     Regex for CORS origin. It is fully anchored.
+      #                             Example: 'https?://(domain1|domain2)\.com'
+      #  --storage.tsdb.path="/var/lib/prometheus/metrics2/"
+      #                             Base path for metrics storage.
+      #  --storage.tsdb.retention=15d
+      #                             [DEPRECATED] How long to retain samples in
+      #                             storage. This flag has been deprecated, use
+      #                             "storage.tsdb.retention.time" instead
+      #  --storage.tsdb.retention.time=15d
+      #                             How long to retain samples in storage. When this
+      #                             flag is set it overrides
+      #                             "storage.tsdb.retention".
+      #                             If neither this flag nor "storage.tsdb.retention"
+      #                             nor "storage.tsdb.retention.size" is set, the
+      #                             retention time defaults to 15d.
+      #                             Units Supported: y, w, d, h, m, s, ms.
+      #  --storage.tsdb.retention.size=
+      #                             [EXPERIMENTAL] Maximum number of bytes that can
+      #                             be stored for blocks. Units supported: KB, MB,
+      #                             GB, TB, PB. This flag is experimental and can be
+      #                             changed in future releases.
+      #  --storage.tsdb.use-lockfile
+      #                             Create a lockfile in data directory.
+      #  --storage.tsdb.allow-overlapping-blocks
+      #                             [EXPERIMENTAL] Allow overlapping blocks, which
+      #                             in turn enables vertical compaction and
+      #                             vertical query merge.
+      #  --storage.tsdb.wal-compression
+      #                             Compress the tsdb WAL.
+      #  --storage.remote.flush-deadline=<duration>
+      #                             How long to wait flushing sample on shutdown or
+      #                             config reload.
+      #  --storage.remote.read-sample-limit=5e7
+      #                             Maximum overall number of samples to return via
+      #                             the remote read interface, in a single query. 0
+      #                             means no limit. This limit is ignored for
+      #                             streamed response types.
+      #  --storage.remote.read-concurrent-limit=10
+      #                             Maximum number of concurrent remote read calls.
+      #                             0 means no limit.
+      #  --storage.remote.read-max-bytes-in-frame=1048576
+      #                             Maximum number of bytes in a single frame for
+      #                             streaming remote read response types before
+      #                             marshalling. Note that client might have limit on
+      #                             frame size as well. 1MB as recommended by
+      #                             protobuf by default.
+      #  --rules.alert.for-outage-tolerance=1h
+      #                             Max time to tolerate prometheus outage for
+      #                             restoring "for" state of alert.
+      #  --rules.alert.for-grace-period=10m
+      #                             Minimum duration between alert and restored "for"
+      #                             state. This is maintained only for alerts with
+      #                             configured "for" time greater than grace period.
+      #  --rules.alert.resend-delay=1m
+      #                             Minimum amount of time to wait before resending
+      #                             an alert to Alertmanager.
+      #  --alertmanager.notification-queue-capacity=10000
+      #                             The capacity of the queue for pending
+      #                             Alertmanager notifications.
+      #  --alertmanager.timeout=10s
+      #                             Timeout for sending alerts to Alertmanager.
+      #  --query.lookback-delta=5m  The maximum lookback duration for retrieving
+      #                             metrics during expression evaluations and
+      #                             federation.
+      #  --query.timeout=2m         Maximum time a query may take before being
+      #                             aborted.
+      #  --query.max-concurrency=20
+      #                             Maximum number of queries executed concurrently.
+      #  --query.max-samples=50000000
+      #                             Maximum number of samples a single query can load
+      #                             into memory. Note that queries will fail if they
+      #                             try to load more samples than this into memory,
+      #                             so this also limits the number of samples a query
+      #                             can return.
+      #  --log.level=info           Only log messages with the given severity or
+      #                             above. One of: [debug, info, warn, error]
+      #  --log.format=logfmt        Output format of log messages. One of: [logfmt,
+      #                             json]
+    state: "copy"
+    mode: "0664"
+    # yamllint enable rule:line-length
+
+# tasks/services.yml
+prometheus_server_custom_services__to_merge:
+  prometheus:
+    enabled: true
+    state: "started"
+    # yamllint disable rule:line-length
+    content: |
+      [Unit]
+      Description=Prometheus
+      Documentation=https://prometheus.io/docs/introduction/overview/
+      Wants=network-online.target
+      After=network-online.target
+      #
+      [Service]
+      Type=simple
+      User=prometheus
+      Group=prometheus
+      ExecReload=/bin/kill -HUP
+      EnvironmentFile=/etc/default/prometheus
+      ExecStart=/usr/local/bin/prometheus --config.file=/etc/prometheus/prometheus.yml $ARGS
+      #
+      SyslogIdentifier=prometheus
+      Restart=always
+      #
+      [Install]
+      WantedBy=multi-user.target
+
+    # yamllint enable rule:line-length
+
+# roles/apache2/tasks/main.yml
+# provision-apache2-servers.yml
+prometheus_apache2_modules__to_merge:
+  proxy_http:
+    &apache2_standard_module
+
+# roles/apache2/tasks/main.yml
+# https://docs.mattermost.com/install/config-apache2.html
+prometheus_apache2_sites__to_merge:
+  prometheus-reverse-proxy:
+    configuration: |
+      <VirtualHost *:80>
+        ServerName prometheus-reverse-proxy
+        ErrorLog ${APACHE_LOG_DIR}/prometheus-reverse-proxy-error.log
+        CustomLog ${APACHE_LOG_DIR}/prometheus-reverse-proxy-access.log combined
+        <Location />
+          Require all granted
+          ProxyPass http://127.0.0.1:9090/
+          ProxyPassReverse http://127.0.0.1:9090/
+          ProxyPassReverseCookieDomain 127.0.0.1 prometheus-reverse-proxy
+        </Location>
+      </VirtualHost>

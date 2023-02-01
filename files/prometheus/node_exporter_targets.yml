@@ -1,0 +1,8 @@
+---
+- labels:
+    job: "target_job_name"
+  targets:
+    - "server-1.example.com"
+    - "server-2.example.com"
+
+## this file is loaded in real time when saved

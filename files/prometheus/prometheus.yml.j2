@@ -1,0 +1,47 @@
+global:
+  scrape_interval: 15s      # Set the scrape interval to every 15 seconds. Default is every 1 minute.
+  evaluation_interval: 15s  # Evaluate rules every 15 seconds. The default is every 1 minute.
+  # scrape_timeout is set to the global default (10s).
+
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+      - targets:
+        {% for am in alertmanager_hosts -%}
+        - {{ am }}
+        {% endfor %}
+        {#- alertmanager_host:port_default_9093 #}
+
+# Load rules once and periodically evaluate them according to the global 'evaluation_interval'.
+#rule_files:
+  # - "first_rules.yml"
+  # - "second_rules.yml"
+
+remote_write:
+  {% for mimir in mimir_hosts %}
+  - url: http://{{ mimir }}/api/v1/push
+  {% endfor %}
+
+scrape_configs:
+  # The job name is added as a label `job=<job_name>` to any timeseries scraped from this config.
+  - job_name: "prometheus-0"
+    static_configs:
+      - targets: ["{{ prometheus_url }}"] 
+    #metrics_path: /prometheus/metrics # default
+    #basic_auth:
+    #  username: htpasswd_user
+    #  password: htpasswd_pass
+  #- job_name: 'node_exporter'
+  #  file_sd_configs:
+  #    - files:
+  #      - 'files_sd/node_exporter/targets.yml'
+  - job_name: 'postfix_exporter'
+    file_sd_configs:
+      - files:
+        - 'files_sd/postfix/targets.yml'
+  - job_name: 'apache_exporter'
+    file_sd_configs:
+      - files:
+        - 'files_sd/apache/targets.yml'
+
