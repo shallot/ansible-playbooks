@@ -45,5 +45,8 @@
     "{{ custom_authorized_keys | dict2items }}"
   loop_control:
     loop_var: "authorized_key"
+  when:
+    - "authorized_key.value.key is defined"
+    - "authorized_key.value.key != omit"
   become:
     true
