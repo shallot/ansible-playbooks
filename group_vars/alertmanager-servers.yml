@@ -16,7 +16,7 @@
 ---
 alertmanager_host: "localhost"
 # yamllint disable rule:line-length
-alertmanager_default_args: "--log.level=info --web.external-url=http://alertmanager-reverse-proxy --web.listen-address=:9093 --cluster.listen-address=0.0.0.0:9094 --cluster.peer={{ alertmanager_host }}:9094 --cluster.peer=some_other_aletmanager:9094"
+alertmanager_default_args: "--log.level=info --web.external-url=http://alertmanager-reverse-proxy --web.listen-address=:9093 --cluster.listen-address=0.0.0.0:9094 --cluster.peer={{ alertmanager_host }}:9094"
 # yamllint enable rule:line-length
 
 # tasks/packages.yml
@@ -38,11 +38,15 @@ alertmanager_server_custom_users__to_merge:
     home: "/var/lib/prometheus"
     system: true
 
-prometheus_server_custom_paths__to_merge:
+alertmanager_server_custom_paths__to_merge:
   /var/lib/prometheus:
     state: "directory"
     mode: "0755"
     owner: "prometheus"
+  /etc/prometheus/alertmanager.yml:
+    src: "files/prometheus/alertmanager.yml"
+    state: "copy"
+    mode: "0664"
 
 alertmanager_server_custom_shells__to_merge:
   ## seen this script failing randomly... eventually run by hand.

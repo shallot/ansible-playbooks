@@ -1,8 +1,9 @@
 ---
 - labels:
-    job: "target_job_name"
+    job: "node_exporter"
+    datacenter: "vagrant"
+
   targets:
-    - "server-1.example.com"
-    - "server-2.example.com"
+    - "prometheus-0:9100"
 
 ## this file is loaded in real time when saved

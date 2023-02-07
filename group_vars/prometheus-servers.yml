@@ -17,6 +17,11 @@
 alertmanager_hosts: ["127.0.0.1:9093"]
 mimir_hosts: ["127.0.0.1:9009"]
 prometheus_url: "prometheus-reverse-proxy"
+nodeexporter_host: "localhost"
+
+exporter_service_list:
+  - "node_exporter"
+  - "apache"
 
 # yamllint disable rule:line-length
 prometheus_default_args: "--storage.tsdb.path=/var/lib/prometheus --web.console.templates=/etc/prometheus/consoles --web.console.libraries=/etc/prometheus/console_libraries --web.listen-address=127.0.0.1:9090"
@@ -26,6 +31,8 @@ prometheus_default_args: "--storage.tsdb.path=/var/lib/prometheus --web.console.
 prometheus_server_custom_packages__to_merge:
   wget: "present"
   vim: "present"
+  mutt: "present"
+  prometheus-node-exporter: "present"
 
 prometheus_server_custom_users__to_merge:
   prometheus:
@@ -81,6 +88,10 @@ prometheus_server_config_custom_paths__to_merge:
     mode: "0664"
   /etc/prometheus/files_sd/node_exporter/targets.yml:
     src: "files/prometheus/node_exporter_targets.yml"
+    state: "copy"
+    mode: "0664"
+  /etc/prometheus/rules/prometheus.yml:
+    src: "files/prometheus/rules/embedded-exporter.yml"
     state: "copy"
     mode: "0664"
   /etc/default/prometheus:
@@ -252,3 +263,18 @@ prometheus_apache2_sites__to_merge:
           ProxyPassReverseCookieDomain 127.0.0.1 prometheus-reverse-proxy
         </Location>
       </VirtualHost>
+  # yamllint disable rule:line-length
+  nodeexporter-reverse-proxy:
+    configuration: |
+      <VirtualHost *:80>
+        ServerName nodeexporter-reverse-proxy
+        ErrorLog ${APACHE_LOG_DIR}/nodeexporter-reverse-proxy-error.log
+        CustomLog ${APACHE_LOG_DIR}/nodeexporter-reverse-proxy-access.log combined
+        <Location />
+          Require all granted
+          ProxyPass http://127.0.0.1:9100/
+          ProxyPassReverse http://127.0.0.1:9100/
+          ProxyPassReverseCookieDomain 127.0.0.1 prometheus-reverse-proxy
+        </Location>
+      </VirtualHost>
+  # yamllint enable rule:line-length

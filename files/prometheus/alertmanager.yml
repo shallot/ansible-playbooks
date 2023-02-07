@@ -1,0 +1,22 @@
+---
+global:
+  smtp_smarthost: "127.0.0.1:25"
+  smtp_hello: "prometheus-0"
+  smtp_require_tls: false
+
+templates:
+  - "/etc/prometheus/alertmanager_templates/*.tmpl"
+
+route:
+  group_by: ["alertname", "cluster", "service"]
+  group_wait: "30s"
+  group_interval: "5m"
+  repeat_interval: "30m"
+  receiver: "default_email"
+
+receivers:
+  - name: "default_email"
+    email_configs:
+      - to: "root@localhost"
+        from: "alertmanager@prometheus-0"
+        send_resolved: true

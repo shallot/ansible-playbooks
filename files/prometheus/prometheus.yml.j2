@@ -14,9 +14,8 @@ alerting:
         {#- alertmanager_host:port_default_9093 #}
 
 # Load rules once and periodically evaluate them according to the global 'evaluation_interval'.
-#rule_files:
-  # - "first_rules.yml"
-  # - "second_rules.yml"
+rule_files:
+  - rules/*
 
 remote_write:
   {% for mimir in mimir_hosts %}
@@ -25,23 +24,17 @@ remote_write:
 
 scrape_configs:
   # The job name is added as a label `job=<job_name>` to any timeseries scraped from this config.
-  - job_name: "prometheus-0"
+  - job_name: "prometheus"
     static_configs:
       - targets: ["{{ prometheus_url }}"] 
     #metrics_path: /prometheus/metrics # default
     #basic_auth:
     #  username: htpasswd_user
     #  password: htpasswd_pass
-  #- job_name: 'node_exporter'
-  #  file_sd_configs:
-  #    - files:
-  #      - 'files_sd/node_exporter/targets.yml'
-  - job_name: 'postfix_exporter'
+{% for exporter_service in exporter_service_list %}
+  - job_name: '{{ exporter_service }}_exporter'
     file_sd_configs:
       - files:
-        - 'files_sd/postfix/targets.yml'
-  - job_name: 'apache_exporter'
-    file_sd_configs:
-      - files:
-        - 'files_sd/apache/targets.yml'
+        - 'files_sd/{{ exporter_service }}/targets.yml'
+{% endfor -%}
 
