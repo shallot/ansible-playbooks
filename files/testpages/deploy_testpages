@@ -52,6 +52,9 @@ sudo -u $user rsync -aHAX --del -v --stats \
                     $ENDPOINTS_CONTENT_SOURCE_DIR/package.json \
                     $dest_dir_nodejs/
 
+sudo systemctl restart testpages-endpoints
+sudo systemctl status testpages-endpoints
+
 # NB: this per-branch logic doesn't actually work
 if [ "$CI_COMMIT_REF_SLUG" != "master" ]; then
   # NB: we do not yet account for different ports for endpoints servers per-branch
