@@ -21,7 +21,7 @@ htpwd_user: "admin"
 htpwd_pass: "admin"
 
 # yamllint disable rule:line-length
-#grafana_default_args: "--log.level=info --web.external-url=http://grafana-reverse-proxy --web.listen-address=:9093 --cluster.listen-address=0.0.0.0:9094 --cluster.peer={{ grafana_host }}:9094"
+# grafana_default_args: "--log.level=info --web.external-url=http://grafana-reverse-proxy --web.listen-address=:9093 --cluster.listen-address=0.0.0.0:9094 --cluster.peer={{ grafana_host }}:9094"
 # yamllint enable rule:line-length
 
 # tasks/os/debian/common.yml
@@ -36,14 +36,14 @@ grafana_apt_repositories__to_merge:
   grafana:
     # yamllint disable rule:line-length
     repo: |
-      deb https://packages.grafana.com/oss/deb stable main 
+      deb https://packages.grafana.com/oss/deb stable main
     # yamllint enable rule:line-length
 
 grafana_custom_shells__to_merge:
   grafana_htpasswd:
     # yamllint disable rule:line-length
     cmd: |
-      htpasswd -b -c /etc/apache2/grafana_htpasswd {{ htpwd_user }} {{ htpwd_pass}} 
+      htpasswd -b -c /etc/apache2/grafana_htpasswd {{ htpwd_user }} {{ htpwd_pass}}
     creates: "/etc/apache2/grafana_htpasswd"
     executable: "/bin/bash"
     # yamllint enable rule:line-length
@@ -55,7 +55,7 @@ grafana_server_custom_packages__to_merge:
   grafana: "present"
 
 grafana_server_custom_paths__to_merge:
-  /var/lib/grafana/dashboards: 
+  /var/lib/grafana/dashboards:
     state: "directory"
     mode: "0775"
     owner: "grafana"
@@ -98,14 +98,10 @@ grafana_server_custom_services__to_merge:
 # roles/apache2/tasks/main.yml
 # provision-apache2-servers.yml
 grafana_apache2_modules__to_merge:
-  proxy_http:
-    &apache2_standard_module
-  proxy:
-    *apache2_standard_module
-  rewrite:
-    *apache2_standard_module
-  headers:
-    *apache2_standard_module
+  proxy_http: &apache2_standard_module
+  proxy: *apache2_standard_module
+  rewrite: *apache2_standard_module
+  headers: *apache2_standard_module
 
 # roles/apache2/tasks/main.yml
 # https://docs.mattermost.com/install/config-apache2.html
