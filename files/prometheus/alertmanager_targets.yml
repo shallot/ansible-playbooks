@@ -1,0 +1,9 @@
+---
+- labels:
+    job: "alertmanager_exporter"
+    datacenter: "vagrant"
+
+  targets:
+    - "prometheus-0:9093"
+
+## this file is loaded in real time when saved

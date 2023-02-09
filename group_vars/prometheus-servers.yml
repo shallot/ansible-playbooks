@@ -17,11 +17,12 @@
 alertmanager_hosts: ["127.0.0.1:9093"]
 mimir_hosts: ["127.0.0.1:9009"]
 prometheus_url: "prometheus-reverse-proxy"
-nodeexporter_host: "localhost"
 
 exporter_service_list:
   - "node_exporter"
   - "apache"
+  - "alertmanager"
+  - "mimir"
 
 # yamllint disable rule:line-length
 prometheus_default_args: "--storage.tsdb.path=/var/lib/prometheus --web.console.templates=/etc/prometheus/consoles --web.console.libraries=/etc/prometheus/console_libraries --web.listen-address=127.0.0.1:9090"
@@ -53,6 +54,9 @@ prometheus_server_custom_paths__to_merge:
     state: "directory"
     mode: "0775"
   /etc/prometheus/files_sd/node_exporter:
+    state: "directory"
+    mode: "0775"
+  /etc/prometheus/files_sd/alertmanager:
     state: "directory"
     mode: "0775"
   /etc/prometheus/rules:
@@ -88,6 +92,10 @@ prometheus_server_config_custom_paths__to_merge:
     mode: "0664"
   /etc/prometheus/files_sd/node_exporter/targets.yml:
     src: "files/prometheus/node_exporter_targets.yml"
+    state: "copy"
+    mode: "0664"
+  /etc/prometheus/files_sd/alertmanager/targets.yml:
+    src: "files/prometheus/alertmanager_targets.yml"
     state: "copy"
     mode: "0664"
   /etc/prometheus/rules/prometheus.yml:
