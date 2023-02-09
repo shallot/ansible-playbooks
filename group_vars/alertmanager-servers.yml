@@ -48,7 +48,7 @@ alertmanager_server_custom_paths__to_merge:
     state: "copy"
     mode: "0664"
   /var/mail/root:
-    state: "copy"
+    state: "touch"
     mode: "0660"
     owner: "root"
     group: "mail"
