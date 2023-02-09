@@ -1,0 +1,139 @@
+# Copyright (c) 2023-present eyeo GmbH
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+grafana_host: "localhost"
+grafana_repo_sdk_key_id:
+  "836F4BEB"
+htpwd_user: "admin"
+htpwd_pass: "admin"
+
+# yamllint disable rule:line-length
+#grafana_default_args: "--log.level=info --web.external-url=http://grafana-reverse-proxy --web.listen-address=:9093 --cluster.listen-address=0.0.0.0:9094 --cluster.peer={{ grafana_host }}:9094"
+# yamllint enable rule:line-length
+
+# tasks/os/debian/common.yml
+grafana_apt_keys__to_merge:
+  "{{ grafana_repo_sdk_key_id}}":
+    id: "9E439B102CF3C0C6"
+    keyring: "grafana"
+    url: "https://packages.grafana.com/gpg.key"
+
+# tasks/os/debian/common.yml
+grafana_apt_repositories__to_merge:
+  grafana:
+    # yamllint disable rule:line-length
+    repo: |
+      deb https://packages.grafana.com/oss/deb stable main 
+    # yamllint enable rule:line-length
+
+grafana_custom_shells__to_merge:
+  grafana_htpasswd:
+    # yamllint disable rule:line-length
+    cmd: |
+      htpasswd -b -c /etc/apache2/grafana_htpasswd {{ htpwd_user }} {{ htpwd_pass}} 
+    creates: "/etc/apache2/grafana_htpasswd"
+    executable: "/bin/bash"
+    # yamllint enable rule:line-length
+
+# tasks/packages.yml
+grafana_server_custom_packages__to_merge:
+  apache2: "present"
+  wget: "present"
+  grafana: "present"
+
+grafana_server_custom_paths__to_merge:
+  /var/lib/grafana/dashboards: 
+    state: "directory"
+    mode: "0775"
+    owner: "grafana"
+  /etc/grafana/provisioning/datasources/datasources.yaml:
+    state: "copy"
+    src: "files/prometheus/grafana/datasources.yaml"
+    mode: "0664"
+    owner: "grafana"
+  /var/lib/grafana/dashboards/nodeExporterFullwithNodeName.json:
+    state: "copy"
+    src: "files/prometheus/grafana/dashboards/nodeExporterFullwithNodeName.json"
+    mode: "0664"
+    owner: "grafana"
+  /var/lib/grafana/dashboards/alertmanager.json:
+    state: "copy"
+    src: "files/prometheus/grafana/dashboards/alertmanager.json"
+    mode: "0664"
+    owner: "grafana"
+  /var/lib/grafana/dashboards/apache2.json:
+    state: "copy"
+    src: "files/prometheus/grafana/dashboards/apache2.json"
+    mode: "0664"
+    owner: "grafana"
+  /etc/grafana/provisioning/dashboards/dashboards.yaml:
+    state: "copy"
+    src: "files/prometheus/grafana/dashboards.yaml"
+    mode: "0664"
+    owner: "grafana"
+  /etc/grafana/grafana.ini:
+    state: "copy"
+    src: "files/prometheus/grafana/grafana.ini"
+    mode: "0664"
+    owner: "grafana"
+
+grafana_server_custom_services__to_merge:
+  grafana-server:
+    enabled: true
+    state: "started"
+
+# roles/apache2/tasks/main.yml
+# provision-apache2-servers.yml
+grafana_apache2_modules__to_merge:
+  proxy_http:
+    &apache2_standard_module
+  proxy:
+    *apache2_standard_module
+  rewrite:
+    *apache2_standard_module
+  headers:
+    *apache2_standard_module
+
+# roles/apache2/tasks/main.yml
+# https://docs.mattermost.com/install/config-apache2.html
+grafana_apache2_sites__to_merge:
+  # yamllint disable rule:line-length
+  grafana-reverse-proxy:
+    configuration: |
+      <VirtualHost *:80>
+        ServerName grafana-reverse-proxy
+        ErrorLog ${APACHE_LOG_DIR}/grafana-reverse-proxy-error.log
+        CustomLog ${APACHE_LOG_DIR}/grafana-reverse-proxy-access.log combined
+        <Proxy *>
+          AuthType Basic
+          AuthName GrafanaAuthProxy
+          AuthBasicProvider file
+          AuthUserFile /etc/apache2/grafana_htpasswd
+          Require valid-user
+          RewriteEngine On
+          RewriteRule .* - [E=PROXY_USER:%{LA-U:REMOTE_USER},NS]
+          RequestHeader set X-WEBAUTH-USER "%{PROXY_USER}e"
+        </Proxy>
+        <Location />
+          RequestHeader unset Authorization
+          #ProxyRequests Off
+          ProxyPass http://127.0.0.1:3000/
+          ProxyPassReverse http://127.0.0.1:3000/
+          ProxyPassReverseCookieDomain 127.0.0.1 prometheus-reverse-proxy
+        </Location>
+      </VirtualHost>
+
+  # yamllint enable rule:line-length

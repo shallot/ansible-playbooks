@@ -28,6 +28,7 @@ vagrant_groups:
   - "prometheus-servers"
   - "alertmanager-servers"
   - "mimir-servers"
+  - "grafana-servers"
 
 # https://www.vagrantup.com/intro/getting-started/networking.html
 vagrant_networks:

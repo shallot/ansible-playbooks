@@ -1,0 +1,46 @@
+### created by hand, and then exported with
+### curl http://user:pass@localhost/api/datasources
+# # config file version
+apiVersion: 1
+#deleteDatasources: ## for removing any default
+#  - name: Graphite
+#    orgId: 1
+datasources:
+  - name: "Prometheus"
+    id: 1
+    uid: BK2sZrA4k
+    orgId: 1
+    name: Prometheus
+    type: prometheus
+    typeName: Prometheus
+    typeLogoUrl: "/usr/share/grafana/public/app/plugins/datasource/prometheus/img/prometheus_logo.svg"
+    access: proxy
+    url: http://localhost:9009/prometheus
+    user: ""
+    database: ""
+    basicAuth: false
+    isDefault: true 
+    jsonData:
+      httpMethod: POST
+      prometheusType: Mimir
+      prometheusVersion: 2.4.0
+    readOnly: false
+  - name: "Alertmanager"
+    id: 2
+    uid: "Gsr-4wAVk"
+    orgId: 1
+    name: "Alertmanager"
+    type: "alertmanager"
+    typeName: "Alertmanager"
+    typeLogoUrl: "/usr/share/grafana/public/app/plugins/datasource/alertmanager/img/logo.svg"
+    access: "proxy"
+    url: "http://localhost:9093/"
+    user: ""
+    database: ""
+    basicAuth: false
+    isDefault: false
+    jsonData:
+        handleGrafanaManagedAlerts: true
+        httpMethod: "POST"
+        implementation: "prometheus"
+    readOnly: false
