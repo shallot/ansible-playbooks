@@ -47,6 +47,11 @@ alertmanager_server_custom_paths__to_merge:
     src: "files/prometheus/alertmanager.yml"
     state: "copy"
     mode: "0664"
+  /var/mail/root:
+    state: "copy"
+    mode: "0660"
+    owner: "root"
+    group: "mail"
 
 alertmanager_server_custom_shells__to_merge:
   ## seen this script failing randomly... eventually run by hand.
