@@ -52,15 +52,31 @@ testpages_subdomain_custom_commands__to_merge:
 testpages_endpoints_server_port:
   "4000"
 
+# TODO: fully parametrize port 4001, match it to an environment file
+testpages_endpoints_websocket_port:
+  "4001"
+
 testpages_endpoints_base_url:
   "/sitekey-frame"
 
+testpages_endpoints_websocket_url:
+  "/websocket"
+
 # yamllint disable rule:line-length
 testpages_endpoints_extra_apache_config: |
+  # HTTP endpoint
   ProxyPass /server-status !
   ProxyPreserveHost On
   ProxyPass {{ testpages_endpoints_base_url }} "http://localhost:{{ testpages_endpoints_server_port }}{{ testpages_endpoints_base_url }}"
   ProxyPassReverse {{ testpages_endpoints_base_url }} "http://localhost:{{ testpages_endpoints_server_port }}{{ testpages_endpoints_base_url }}"
+
+  # Websocket endpoint
+  RewriteEngine On
+  RewriteCond ${HTTP:Upgrade} websocket [NC]
+  RewriteCond ${HTTP:Connection} upgrade [NC]
+  RewriteRule {{ testpages_endpoints_websocket_url }} wss://localhost:{{ testpages_endpoints_websocket_port }} [P,L]
+  ProxyPass "{{ testpages_endpoints_websocket_url }}" "http://localhost:{{ testpages_endpoints_websocket_port }}/" upgrade=websocket
+  ProxyPassReverse "{{ testpages_endpoints_websocket_url }}" "http://localhost:{{ testpages_endpoints_websocket_port }}/" upgrade=websocket
 # yamllint enable rule:line-length
 
 testpages_endpoints_dest_dir:
