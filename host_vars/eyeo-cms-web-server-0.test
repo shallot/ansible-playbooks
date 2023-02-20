@@ -17,8 +17,8 @@
 
 # provision-eyeo-cms-web-servers.yml
 test_eyeo_cms_content_repos__to_merge:
-  adblockplus.org:
-    repo: "https://gitlab.com/eyeo/websites/web.adblockplus.org.git"
+  adblockbrowser.org:
+    repo: "https://gitlab.com/eyeo/devops/examples/web.adblockbrowser.org.git"
 
 # roles/eyeo/sitescripts/tasks/main.yml
 sitescripts_git_version:
@@ -27,19 +27,19 @@ sitescripts_git_version:
 # roles/apache2/tasks/main.yml
 # provision-eyeo-cms-web-servers.yml
 test_apache2_sites__to_merge:
-  adblockplus.org:
+  adblockbrowser.org:
     # yamllint disable rule:line-length
     configuration: |
       <VirtualHost *:80>
 
         {{ eyeo_cms_shared_apache_config
-         | replace("_SITE_NAME_", "adblockplus.org")
+         | replace("_SITE_NAME_", "adblockbrowser.org")
          | indent(2) }}
 
         # this part used to be @aliases
-        ServerAlias www.adblockplus.org
-        RewriteCond %{HTTP_HOST} ^www.adblockplus.org$
-        RewriteRule ^/(.*)$ http://adblockplus.org/$1 [R,L]
+        ServerAlias www.adblockbrowser.org
+        RewriteCond %{HTTP_HOST} ^www.adblockbrowser.org$
+        RewriteRule ^/(.*)$ http://adblockbrowser.org/$1 [R,L]
 
       </VirtualHost>
     # yamllint enable rule:line-length
