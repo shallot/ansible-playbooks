@@ -28,7 +28,7 @@ testpages_endpoints_user:
   "{{ eyeo_cms_system_username }}"
 
 testpages_version:
-  "express-sitekey"
+  "master"
 
 testpages_primary_domain:
   "testpages.adblockplus.org"
