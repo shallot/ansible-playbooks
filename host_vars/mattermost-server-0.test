@@ -39,11 +39,24 @@ postgresql_hba_entries__to_merge:
     address: "{{ mattermost_server_ipv4_address }}/32"
     auth_method: "md5"
 postgresql_server_version:
-  "11"
+  "{{ mattermost_postgresql_version }}"
 postgresql_users__to_merge:
   "{{ mattermost_database_user }}":
     name: "{{ mattermost_database_user }}"
     password: "{{ mattermost_database_password }}"
+
+mattermost_postgresql_os_specific_versions:
+  buster:
+    "11"
+  bullseye:
+    "13"
+  focal:
+    "12"
+
+# yamllint disable rule:line-length
+mattermost_postgresql_version:
+  "{{ mattermost_postgresql_os_specific_versions[ansible_distribution_release] }}"
+# yamllint enable rule:line-length
 
 # roles/apache2/tasks/main.yml
 # provision-apache2-servers.yml

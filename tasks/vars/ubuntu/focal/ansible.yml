@@ -15,6 +15,12 @@
 
 ---
 
+# Default list of packages necessary for the initial part of the
+# Ansible admin host provision to work
+ansible_admin_default_packages:
+  ca-certificates: "present"
+  git: "present"
+
 # Default list of packages necessary for pip to compile Ansible
 # Contains Python 3 specifics for Ubuntu 20 LTS
 ansible_default_packages:
