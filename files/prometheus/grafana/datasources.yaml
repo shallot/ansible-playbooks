@@ -10,7 +10,6 @@ datasources:
     id: 1
     uid: BK2sZrA4k
     orgId: 1
-    name: Prometheus
     type: prometheus
     typeName: Prometheus
     typeLogoUrl: "/usr/share/grafana/public/app/plugins/datasource/prometheus/img/prometheus_logo.svg"
@@ -29,7 +28,6 @@ datasources:
     id: 2
     uid: "Gsr-4wAVk"
     orgId: 1
-    name: "Alertmanager"
     type: "alertmanager"
     typeName: "Alertmanager"
     typeLogoUrl: "/usr/share/grafana/public/app/plugins/datasource/alertmanager/img/logo.svg"
