@@ -39,15 +39,6 @@ grafana_apt_repositories__to_merge:
       deb https://packages.grafana.com/oss/deb stable main
     # yamllint enable rule:line-length
 
-grafana_custom_shells__to_merge:
-  grafana_htpasswd:
-    # yamllint disable rule:line-length
-    cmd: |
-      htpasswd -b -c /etc/apache2/grafana_htpasswd {{ htpwd_user }} {{ htpwd_pass}}
-    creates: "/etc/apache2/grafana_htpasswd"
-    executable: "/bin/bash"
-    # yamllint enable rule:line-length
-
 # tasks/packages.yml
 grafana_server_custom_packages__to_merge:
   apache2: "present"
@@ -133,3 +124,12 @@ grafana_apache2_sites__to_merge:
       </VirtualHost>
 
   # yamllint enable rule:line-length
+
+grafana_custom_shells__to_merge:
+  grafana_htpasswd:
+    # yamllint disable rule:line-length
+    cmd: |
+      htpasswd -b -c /etc/apache2/grafana_htpasswd {{ htpwd_user }} {{ htpwd_pass}}
+    creates: "/etc/apache2/grafana_htpasswd"
+    executable: "/bin/bash"
+    # yamllint enable rule:line-length
