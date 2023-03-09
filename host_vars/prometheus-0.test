@@ -23,7 +23,6 @@ vagrant_box:
 
 # https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
 vagrant_groups:
-  - "unattended-upgrades"
   - "apache2-servers"
   - "prometheus-servers"
   - "alertmanager-servers"
@@ -38,7 +37,6 @@ vagrant_networks:
 # https://www.vagrantup.com/docs/provisioning/ansible.html
 vagrant_playbooks:
   - "provision-custom-systems.yml"
-  - "provision-unattended-upgrades.yml"
-  - "provision-custom-shells.yml"
   - "provision-apache2-servers.yml"
-  # - "provision-prometheus-servers.yml"
+  - "provision-prometheus-servers.yml"
+  #- "provision-grafana-servers.yml"
