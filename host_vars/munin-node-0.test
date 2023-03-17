@@ -24,7 +24,9 @@ munin_servers:
 munin_server_from_host_list:
   "{{ munin_servers | map(attribute='ip') | flatten }}"
 munin_server_ssh_key:
-  "ssh-ed25519 Example-ssh-key-of-a-Munin-server"
+  # yamllint disable rule:line-length
+  "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGd+/YVs1tC4Rr9RE11UswDmb+AiVPcAKDrF3dsr4IKG Example-ssh-key-of-a-Munin-server"
+  # yamllint enable rule:line-length
 custom_munin_node_configuration:
   # NB: this is only if you want to avoid using munin-async
   cidr_allow: "{{ munin_server_ip }}/32"

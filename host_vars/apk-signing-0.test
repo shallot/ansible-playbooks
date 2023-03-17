@@ -38,13 +38,13 @@ apk_signing_users: &apk_signing_users
     # yamllint disable rule:line-length
     authorized_keys: >
       command="/usr/bin/env CREDENTIAL_FILE=exampleproject1 /usr/local/bin/apk_signer"
-      ssh-rsa This-is-just-an-example-authorized-key
+      ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGd+/YVs1tC4Rr9RE11UswDmb+AiVPcAKDrF3dsr4IKG This-is-just-an-example-authorized-key
     # yamllint enable rule:line-length
   "signer2":
     # yamllint disable rule:line-length
     authorized_keys: >
       command="/usr/bin/env CREDENTIAL_FILE=exampleproject2 /usr/local/bin/apk_signer"
-      ssh-rsa This-is-just-an-example-authorized-key
+      ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEtGYuPmLOqEErA9I62ZNk6CKPkKnA4mSiOZ7Uw0in4k This-is-just-an-example-authorized-key
     # yamllint enable rule:line-length
 
 # tasks/users.yml

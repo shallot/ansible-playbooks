@@ -24,8 +24,11 @@ filter_list_origin_sshd_configuration__to_merge:
 # "{{ lookup('file',
 #             filter_list_origin_mirror_server_key_location + '.pub' )
 #  }}"
+
+# yamllint disable rule:line-length
 filter_list_origin_mirror_ssh_key:
-  "ssh-rsa Example-filter_list_origin_mirror_ssh_key"
+  " ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGd+/YVs1tC4Rr9RE11UswDmb+AiVPcAKDrF3dsr4IKG Example-filter_list_origin_mirror_ssh_key"
+# yamllint enable rule:line-length
 
 filter_list_origin_mirror_user:
   "rsync"

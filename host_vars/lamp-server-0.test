@@ -27,9 +27,11 @@ test_lamp_web_spaces__to_merge:
     owner: "someone-1"
     # changeme @ mkpasswd -m sha-512
     owner_password: "$6$vgHd3kL6YYU$znTqvJ0VlcXzcxYDD8o5pUtASM/by45vkYeIH6D8UhMxk2ZY2xNO6gjqKL0xrVd/fT4UdNU7d2gCgbNlXcXam0"
+    # yamllint disable rule:line-length
     owner_ssh_authorized_keys: |
-      ssh-rsa AAA... j.doe+key-comment@eyeo.com
-      ssh-rsa This-is-an-example-second-SSH-key Comment-indicating-key-origin
+      ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGd+/YVs1tC4Rr9RE11UswDmb+AiVPcAKDrF3dsr4IKG j.doe+key-comment@eyeo.com
+      ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEtGYuPmLOqEErA9I62ZNk6CKPkKnA4mSiOZ7Uw0in4k This-is-an-example-second-SSH-key Comment-indicating-key-origin
+    # yamllint enable rule:line-length
 
 # roles/mysql/tasks/main.yml
 # provision-lamp-servers.yml

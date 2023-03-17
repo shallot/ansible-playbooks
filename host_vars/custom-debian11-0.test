@@ -190,13 +190,17 @@ host_specific_custom_authorized_keys__to_merge:
       - "no-X11-forwarding"
   example:
     user: "example"
+    # yamllint disable rule:line-length
     key: |
-      ssh-rsa This-is-just-an-example-authorized-key
+      ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID/6KNIF+d6ZjGbFMWR26MGQoOWHoqqIt9YYIhXbOcuc This-is-jt-an-example-authorized-key
+    # yamllint enable rule:line-length
   example2:
     user: "example2"
+    # yamllint disable rule:line-length
     key: |
-      ssh-rsa This-is-another-example-of-an-authorized-key
-      ssh-rsa This-is-yet-another-example-of-an-authorized-key
+      ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGd+/YVs1tC4Rr9RE11UswDmb+AiVPcAKDrF3dsr4IKG This-is-another-example-of-an-authorized-key
+      ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEtGYuPmLOqEErA9I62ZNk6CKPkKnA4mSiOZ7Uw0in4k This-is-yet-another-example-of-an-authorized-key
+    # yamllint enable rule:line-length
 
 # tasks/cron-jobs.yml
 host_specific_custom_cron_jobs__to_merge:
