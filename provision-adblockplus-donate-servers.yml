@@ -35,8 +35,7 @@
     - import_role:
         name: "gitlab/runner"
 
-    # NB: note ordering issue in group_vars/telemetry-pingv1-servers.yml
-    # that requires gitlab/runner to be run before
+    # NB: note ordering issue that requires gitlab/runner to be run before
     # adblockplus_donate_server_prerequisite_paths and
     # adblockplus_donate_server_services
 

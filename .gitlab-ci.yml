@@ -552,30 +552,6 @@ subscriptionlist-fallback-server-0-persistent:
   variables:
     TEST_HOST: "subscriptionlist-fallback-server-0.test"
 
-telemetry-log-fetch-dest-host-0-shortlived:
-  extends:
-    - ".vagrantshortlivedjob"
-  variables:
-    TEST_HOST: "telemetry-log-fetch-dest-host-0.test"
-
-telemetry-log-fetch-dest-host-0-persistent:
-  extends:
-    - ".vagrantpersistentjob"
-  variables:
-    TEST_HOST: "telemetry-log-fetch-dest-host-0.test"
-
-telemetry-pingv1-server-0-shortlived:
-  extends:
-    - ".vagrantshortlivedjob"
-  variables:
-    TEST_HOST: "telemetry-pingv1-server-0.test"
-
-telemetry-pingv1-server-0-persistent:
-  extends:
-    - ".vagrantpersistentjob"
-  variables:
-    TEST_HOST: "telemetry-pingv1-server-0.test"
-
 testpages-server-0-shortlived:
   extends:
     - ".vagrantshortlivedjob"
