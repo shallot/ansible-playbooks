@@ -49,7 +49,7 @@ fixture_modified=$(date -d "$fixture_time" '+%d %b %Y %H:%M %Z')
 fixture_version=$(date -d "$fixture_time" '+%Y%m%d%H%M')
 
 # Find all txt files in the "default" directory
-filterlist_files=$(find $extract_dir/filterlists/default/ -type f -name "*.txt")
+filterlist_files=$(find $extract_dir/default/ -type f -name "*.txt")
 
 ## Loop through each file
 for filterlist_file in $filterlist_files
