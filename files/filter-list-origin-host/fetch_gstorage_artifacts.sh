@@ -43,10 +43,10 @@ tar zxvf $download_dir/$project.tar.gz -C $extract_dir/ \
 # allows to test how much traffic reduction caching could bring.
 filterlist_modification_start=$(date +%s)
 
-# Convert fixtures to required format
+# Convert fixtures to required format and ensure UTC
 fixture_time='20230329 09:00:00 UTC'
-fixture_modified=$(date -d "$fixture_time" '+%d %b %Y %H:%M %Z')
-fixture_version=$(date -d "$fixture_time" '+%Y%m%d%H%M')
+fixture_modified=$(date -u -d "$fixture_time" '+%d %b %Y %H:%M %Z')
+fixture_version=$(date -u -d "$fixture_time" '+%Y%m%d%H%M')
 
 # Find all txt files in the "default" directory
 filterlist_files=$(find $extract_dir/default/ -type f -name "*.txt")
