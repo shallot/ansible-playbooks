@@ -63,7 +63,8 @@ do
 
     # Remove old brotli file and regenerate the new version
     rm -f $filterlist_file.br
-    brotli --quality 9 --force --output $filterlist_file.br --input $filterlist_file --verbose
+    brotli --quality 9 --force --output $filterlist_file.br --input $filterlist_file --verbose && \
+        chmod +r $filterlist_file.br
 
     # Remove old gz file as it gets otherwise updated and regenerate the new version
     rm -f $filterlist_file.gz
