@@ -37,6 +37,42 @@ download_message=$(wget https://storage.googleapis.com/$src.tar.gz \
 tar zxvf $download_dir/$project.tar.gz -C $extract_dir/ \
   --strip-components=$filter_len $filter
 
+
+# The "modified" and "version" strings in the filter list headers change every
+# 10min which prevents any kind of caching. Replacing the values with fixtures
+# allows to test how much traffic reduction caching could bring.
+filterlist_modification_start=$(date +%s)
+
+# Convert fixtures to required format
+fixture_time='20230329 09:00:00 UTC'
+fixture_modified=$(date -d "$fixture_time" '+%d %b %Y %H:%M %Z')
+fixture_version=$(date -d "$fixture_time" '+%Y%m%d%H%M')
+
+# Find all txt files in the "default" directory
+filterlist_files=$(find $extract_dir/filterlists/default/ -type f -name "*.txt")
+
+## Loop through each file
+for filterlist_file in $filterlist_files
+do
+  # Check if the file contains the lines "! Last modified: <timestamp>" and "Version: <timestamp>"
+  if [ "$(grep -c "! Last modified: " $filterlist_file)" -ne 0 ] && [ "$(grep -c "Version: " $filterlist_file;)" -ne 0 ]; then
+    # Replace timestamps with fixture
+    echo "$filterlist_file: Setting version string to $fixture_modified and last modified to $fixture_modified"
+    sed -i "s/! Version: .*$/! Version: $fixture_version/g" $filterlist_file
+    sed -i "s/! Last modified: .*$/! Last modified: $fixture_modified/g" $filterlist_file
+
+    # Remove old brotli file and regenerate the new version
+    rm -f $filterlist_file.br
+    brotli -q 9 -f -o $filterlist_file.br $filterlist_file
+
+    # Remove old gz file as it gets otherwise updated and regenerate the new version
+    rm -f $filterlist_file.gz
+    7za a -tgzip -mx=9 -bd -mpass=5 $filterlist_file.gz $filterlist_file
+  fi
+done
+echo "Filterlists header modification runtime: $(($(date +%s)-filterlist_modification_start))s"
+
+
 # Only the v3 subdirectory has a index.json in it right now.
 for index_file in $(find $extract_dir -type f -name index.json); do
   if ! cat $index_file | jq .; then
