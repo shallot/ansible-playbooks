@@ -61,6 +61,11 @@ do
     sed -i "s/! Version: .*$/! Version: $fixture_version/g" $filterlist_file
     sed -i "s/! Last modified: .*$/! Last modified: $fixture_modified/g" $filterlist_file
 
+    # Regenerate checksum as it covers "version" and "last modified" as well and therefore changes every 10 minutes
+    sed -i '/! Checksum: /d' $filterlist_file
+    md5=$(openssl dgst -md5 -binary $filterlist_file | openssl enc -base64 | sed 's/=*//g')
+    sed -i "2 i ! Checksum: $md5" $filterlist_file
+
     # Remove old brotli file and regenerate the new version
     rm -f $filterlist_file.br
     brotli --quality 9 --force --output $filterlist_file.br --input $filterlist_file --verbose && \
