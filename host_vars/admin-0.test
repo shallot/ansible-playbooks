@@ -45,6 +45,70 @@ custom_ansible_group_members:
 custom_ansible_playbooks_repository:
   "/vagrant"
 
+ansible_host_vars_lint_hooks_dir:
+  "{{ custom_ansible_user.home }}/inventory-host-vars-lint"
+
+ansible_host_vars_lint_hooks_custom_paths__to_merge:
+  "{{ ansible_host_vars_lint_hooks_dir }}":
+    state: "directory"
+    dest: "{{ ansible_host_vars_lint_hooks_dir }}"
+    mode: "0755"
+  "{{ ansible_host_vars_lint_hooks_dir }}/inventory-host-vars-lint":
+    state: "copy"
+    dest: "{{ ansible_host_vars_lint_hooks_dir }}/inventory-host-vars-lint"
+    # yamllint disable rule:line-length
+    content: |
+      #!/bin/sh
+
+      missing_host_vars=""
+
+      for h in $(PYTHONWARNINGS=ignore::UserWarning ANSIBLE_TRANSFORM_INVALID_GROUP_CHARS=silently \
+          ansible all --list-hosts | tail -n +2); do
+              test -e host_vars/$i.yml || missing_host_vars="$missing_host_vars $h"
+      done
+
+      if [ ! -z "$missing_host_vars" ]; then
+              echo "Missing host_vars files:"
+
+              for h in $missing_host_vars; do
+                      echo "\thost_vars/$h.yml"
+              done
+
+              exit 1
+      fi
+    # yamllint enable rule:line-length
+    mode: "0755"
+  "{{ ansible_host_vars_lint_hooks_dir }}/.pre-commit-hooks.yaml":
+    state: "copy"
+    dest: "{{ ansible_host_vars_lint_hooks_dir }}/.pre-commit-hooks.yaml"
+    content: |
+      ---
+
+      # For use with pre-commit.
+      # See usage instructions at https://pre-commit.com/#new-hooks
+
+      - id: inventory-host-vars-lint
+        name: inventory-host-vars-lint
+        description: Checks if every ansible host as a host_vars file.
+        entry: {{ ansible_host_vars_lint_hooks_dir }}/inventory-host-vars-lint
+        language: system
+        types: [file]
+    mode: "0644"
+
+ansible_host_vars_lint_hooks_custom_shells__to_merge:
+  ab_git_setup:
+    cmd: "git init && git add . && git commit -m 'Init commit' && git tag v0.1"
+    chdir: "{{ ansible_host_vars_lint_hooks_dir }}"
+    creates: "{{ ansible_host_vars_lint_hooks_dir }}/.git"
+
+# Fix permissions of ansible home after host_vars pre-commit is set up
+ansible_host_vars_lint_hooks_ansible_admin_commands__to_merge:
+  aa_ansible_home_owner_reset:
+    cmd: "chown -R ansible: {{ custom_ansible_user.home }}"
+
+ansible_host_vars_lint_hook_custom_packages__to_merge:
+  git: "present"
+
 # https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
 vagrant_groups:
   - "ansible-admin-hosts"
@@ -57,6 +121,7 @@ vagrant_networks:
 # https://www.vagrantup.com/docs/provisioning/ansible.html
 vagrant_playbooks:
   - "provision-custom-systems.yml"
+  - "provision-custom-shells.yml"
   - "provision-ansible-admin-hosts.yml"
 
 # https://www.vagrantup.com/docs/synced-folders/rsync.html
