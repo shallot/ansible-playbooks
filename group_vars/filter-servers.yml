@@ -95,7 +95,7 @@ default_filter_server_prerequisite_custom_apache_config: |
   # Set Etag based content rather then the last modified date (mtime) to allow
   # newly generated filer list files with unchanged content to be cached.
   # https://httpd.apache.org/docs/2.4/en/mod/core.html#fileetag
-  FileETag INode Digest Size
+  FileETag Digest Size
 
   AddDefaultCharset UTF-8
 
