@@ -76,7 +76,7 @@
                   'name': item.name
                     | default(item.item.key),
                   'authorized_keys': item.item.value.authorized_keys
-                    | default(None),
+                    | default(omit),
               }
             ]
        }}"
@@ -122,7 +122,9 @@
         })
        }}"
   when:
-    - "item.exists and item.authorized_keys != None"
+    - "item.authorized_keys is defined"
+    - "item.authorized_keys != omit"
+    - "item.exists"
     - "item.state != 'absent'"
     # NB: there's another possibility of checking for:
     # or (item.state == 'absent' and item.authorized_keys_path is defined)"
