@@ -140,8 +140,8 @@ test_icinga_host_vars__to_merge:
     {
       http_codes_logfile = "/var/log/apache2/access.log"
       http_codes_offsetfile = "/var/lib/nagios/access.log.offset"
-      http_codes_warning = "3"
-      http_codes_critical = "5"
+      http_codes_warning = "1.75"
+      http_codes_critical = "2.5"
     }
 
 example_icinga_host_options__to_merge:
