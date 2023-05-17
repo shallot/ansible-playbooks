@@ -46,3 +46,6 @@
 [submodule "roles/icinga2-mattermost"]
 	path = roles/icinga2-mattermost
 	url = https://gitlab.com/eyeo/devops/dependencies/icinga2-mattermost
+[submodule "roles/elastic"]
+	path = roles/elastic
+	url = https://gitlab.com/eyeo/devops/ansible-role-elastic

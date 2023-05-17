@@ -219,6 +219,13 @@ def fill_extra_vars(hostvars, ansible_extra_vars)
     'gitlab-runners' => {
       'TEST_GITLAB_REGISTRATION_TOKEN' =>
         ENV.key?('TEST_GITLAB_REGISTRATION_TOKEN') ? ENV['TEST_GITLAB_REGISTRATION_TOKEN'] : '',
+    },
+    # host_vars/elastic-agent-0.test
+    'elastic-agents' => {
+      'elastic_agent_enrollment_token' =>
+        ENV.key?('TEST_ELASTIC_AGENT_TOKEN') ? ENV['TEST_ELASTIC_AGENT_TOKEN'] : '',
+      'elastic_agent_fleet_url' =>
+        ENV.key?('TEST_ELASTIC_AGENT_FLEET_URL') ? ENV['TEST_ELASTIC_AGENT_FLEET_URL'] : '',
     }
   }
 

@@ -1,4 +1,4 @@
-# Copyright (c) 2018-present eyeo GmbH
+# Copyright (c) 2023-present eyeo GmbH
 #
 # This module is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -13,35 +13,16 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# https://github.com/rubocop-hq/rubocop/blob/master/manual/configuration.md
 ---
 
-Layout/EmptyLinesAroundBlockBody:
-  Enabled: false
+- name:
+    "provision-elastic-agents"
 
-Metrics/BlockLength:
-  Max: 100
+  hosts:
+    "elastic-agents"
 
-Metrics/LineLength:
-  Max: 160
+  tasks:
 
-Metrics/MethodLength:
-  Max: 30
-
-Style/HashSyntax:
-  EnforcedStyle: "ruby19_no_mixed_keys"
-
-Style/MethodCalledOnDoEndBlock:
-  Enabled: false
-
-Style/RescueModifier:
-  Enabled: false
-
-Style/TrailingCommaInArguments:
-  Enabled: false
-
-Style/TrailingCommaInArrayLiteral:
-  Enabled: false
-
-Style/TrailingCommaInHashLiteral:
-  Enabled: false
+    # https://docs.ansible.com/ansible/latest/import_tasks_module.html
+    - import_tasks:
+        "tasks/elastic-agent.yml"
