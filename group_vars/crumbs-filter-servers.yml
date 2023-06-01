@@ -39,6 +39,11 @@ crumbs_filter_server_custom_apache_config: |
 default_crumbs_filter_server_header_custom_apache_config: |
   <FilesMatch "(crumbs_abb\.json|crumbs_extension\.json)">
     # Append Crumbs CC header
+    <If "%{IPV6} == 'on'">
+    Header append X-Crumbs-Country-Code "expr=%{ENV:GEOIP_COUNTRY_CODE_V6}"
+    </If>
+    <Else>
     Header append X-Crumbs-Country-Code "expr=%{ENV:GEOIP_COUNTRY_CODE}"
+    </Else>
     Header append X-Crumbs-Language-Code "expr=%{HTTP:Accept-Language}"
   </FilesMatch>
