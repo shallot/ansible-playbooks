@@ -320,6 +320,16 @@ elastic-agent-0-shortlived:
     TEST_ELASTIC_AGENT_TOKEN: "$ANSIBLE_ROLE_EXAMPLE_ELASTIC_AGENT_TOKEN"
     TEST_ELASTIC_AGENT_FLEET_URL: "$ANSIBLE_ROLE_EXAMPLE_ELASTIC_AGENT_FLEET_URL"
 
+elastic-agent-0-persistent:
+  extends:
+    - ".vagrantpersistentjob"
+  variables:
+    TEST_HOST: "elastic-agent-0.test"
+    # https://gitlab.com/eyeo/devops/examples/ansible-role-example/-/settings/ci_cd
+    # https://gitlab.com/eyeo/devops/ansible-playbooks/-/settings/ci_cd
+    TEST_ELASTIC_AGENT_TOKEN: "$ANSIBLE_ROLE_EXAMPLE_ELASTIC_AGENT_TOKEN"
+    TEST_ELASTIC_AGENT_FLEET_URL: "$ANSIBLE_ROLE_EXAMPLE_ELASTIC_AGENT_FLEET_URL"
+
 eramba-server-0-shortlived:
   extends:
     - ".vagrantshortlivedjob"
