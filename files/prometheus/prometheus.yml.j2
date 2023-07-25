@@ -31,6 +31,39 @@ scrape_configs:
     #basic_auth:
     #  username: htpasswd_user
     #  password: htpasswd_pass
+  - job_name: blackbox
+    file_sd_configs:
+      - files:
+        - 'files_sd/blackbox/*.yml'
+    metrics_path: /probe
+    relabel_configs:
+      # When __address__ consists of just a name or IP address,
+      # copy it to both the "instance" label (visible to user)
+      # and "__param_target" (where blackbox_exporter probes)
+      - source_labels: [__address__]
+        regex: '([^/]+)'
+        target_label: instance
+      - source_labels: [__address__]
+        regex: '([^/]+)'
+        target_label: __param_target
+      # When __address__ is of the form "name/address", extract
+      # name to "instance" label and address to "__param_target"
+      - source_labels: [__address__]
+        regex: '(.+)/(.+)'
+        target_label: instance
+        replacement: '${1}'
+      - source_labels: [__address__]
+        regex: '(.+)/(.+)'
+        target_label: __param_target
+        replacement: '${2}'
+      # Copy "module" label to "__param_module" so that blackbox_exporter
+      # receives it as part of the scrape URL
+      - source_labels: [module]
+        target_label: __param_module
+      # Send the actual scrape to SNMP exporter
+      - target_label: __address__
+        replacement: 127.0.0.1:9115
+
 {% for exporter_service in exporter_service_list %}
   - job_name: '{{ exporter_service }}_exporter'
     file_sd_configs:

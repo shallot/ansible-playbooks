@@ -1,0 +1,4 @@
+- labels:
+    module: ssh_banner  
+  targets:
+    - admin-2.uplink.eyeo.it:22

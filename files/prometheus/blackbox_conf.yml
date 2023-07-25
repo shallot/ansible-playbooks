@@ -1,0 +1,46 @@
+### find non easy to find docs here (sample conf)
+# https://github.com/prometheus/blackbox_exporter/blob/068b38468de8f3c844f7f7d8cec758c90675b1b3/example.yml#L29
+modules:
+  http_2xx:
+    prober: http
+    http:
+      preferred_ip_protocol: "ip4" # defaults to "ip6"
+      ip_protocol_fallback: false  # no fallback to "ip6"
+  http_post_2xx:
+    prober: http
+    http:
+      method: POST
+  tcp_connect:
+    prober: tcp
+    tcp:
+      preferred_ip_protocol: "ip4" # defaults to "ip6"
+      ip_protocol_fallback: false  # no fallback to "ip6"
+  ssh_banner:
+    prober: tcp
+    tcp:
+      preferred_ip_protocol: "ip4" # defaults to "ip6"
+      ip_protocol_fallback: false  # no fallback to "ip6"
+      query_response:
+      - expect: "^.*OpenSSH.*$"
+
+##  pop3s_banner:
+##    prober: tcp
+##    tcp:
+##      query_response:
+##      - expect: "^+OK"
+##      tls: true
+##      tls_config:
+##        insecure_skip_verify: false
+#  #irc_banner:
+#  #  prober: tcp
+#  #  tcp:
+#  #    query_response:
+#  #    - send: "NICK prober"
+#  #    - send: "USER prober prober prober :prober"
+#  #    - expect: "PING :([^ ]+)"
+#  #      send: "PONG ${1}"
+#  #    - expect: "^:[^ ]+ 001"
+#  icmp:
+#    prober: icmp
+##
+

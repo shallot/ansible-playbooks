@@ -34,6 +34,7 @@ prometheus_server_custom_packages__to_merge:
   vim: "present"
   mutt: "present"
   prometheus-node-exporter: "present"
+  prometheus-blackbox-exporter: "present"
 
 prometheus_server_custom_users__to_merge:
   prometheus:
@@ -57,6 +58,9 @@ prometheus_server_custom_paths__to_merge:
     state: "directory"
     mode: "0775"
   /etc/prometheus/files_sd/alertmanager:
+    state: "directory"
+    mode: "0775"
+  /etc/prometheus/files_sd/blackbox:
     state: "directory"
     mode: "0775"
   /etc/prometheus/rules:
@@ -89,6 +93,10 @@ prometheus_server_config_custom_paths__to_merge:
   /etc/prometheus/prometheus.yml:
     src: "files/prometheus/prometheus.yml.j2"
     state: "template"
+    mode: "0664"
+  /etc/prometheus/files_sd/blackbox/http.yml:
+    src: "files/prometheus/blackbox_targets.yml"
+    state: "copy"
     mode: "0664"
   /etc/prometheus/files_sd/node_exporter/targets.yml:
     src: "files/prometheus/node_exporter_targets.yml"
@@ -222,6 +230,9 @@ prometheus_server_config_custom_paths__to_merge:
 
 # tasks/services.yml
 prometheus_server_custom_services__to_merge:
+  prometheus-blackbox-exporter:
+    enabled: true
+    state: "started"
   prometheus:
     enabled: true
     state: "started"
