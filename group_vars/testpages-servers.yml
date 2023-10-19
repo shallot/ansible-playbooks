@@ -56,11 +56,18 @@ testpages_endpoints_server_port:
 testpages_endpoints_websocket_port:
   "4001"
 
+# TODO: fully parametrize port 4001, match it to an environment file
+testpages_endpoints_exception_websocket_port:
+  "4002"
+
 testpages_endpoints_base_url:
   "/sitekey-frame"
 
 testpages_endpoints_websocket_url:
   "/websocket"
+
+testpages_endpoints_exception_websocket_url:
+  "/exception_websocket"
 
 # yamllint disable rule:line-length
 testpages_endpoints_extra_apache_config: |
@@ -70,13 +77,22 @@ testpages_endpoints_extra_apache_config: |
   ProxyPass {{ testpages_endpoints_base_url }} "http://localhost:{{ testpages_endpoints_server_port }}{{ testpages_endpoints_base_url }}"
   ProxyPassReverse {{ testpages_endpoints_base_url }} "http://localhost:{{ testpages_endpoints_server_port }}{{ testpages_endpoints_base_url }}"
 
-  # Websocket endpoint
   RewriteEngine On
+
+  # Websocket endpoint
   RewriteCond ${HTTP:Upgrade} websocket [NC]
   RewriteCond ${HTTP:Connection} upgrade [NC]
   RewriteRule {{ testpages_endpoints_websocket_url }} wss://localhost:{{ testpages_endpoints_websocket_port }} [P,L]
   ProxyPass "{{ testpages_endpoints_websocket_url }}" "http://localhost:{{ testpages_endpoints_websocket_port }}/" upgrade=websocket
   ProxyPassReverse "{{ testpages_endpoints_websocket_url }}" "http://localhost:{{ testpages_endpoints_websocket_port }}/" upgrade=websocket
+
+  # Exception websocket endpoint
+  RewriteCond ${HTTP:Upgrade} websocket [NC]
+  RewriteCond ${HTTP:Connection} upgrade [NC]
+  RewriteRule {{ testpages_endpoints_exception_websocket_url }} wss://localhost:{{ testpages_endpoints_exception_websocket_port }} [P,L]
+  ProxyPass "{{ testpages_endpoints_exception_websocket_url }}" "http://localhost:{{ testpages_endpoints_exception_websocket_port }}/" upgrade=websocket
+  ProxyPassReverse "{{ testpages_endpoints_exception_websocket_url }}" "http://localhost:{{ testpages_endpoints_exception_websocket_port }}/" upgrade=websocket
+
 # yamllint enable rule:line-length
 
 testpages_endpoints_dest_dir:
