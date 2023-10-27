@@ -63,6 +63,8 @@ munin_asyncd_plugin_update_rate_patches:
     "files/munin-asyncd.plugin_update_rate.2.0.67.patch"
   bullseye: # 2.0.67
     *munin_asyncd_bullseye_patch
+  jammy: # 2.0.57
+    *munin_asyncd_pre_bullseye_patch
 
 # yamllint disable rule:line-length
 debian_family_backports_selector:
@@ -74,7 +76,8 @@ debian_family_backports_selector:
     }}"
 
 munin_asyncd_plugin_update_rate_patch:
-  "{{ munin_asyncd_plugin_update_rate_patches[debian_family_backports_selector] }}"
+  "{{ munin_asyncd_plugin_update_rate_patches[debian_family_backports_selector]
+    | default('') }}"
 # yamllint enable rule:line-length
 
 # provision-munin-node-hosts.yml
