@@ -34,7 +34,6 @@
     creates: "{{ shell.value.creates | default(omit) }}"
     removes: "{{ shell.value.removes | default(omit) }}"
     stdin: "{{ shell.value.stdin | default(omit) }}"
-    warn: "{{ shell.value.warn | default(false) }}"
   become:
     true
   become_user:
