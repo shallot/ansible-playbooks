@@ -18,6 +18,7 @@
 aa_debian_custom_packages__to_merge:
   dnsutils: "present"
   fail2ban: "present"
+  iptables: "present"
   needrestart: "present"
   ntp: "present"
 
