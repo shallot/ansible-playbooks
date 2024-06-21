@@ -1,51 +1,51 @@
 [submodule "roles/apt"]
 	path = roles/apt
-	url = https://gitlab.com/eyeo/devops/ansible-role-apt
+	url = https://gitlab.com/shallot/ansible-role-apt.git
 [submodule "roles/openssh"]
 	path = roles/openssh
-	url = https://gitlab.com/eyeo/devops/ansible-role-openssh
+	url = https://gitlab.com/shallot/ansible-role-openssh.git
 [submodule "roles/virtualbox"]
 	path = roles/virtualbox
-	url = https://gitlab.com/eyeo/devops/ansible-role-virtualbox
+	url = https://gitlab.com/shallot/ansible-role-virtualbox.git
 [submodule "roles/postgresql"]
 	path = roles/postgresql
-	url = https://gitlab.com/eyeo/devops/ansible-role-postgresql
+	url = https://gitlab.com/shallot/ansible-role-postgresql.git
 [submodule "roles/mumble"]
 	path = roles/mumble
-	url = https://gitlab.com/eyeo/devops/ansible-role-mumble
+	url = https://gitlab.com/shallot/ansible-role-mumble.git
 [submodule "roles/apache2"]
 	path = roles/apache2
-	url = https://gitlab.com/eyeo/devops/ansible-role-apache2.git
+	url = https://gitlab.com/shallot/ansible-role-apache2.git
 [submodule "roles/gitlab"]
 	path = roles/gitlab
-	url = https://gitlab.com/eyeo/devops/ansible-role-gitlab.git
+	url = https://gitlab.com/shallot/ansible-role-gitlab.git
 [submodule "roles/docker"]
 	path = roles/docker
-	url = https://gitlab.com/eyeo/devops/ansible-role-docker.git
+	url = https://gitlab.com/shallot/ansible-role-docker.git
 [submodule "roles/tmate"]
 	path = roles/tmate
-	url = https://gitlab.com/eyeo/devops/ansible-role-tmate.git
+	url = https://gitlab.com/shallot/ansible-role-tmate.git
 [submodule "roles/mysql"]
 	path = roles/mysql
-	url = https://gitlab.com/eyeo/devops/ansible-role-mysql.git
+	url = https://gitlab.com/shallot/ansible-role-mysql.git
 [submodule "roles/eyeo"]
 	path = roles/eyeo
-	url = https://gitlab.com/eyeo/devops/ansible-role-eyeo.git
+	url = https://gitlab.com/shallot/ansible-role-eyeo.git
 [submodule "roles/postfix"]
 	path = roles/postfix
-	url = https://gitlab.com/eyeo/devops/ansible-role-postfix.git
+	url = https://gitlab.com/shallot/ansible-role-postfix.git
 [submodule "roles/libvirt"]
 	path = roles/libvirt
-	url = https://gitlab.com/eyeo/devops/ansible-role-libvirt.git
+	url = https://gitlab.com/shallot/ansible-role-libvirt.git
 [submodule "roles/monitoring-plugins"]
 	path = roles/monitoring-plugins
-	url = https://gitlab.com/eyeo/devops/utilities/monitoring-plugins.git
+	url = https://gitlab.com/shallot/monitoring-plugins.git
 [submodule "roles/icinga"]
 	path = roles/icinga
-	url = https://gitlab.com/eyeo/devops/ansible-role-icinga.git
+	url = https://gitlab.com/shallot/ansible-role-icinga.git
 [submodule "roles/icinga2-mattermost"]
 	path = roles/icinga2-mattermost
-	url = https://gitlab.com/eyeo/devops/dependencies/icinga2-mattermost
+	url = https://gitlab.com/shallot/icinga2-mattermost.git
 [submodule "roles/elastic"]
 	path = roles/elastic
-	url = https://gitlab.com/eyeo/devops/ansible-role-elastic
+	url = https://gitlab.com/shallot/ansible-role-elastic.git
