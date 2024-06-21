@@ -1,14 +1,16 @@
-# eyeo's Ansible Playbooks
+# Ansible Playbooks
 
 This repository is a collection of [Ansible][ansible] [playbooks][playbook]
-and associated resources used to operate the infrastructure at [eyeo][eyeo].
+and associated resources.
+
+It was initially created to operate the infrastructure at [eyeo][eyeo].
 
 ## Bootstrap
 
 In order to prepare the local system for development or provisioning of any
 environment, first [clone][clone] the [Git][git] repository:
 
-    git clone https://gitlab.com/eyeo/devops/ansible-playbooks
+    git clone https://gitlab.com/shallot/ansible-playbooks
 
 Now `cd` to the local repository and then fetch the [submodules][submodule]
 that populate the `roles/` directory therein:
