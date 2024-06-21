@@ -64,3 +64,15 @@
   #     - "custom_os_version != ''"
   #     - "custom_os_version != 'NA'"
 # yamllint enable rule:comments-indentation
+
+# https://docs.ansible.com/ansible/latest/modules/getent_module.html
+- name:
+    "getent : passwd"
+  getent:
+    database: "passwd"
+
+# https://docs.ansible.com/ansible/latest/modules/getent_module.html
+- name:
+    "getent : group"
+  getent:
+    database: "group"

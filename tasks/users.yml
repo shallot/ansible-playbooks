@@ -56,6 +56,12 @@
   become:
     true
 
+# https://docs.ansible.com/ansible/latest/modules/getent_module.html
+- name:
+    "getent : passwd"
+  getent:
+    database: "passwd"
+
 # https://docs.ansible.com/ansible/latest/modules/set_fact_module.html
 - name:
     "set_fact : set defaults"
