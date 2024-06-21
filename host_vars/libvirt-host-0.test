@@ -55,10 +55,10 @@ libvirt_guests:
   "guest1":
     hostname: "guest1a"
     logical_volume_size: "2G"
-    debootstrap_distribution: "stretch"
+    debootstrap_distribution: "bookworm"
     vcpus: 1
     ram: "2G"
-    os_variant: "debian9"
+    os_variant: "debian10"
     bridge: "br0"
     ifupdown:
       name: "eth0"
@@ -69,7 +69,7 @@ libvirt_guests:
   "guest2":
     name: "guest2-fancy-name"
     logical_volume_size: "3G"
-    debootstrap_release: "buster"
+    debootstrap_release: "bullseye"
     debootstrap_mirror:
       "http://ftp.de.debian.org/debian"
     debootstrap_packages:
