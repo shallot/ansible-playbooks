@@ -30,7 +30,9 @@
     "apt_sources_list_stable"
 
 # https://docs.ansible.com/ansible/latest/modules/fail_module.html
-- fail:
+- name:
+    "apt : /etc/apt/sources.list : stable"
+  fail:
     msg: >-
       Found {{ apt_sources_list_stable.found }} occurences of the 'stable'
       keyword in apt sources.list files. Replace this with the distribution
@@ -46,14 +48,32 @@
     security_apt_regexp: "{{ security_apt_sites[custom_os_distribution] }}"
   vars:
     security_apt_sites:
-      debian: "security\\.debian\\.org"
+      debian: "/debian-security"
       ubuntu: "security\\.ubuntu\\.com"
+
+# https://docs.ansible.com/ansible/latest/collections/ansible/builtin/stat_module.html
+- name:
+    "apt : /etc/apt/sources.list.d/debian.sources"
+  stat:
+    path: "/etc/apt/sources.list.d/debian.sources"
+  register: "debian_sources_stat_result"
+
+# https://docs.ansible.com/ansible/latest/modules/set_fact_module.html
+- name:
+    "set_fact : security_apt_file"
+  set_fact:
+    security_apt_file: "{{ debian_sources_stat_result.stat.exists
+                         | ternary(
+                             '/etc/apt/sources.list.d/debian.sources',
+                             '/etc/apt/sources.list'
+                           )
+                         }}"
 
 # https://docs.ansible.com/ansible/latest/collections/ansible/builtin/lineinfile_module.html
 - name:
-    "apt : security source check"
+    "apt : {{ security_apt_file }} : {{ security_apt_regexp }}"
   lineinfile:
-    path: "/etc/apt/sources.list"
+    path: "{{ security_apt_file }}"
     regexp: "{{ security_apt_regexp }}"
     state: "absent"
   check_mode:
@@ -70,8 +90,6 @@
       Please add it and try again.
   when:
     - "not apt_sources_list_security.found"
-    # FIXME: this is just to make some CI work
-    - "ansible_distribution_release != 'stretch'"
 
 # action_plugins/merge_variable.py
 # https://docs.ansible.com/ansible/latest/modules/apt_key_module.html
