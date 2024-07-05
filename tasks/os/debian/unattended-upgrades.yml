@@ -17,10 +17,6 @@
 
 # https://docs.ansible.com/ansible/latest/import_tasks_module.html
 - import_tasks:
-    "tasks/postfix-agent.yml"
-
-# https://docs.ansible.com/ansible/latest/import_tasks_module.html
-- import_tasks:
     "tasks/packages.yml"
   vars:
     custom_packages_suffix:

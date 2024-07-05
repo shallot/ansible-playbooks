@@ -29,6 +29,12 @@
 
   tasks:
 
+    # https://docs.ansible.com/ansible/latest/include_tasks_module.html
+    - include_tasks:
+        "tasks/postfix-agent.yml"
+      when:
+        "'postfix-agents' in group_names"
+
     # https://docs.ansible.com/ansible/latest/import_tasks_module.html
     - import_tasks:
         "tasks/unattended-upgrades.yml"
