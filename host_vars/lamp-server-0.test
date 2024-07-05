@@ -58,11 +58,7 @@ test_mysql_databases__to_merge:
 test_apache2_modules__to_merge:
   headers: &apache2_standard_module
     package: false
-  proxy_fcgi:
-    *apache2_standard_module
   rewrite:
-    *apache2_standard_module
-  setenvif:
     *apache2_standard_module
   socache:
     <<: *apache2_standard_module

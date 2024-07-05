@@ -31,3 +31,9 @@ lamp_shared_apache_config: |
     AllowOverride All
     Require all granted
   </Directory>
+
+# roles/apache2/tasks/main.yml
+# provision-lamp-servers.yml
+lamp_php_apache2_modules__to_merge:
+  proxy_fcgi:
+  setenvif:
