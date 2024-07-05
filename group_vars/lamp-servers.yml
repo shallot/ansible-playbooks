@@ -37,8 +37,3 @@ lamp_shared_apache_config: |
   # https://issues.adblockplus.org/ticket/4068
   RewriteCond %{HTTP_HOST} ^(.+)\.$"
   RewriteRule ^(.*)$ http://%1/$1 [R=permanent,L]
-
-# tasks/apache2.yml
-# Reduced here because of GDPR compliance recommendations
-apache2_logrotate_count:
-  7
