@@ -31,9 +31,3 @@ lamp_shared_apache_config: |
     AllowOverride All
     Require all granted
   </Directory>
-
-  RewriteEngine On
-
-  # https://issues.adblockplus.org/ticket/4068
-  RewriteCond %{HTTP_HOST} ^(.+)\.$"
-  RewriteRule ^(.*)$ http://%1/$1 [R=permanent,L]
