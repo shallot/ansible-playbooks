@@ -1,0 +1,40 @@
+# Copyright (c) 2023-2024 Josip Rodin
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+# tasks/packages.yml
+certbot_custom_packages__to_merge:
+  certbot: "present"
+
+# tasks/packages.yml
+certbot_extra_custom_packages__to_merge:
+  python3-certbot-apache:
+    "{{ ('apache2-servers' in group_names)
+      | ternary('present', omit)
+      }}"
+  python3-certbot-nginx:
+    "{{ ('nginx-servers' in group_names)
+      | ternary('present', omit)
+      }}"
+
+# tasks/shells.yml
+certbot_custom_shells__to_merge:
+  certbot_1_register:
+    cmd: |
+      certbot register --noninteractive \
+                       --agree-tos \
+                       --email {{ letsencrypt_registration_email }}
+    creates: "/etc/letsencrypt/accounts/acme-v02.api.letsencrypt.org/directory"

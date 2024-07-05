@@ -1,0 +1,31 @@
+# Copyright (c) 2023 Josip Rodin
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+# tasks/shells.yml
+certonly_aliases_certbot_custom_shells__to_merge:
+  certbot_2_certonly_with_aliases:
+    # yamllint disable rule:line-length
+    cmd: |
+      certbot certonly --noninteractive \
+                       --webroot \
+                       --webroot-path '{{ web_root_path }}' \
+                       --expand \
+                       {% for each_hostname in public_hostname_with_aliases %}
+                       -d '{{ each_hostname }}'{% if not loop.last %} \{% endif %}{{''}}
+                       {% endfor %}
+    # yamllint enable rule:line-length
+    creates: "/etc/letsencrypt/renewal/{{ public_hostname }}.conf"

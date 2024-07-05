@@ -1,0 +1,38 @@
+# Copyright (c) 2024 Josip Rodin
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+# tasks/shells.yml
+certonly_multiple_certbot_custom_shells__to_merge:
+  certbot_2_certonly_multiple:
+    # yamllint disable rule:line-length
+    cmd: |
+      {% for each_public_hostname in public_hostnames %}
+      if [ ! -f /etc/letsencrypt/renewal/{{ each_public_hostname.name }}.conf ]; then
+      certbot certonly --noninteractive \
+                       --webroot \
+                       --webroot-path '{{ each_public_hostname.web_root_path | default(web_root_path) }}' \
+                       -d '{{ each_public_hostname.name }}'{% if aliases in each_public_hostname %} \
+                       {% for each_hostname in each_public_hostname.aliases %}
+                       -d '{{ each_hostname }}'{% if not loop.last %} \{% endif %}{{''}}
+                       {% endfor %}
+                       {% endif %}
+      fi
+      {% endfor %}
+    # yamllint enable rule:line-length
+# FIXME: can't have something like
+#    creates: "/etc/letsencrypt/renewal/{{ each_hostname }}.conf"
+# so it will always report changed: true

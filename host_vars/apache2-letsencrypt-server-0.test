@@ -1,0 +1,131 @@
+# Copyright (c) 2024 Josip Rodin
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+# group_vars/certbot.yml
+letsencrypt_registration_email:
+  "webmaster@example.com"
+
+# group_vars/certbot-*.yml
+web_root_path:
+  "/var/www/html"
+
+# group_vars/certbot-single.yml
+# group_vars/certbot-standalone.yml
+# group_vars/certbot-with-aliases.yml
+# FIXME: to actually test this we would need a working DNS domain
+public_hostname:
+  "example.com"
+
+# group_vars/certbot-with-aliases.yml
+public_hostname_with_aliases:
+  - "example.com"
+  - "alias.example.com"
+
+# group_vars/certbot-standalone.yml
+example_standalone_certbot_custom_paths__to_merge:
+  /etc/exim4/certs:
+    state: "directory"
+  /etc/letsencrypt/renewal-hooks/deploy/exim4:
+    state: "copy"
+    mode: "0755"
+    # yamllint disable rule:line-length
+    content: |
+      #!/bin/sh
+      install -m 0644 \
+        /etc/letsencrypt/live/{{ public_hostname }}/fullchain.pem \
+        /etc/exim4/certs/exim4.crt
+      install -m 0640 -g Debian-exim \
+        /etc/letsencrypt/live/{{ public_hostname }}/privkey.pem \
+        /etc/exim4/certs/exim4.key
+    # yamllint enable rule:line-length
+
+# group_vars/certbot-multiple.yml
+public_hostnames:
+  - name: "example.com"
+  - name: "another.example.com"
+    aliases:
+      - "yet.another.example.com"
+
+# roles/apache2/tasks/main.yml
+# provision-apache2-servers.yml
+host_specific_apache2_modules__to_merge:
+  ssl:
+
+example_com_basic_apache_config: |
+  ServerName example.com
+  ServerAdmin webmaster@example.com
+  DocumentRoot /var/www/html
+  ErrorLog ${APACHE_LOG_DIR}/error.log
+  CustomLog ${APACHE_LOG_DIR}/access.log combined
+
+example_com_extended_apache_config: |
+  # whatever else
+
+# roles/apache2/tasks/main.yml
+host_specific_apache2_sites__to_merge:
+  example.com:
+    # yamllint disable rule:line-length
+    configuration: |
+      <VirtualHost *:80>
+        {{ example_com_basic_apache_config | indent(2) }}
+        {% if example_com_https_enabled | default(false) %}
+        RedirectMatch permanent ^(?!/(server-status|.well-known)) https://{{ public_hostname }}/
+        {% else %}
+        {{ example_com_extended_apache_config | indent(2) }}
+        {% endif %}
+      </VirtualHost>
+    # yamllint enable rule:line-length
+    enabled_site_name:
+      "000-example.com"
+  example.com-le-ssl:
+    name: "{{ public_hostname }}-le-ssl"
+    enabled: "{{ example_com_https_enabled | default(false) }}"
+    # yamllint disable rule:line-length
+    configuration: |
+      <VirtualHost *:443>
+        {{ example_com_basic_apache_config | indent(2) }}
+        SSLEngine on
+        SSLCertificateFile /etc/letsencrypt/live/{{ public_hostname }}/fullchain.pem
+        SSLCertificateKeyFile /etc/letsencrypt/live/{{ public_hostname }}/privkey.pem
+        {{ example_com_extended_apache_config | indent(2) }}
+      </VirtualHost>
+    # yamllint enable rule:line-length
+
+# FIXME: this needs to be false for the initial apache provision,
+# and then become true after provision-custom-shells.yml runs certbot
+example_com_https_enabled:
+  false
+
+# https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
+vagrant_groups:
+  - "apache2-servers"
+  - "certbot"
+  - "certbot-single"
+  - "certbot-with-aliases"
+  - "certbot-standalone"
+  - "certbot-multiple"
+
+# https://www.vagrantup.com/intro/getting-started/networking.html
+vagrant_networks:
+  - private_network:
+      ip: "10.8.100.34"
+
+# https://www.vagrantup.com/docs/provisioning/ansible.html
+vagrant_playbooks:
+  - "provision-custom-systems.yml"
+  - "provision-apache2-servers.yml"
+  - "provision-custom-shells.yml"

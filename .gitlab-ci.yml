@@ -88,6 +88,14 @@ apache2-server-0-shortlived:
   variables:
     TEST_HOST: "apache2-server-0.test"
 
+apache2-letsencrypt-server-0-shortlived:
+  extends:
+    - ".vagrantshortlivedjob"
+  variables:
+    TEST_HOST: "apache2-letsencrypt-server-0.test"
+  # would require proper hostnames instead of example.com to complete
+  allow_failure: true
+
 apache2-mimeo-server-0-shortlived:
   extends:
     - ".vagrantshortlivedjob"
