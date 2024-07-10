@@ -1,0 +1,57 @@
+# Copyright (c) 2024 Josip Rodin
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+# group_vars/openvpn-servers.yml
+# NB: must ship /etc/openvpn/server/{{ openvpn_server_name }}.conf
+# for any of this to work
+openvpn_server_name:
+  "openvpn.example.com"
+openvpn_data_dir:
+  "/etc/openvpn/server/data"
+# NB: must ship {{ openvpn_data_dir }}/vars for any of this to work
+# NB: should match EASYRSA_KEY_SIZE in vars
+openvpn_easyrsa_key_size:
+  "4096"
+# NB: must match EASYRSA_PKI in vars
+openvpn_easyrsa_ca_dir:
+  "/srv/easyrsa"
+openvpn_ca_name:
+  "Example VPN CA"
+# FIXME: if this is not set to nopass, the easyrsa commands
+# are actually interactive and will hang Ansible
+openvpn_ca_cert_pass:
+  "nopass"
+# NB: if this is not set to nopass, both the easyrsa commands
+# would be interactive and hang Ansible,
+# and the openvpn server couldn't start automatically as well,
+# which is not tenable
+openvpn_server_cert_pass:
+  "nopass"
+
+# https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
+vagrant_groups:
+  - "openvpn-servers"
+
+# https://www.vagrantup.com/intro/getting-started/networking.html
+vagrant_networks:
+  - private_network:
+      ip: "10.8.100.119"
+
+# https://www.vagrantup.com/docs/provisioning/ansible.html
+vagrant_playbooks:
+  - "provision-custom-systems.yml"
+  - "provision-custom-shells.yml"

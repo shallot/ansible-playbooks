@@ -295,6 +295,12 @@ mumble-0-shortlived:
   variables:
     TEST_HOST: "mumble-0.test"
 
+openvpn-server-0-shortlived:
+  extends:
+    - ".vagrantshortlivedjob"
+  variables:
+    TEST_HOST: "openvpn-server-0.test"
+
 postfix-0-shortlived:
   extends:
     - ".vagrantshortlivedjob"

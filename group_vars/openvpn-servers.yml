@@ -1,0 +1,111 @@
+# Copyright (c) 2024 Josip Rodin
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+# tasks/packages.yml
+openvpn_vpn_custom_packages__to_merge:
+  openvpn: "present"
+  easy-rsa: "present"
+
+# tasks/services.yml
+openvpn_server_custom_services__to_merge:
+  "openvpn-server@{{ openvpn_server_name }}":
+    enabled: true
+    state: "started"
+
+# tasks/services.yml
+openvpn_server_custom_service_dropins__to_merge:
+  openvpn-server@:
+    dropin_name: "local-logtime"
+    # yamllint disable rule:line-length
+    content: |
+      [Service]
+      # dropped --suppress-timestamps because of log-append in the server config
+      ExecStart=
+      ExecStart=/usr/sbin/openvpn --status %t/openvpn-server/status-%i.log --status-version 2 --config %i.conf
+    # yamllint enable rule:line-length
+
+# tasks/paths.yml
+openvpn_vpn_config_custom_paths__to_merge:
+  /etc/openvpn/server/data:
+    dest: "{{ openvpn_data_dir }}"
+    state: "directory"
+
+# tasks/shells.yml
+openvpn_non_easyrsa_data_files_custom_shells__to_merge:
+  openvpn_server_10_make_ta_key:
+    cmd: |
+      openvpn --genkey --secret {{ openvpn_data_dir }}/ta.key
+    creates:
+      "{{ openvpn_data_dir }}/ta.key"
+  openvpn_server_11_make_dh:
+    # yamllint disable rule:line-length
+    cmd: |
+      openssl dhparam -out {{ openvpn_data_dir }}/dh.pem {{ openvpn_easyrsa_key_size }}
+    # yamllint enable rule:line-length
+    creates:
+      "{{ openvpn_data_dir }}/dh.pem"
+
+# tasks/shells.yml
+# yamllint disable rule:line-length
+openvpn_vpn_easyrsa_custom_shells__to_merge:
+  openvpn_easyrsa_1_make_cadir:
+    cmd: |
+      make-cadir {{ openvpn_easyrsa_ca_dir }}
+    creates:
+      "{{ openvpn_easyrsa_ca_dir }}/easyrsa"
+  openvpn_easyrsa_2_our_vars:
+    cmd: |
+      cp {{ openvpn_data_dir }}/vars {{ openvpn_easyrsa_ca_dir }}/vars
+  openvpn_easyrsa_3_init_pki:
+    cmd: |
+      {{ openvpn_easyrsa_ca_dir }}/easyrsa --pki-dir={{ openvpn_easyrsa_ca_dir }}/pki init-pki
+    creates:
+      "{{ openvpn_easyrsa_ca_dir }}/pki"
+  openvpn_easyrsa_4_build_ca:
+    cmd: |
+      {{ openvpn_easyrsa_ca_dir }}/easyrsa --pki-dir={{ openvpn_easyrsa_ca_dir }}/pki --vars={{ openvpn_easyrsa_ca_dir }}/vars --req-cn="{{ openvpn_ca_name }}" build-ca "{{ openvpn_ca_cert_pass }}"
+    creates:
+      "{{ openvpn_easyrsa_ca_dir }}/pki/ca.crt"
+  openvpn_easyrsa_5_gen_req:
+    cmd: |
+      {{ openvpn_easyrsa_ca_dir }}/easyrsa --vars={{ openvpn_easyrsa_ca_dir }}/vars --req-cn={{ openvpn_server_name }} gen-req {{ openvpn_server_name }} "{{ openvpn_server_cert_pass }}"
+    creates:
+      "{{ openvpn_easyrsa_ca_dir }}/pki/reqs/{{ openvpn_server_name }}.req"
+  openvpn_easyrsa_6_sign_req:
+    cmd: |
+      {{ openvpn_easyrsa_ca_dir }}/easyrsa --vars={{ openvpn_easyrsa_ca_dir }}/vars sign-req server {{ openvpn_server_name }}
+    creates:
+      "{{ openvpn_easyrsa_ca_dir }}/pki/issued/{{ openvpn_server_name }}.crt"
+  openvpn_easyrsa_7_copy_ca_cert:
+    cmd: |
+      cp {{ openvpn_easyrsa_ca_dir }}/pki/ca.crt \
+      {{ openvpn_data_dir }}/ca.crt
+    creates:
+      "{{ openvpn_data_dir }}/ca.crt"
+  openvpn_easyrsa_8_copy_server_cert:
+    cmd: |
+      cp {{ openvpn_easyrsa_ca_dir }}/pki/issued/{{ openvpn_server_name }}.crt \
+      {{ openvpn_data_dir }}/{{ openvpn_server_name }}.crt
+    creates:
+      "{{ openvpn_data_dir }}/{{ openvpn_server_name }}.crt"
+  openvpn_easyrsa_9_copy_server_key:
+    cmd: |
+      cp {{ openvpn_easyrsa_ca_dir }}/pki/private/{{ openvpn_server_name }}.key \
+      {{ openvpn_data_dir }}/{{ openvpn_server_name }}.key
+    creates:
+      "{{ openvpn_data_dir }}/{{ openvpn_server_name }}.key"
+# yamllint enable rule:line-length
