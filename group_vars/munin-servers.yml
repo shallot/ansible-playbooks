@@ -21,6 +21,7 @@ munin_server_custom_packages__to_merge:
   libcgi-fast-perl: "present"
   bsd-mailx: "present"
   cron: "present"
+  logrotate: "present"
 
 # tasks/paths.yml
 munin_server_ssh_keys_dirs_custom_paths__to_merge:
