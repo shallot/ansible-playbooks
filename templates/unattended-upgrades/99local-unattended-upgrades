@@ -4,7 +4,7 @@
 
 Unattended-Upgrade::Origins-Pattern {
         "{{ unattended_upgrades_origins_pattern |
-            default("origin=Debian,codename=${distro_codename},label=Debian-Security")
+            default(default_unattended_upgrades_origins_pattern)
         }}";
 };
 
@@ -19,4 +19,5 @@ Unattended-Upgrade::Remove-Unused-Dependencies "{{ unattended_upgrades_remove_un
 Unattended-Upgrade::Automatic-Reboot "{{ unattended_upgrades_automatic_reboot | default("false") }}";
 
 Unattended-Upgrade::SyslogEnable "{{ unattended_upgrades_syslog_enable | default("true") }}";
-Unattended-Upgrade::SyslogFacility "{{ unattended_upgrades_syslog_facility | default("daemon") }}";
+Unattended-Upgrade::SyslogFacility "{{ unattended_upgrades_syslog_facility
+                                     | default(default_unattended_upgrades_syslog_facility) }}";

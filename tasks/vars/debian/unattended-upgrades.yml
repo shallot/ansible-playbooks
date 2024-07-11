@@ -1,0 +1,27 @@
+# Copyright (c) 2024 Josip Rodin
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+# Default origin pattern to enable unattended upgrades from
+# Unattended-Upgrade::Origins-Pattern
+# Conservative default is just the security repository
+default_unattended_upgrades_origins_pattern:
+  "origin=Debian,codename=${distro_codename},label=Debian-Security"
+
+# Default syslog facility for unattended upgrades
+# Unattended-Upgrade::SyslogFacility
+default_unattended_upgrades_syslog_facility:
+  "daemon"

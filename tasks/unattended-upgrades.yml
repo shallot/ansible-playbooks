@@ -15,6 +15,19 @@
 
 ---
 
+# https://docs.ansible.com/ansible/latest/modules/include_vars_module.html
+- include_vars:
+    file: "{{ unattended_upgrades_vars }}"
+  with_first_found:
+    # yamllint disable rule:line-length
+    - "vars/{{ custom_os_distribution }}/{{ custom_os_codename }}/unattended-upgrades.yml"
+    # yamllint enable rule:line-length
+    - "vars/{{ custom_os_distribution }}/unattended-upgrades.yml"
+    - "vars/{{ custom_os_family }}/unattended-upgrades.yml"
+    - "vars/debian/unattended-upgrades.yml"
+  loop_control:
+    loop_var: "unattended_upgrades_vars"
+
 # https://docs.ansible.com/ansible/latest/modules/include_tasks_module.html
 - include_tasks:
     "{{ unattended_upgrades_tasks }}"
