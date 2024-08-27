@@ -23,6 +23,8 @@ certonly_multiple_certbot_custom_shells__to_merge:
       {% for each_public_hostname in public_hostnames %}
       if [ ! -f /etc/letsencrypt/renewal/{{ each_public_hostname.name }}.conf ]; then
       certbot certonly --noninteractive \
+                       -a webroot \
+                       {{ certbot_web_installer_plugin }} \
                        --webroot \
                        --webroot-path '{{ each_public_hostname.web_root_path | default(web_root_path) }}' \
                        -d '{{ each_public_hostname.name }}'{% if aliases in each_public_hostname %} \

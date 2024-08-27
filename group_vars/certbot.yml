@@ -30,6 +30,16 @@ certbot_extra_custom_packages__to_merge:
       | ternary('present', omit)
       }}"
 
+certbot_web_installer_plugin:
+  "{{ ('apache2-servers' in group_names)
+      | ternary(
+          '-i apache',
+          ('nginx-servers' in group_names)
+          | ternary('-i nginx',
+                    '')
+        )
+      }}"
+
 # tasks/shells.yml
 certbot_custom_shells__to_merge:
   certbot_1_register:

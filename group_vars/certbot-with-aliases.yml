@@ -21,6 +21,8 @@ certonly_aliases_certbot_custom_shells__to_merge:
     # yamllint disable rule:line-length
     cmd: |
       certbot certonly --noninteractive \
+                       -a webroot \
+                       {{ certbot_web_installer_plugin }} \
                        --webroot \
                        --webroot-path '{{ web_root_path }}' \
                        --expand \

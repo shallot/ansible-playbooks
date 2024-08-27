@@ -20,6 +20,8 @@ certbot_single_custom_shells__to_merge:
   certbot_2_certonly:
     cmd: |
       certbot certonly --noninteractive \
+                       -a webroot \
+                       {{ certbot_web_installer_plugin }} \
                        --webroot \
                        --webroot-path '{{ web_root_path }}' \
                        -d '{{ public_hostname }}'
