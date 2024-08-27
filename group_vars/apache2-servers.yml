@@ -34,3 +34,8 @@ ssl_stapling_cache_apache2_conf__to_merge:
 # https://httpd.apache.org/docs/trunk/mod/mod_ssl.html#sslusestapling
 ocsp_stapling_apache_config:
   "SSLUseStapling on"
+
+# tasks/packages.yml
+# tasks/apache2-logrotate.yml
+apache_logrotate_custom_packages__to_merge:
+  logrotate: "present"
