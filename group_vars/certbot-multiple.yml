@@ -27,10 +27,12 @@ certonly_multiple_certbot_custom_shells__to_merge:
                        {{ certbot_web_installer_plugin }} \
                        --webroot \
                        --webroot-path '{{ each_public_hostname.web_root_path | default(web_root_path) }}' \
-                       -d '{{ each_public_hostname.name }}'{% if aliases in each_public_hostname %} \
+                       -d '{{ each_public_hostname.name }}'{% if 'aliases' in each_public_hostname %} \
                        {% for each_hostname in each_public_hostname.aliases %}
                        -d '{{ each_hostname }}'{% if not loop.last %} \{% endif %}{{''}}
                        {% endfor %}
+                       {% else %}
+                       {{''}}
                        {% endif %}
       fi
       {% endfor %}
