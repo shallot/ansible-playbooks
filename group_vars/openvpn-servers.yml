@@ -23,8 +23,9 @@ openvpn_vpn_custom_packages__to_merge:
 # tasks/services.yml
 openvpn_server_custom_services__to_merge:
   "openvpn-server@{{ openvpn_server_name }}":
-    enabled: true
-    state: "started"
+    name: "openvpn-server@{{ openvpn_server_name }}"
+    enabled: "{{ openvpn_server_service_enabled | default(true) }}"
+    state: "{{ openvpn_server_service_state | default('started') }}"
 
 # tasks/services.yml
 openvpn_server_custom_service_dropins__to_merge:
