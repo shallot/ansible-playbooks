@@ -27,18 +27,6 @@ openvpn_server_custom_services__to_merge:
     enabled: "{{ openvpn_server_service_enabled | default(true) }}"
     state: "{{ openvpn_server_service_state | default('started') }}"
 
-# tasks/services.yml
-openvpn_server_custom_service_dropins__to_merge:
-  openvpn-server@:
-    dropin_name: "local-logtime"
-    # yamllint disable rule:line-length
-    content: |
-      [Service]
-      # dropped --suppress-timestamps because of log-append in the server config
-      ExecStart=
-      ExecStart=/usr/sbin/openvpn --status %t/openvpn-server/status-%i.log --status-version 2 --config %i.conf
-    # yamllint enable rule:line-length
-
 # tasks/paths.yml
 openvpn_vpn_config_custom_paths__to_merge:
   /etc/openvpn/server/data:
