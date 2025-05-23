@@ -58,6 +58,13 @@
     path: "/etc/apt/sources.list.d/debian.sources"
   register: "debian_sources_stat_result"
 
+# https://docs.ansible.com/ansible/latest/collections/ansible/builtin/stat_module.html
+- name:
+    "apt : /etc/apt/sources.list.d/ubuntu.sources"
+  stat:
+    path: "/etc/apt/sources.list.d/ubuntu.sources"
+  register: "ubuntu_sources_stat_result"
+
 # https://docs.ansible.com/ansible/latest/modules/set_fact_module.html
 - name:
     "set_fact : security_apt_file"
@@ -65,7 +72,11 @@
     security_apt_file: "{{ debian_sources_stat_result.stat.exists
                          | ternary(
                              '/etc/apt/sources.list.d/debian.sources',
-                             '/etc/apt/sources.list'
+                             ubuntu_sources_stat_result.stat.exists
+                             | ternary(
+                                 '/etc/apt/sources.list.d/ubuntu.sources',
+                                 '/etc/apt/sources.list'
+                               )
                            )
                          }}"
 
