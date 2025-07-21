@@ -239,6 +239,13 @@
       custom_dropin_ini.changed or
       custom_dropin_copy.changed or
       need_systemd_daemon_reload)"
+  changed_when:
+    "(custom_service_ini.changed or
+      custom_service_copy.changed or
+      custom_dropin_dir.changed or
+      custom_dropin_ini.changed or
+      custom_dropin_copy.changed or
+      need_systemd_daemon_reload)"
   become:
     true
 
