@@ -52,15 +52,11 @@
     - import_tasks:
         "tasks/munin-node.yml"
 
-  handlers:
+    # https://docs.ansible.com/ansible/latest/import_tasks_module.html
+    - import_tasks:
+        "tasks/services.yml"
 
-    # https://docs.ansible.com/ansible/latest/modules/systemd_module.html
-    - name:
-        "systemd : daemon-reload"
-      systemd:
-        daemon_reload: true
-      become:
-        true
+  handlers:
 
     # https://docs.ansible.com/ansible/latest/modules/service_module.html
     - name:

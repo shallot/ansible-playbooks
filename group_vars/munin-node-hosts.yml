@@ -80,20 +80,20 @@ munin_asyncd_plugin_update_rate_patch:
     | default('') }}"
 # yamllint enable rule:line-length
 
-# provision-munin-node-hosts.yml
-munin_async_systemd_munin_node_paths__to_merge:
-  /etc/systemd/system/munin-async.service.d:
-    state: "directory"
-  /etc/systemd/system/munin-async.service.d/override.conf:
-    state: "copy"
+# tasks/services.yml
+munin_async_custom_service_dropins__to_merge:
+  munin-async:
+    dropin_name: "override"
     content: |
       [Service]
       ExecStart=
       ExecStart=/usr/share/munin/munin-asyncd {{ munin_asyncd_parameters }}
-    mode: "0644"
-    notify:
-      - "systemd : daemon-reload"
-      - "service : munin-async"
+
+munin_node_custom_services__to_merge:
+  munin-node:
+    enabled: "{{ munin_node_service_enabled }}"
+  munin-async:
+    enabled: "{{ munin_async_service_enabled }}"
 
 # provision-munin-node-hosts.yml
 munin_node_service_state:
