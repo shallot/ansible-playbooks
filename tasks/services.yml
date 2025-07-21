@@ -170,6 +170,63 @@
   become:
     true
 
+# https://docs.ansible.com/ansible/latest/modules/set_fact_module.html
+- name:
+    "set_fact : systemd_units_affected"
+  set_fact:
+    systemd_units_affected:
+      "{{ (systemd_units_affected + [ service_file_name ])
+        | unique }}"
+  loop: "{{ (custom_services | dict2items) + (custom_service_dropins | dict2items) }}"
+  loop_control:
+    label: "{{ service_file_name }}"
+  vars:
+    systemd_units_affected: []
+    service_short_name:
+      "{{ item.value.name
+        | default(item.ini_file)
+        | default(item.key) }}"
+    service_file_name:
+      "{{ service_short_name }}.{{ item.value.type
+                                 | default('service') }}"
+
+# https://docs.ansible.com/ansible/latest/modules/systemd_module.html
+# in the future: use systemd's get_status, which would require Ansible 2.15+
+# https://docs.ansible.com/ansible/latest/collections/ansible/builtin/command_module.html
+- name:
+    "systemd : systemctl show"
+#  systemd:
+#    name: "{{ systemd_unit_name }}"
+#    get_status: true
+  command:
+    "systemctl show {{ item }} --property=NeedDaemonReload"
+  loop:
+    "{{ systemd_units_affected }}"
+  become:
+    true
+  changed_when:
+    false
+  register:
+    "systemd_service_needs_daemon_reload"
+
+# https://docs.ansible.com/ansible/latest/modules/set_fact_module.html
+# in the future: (systemd_service_status.status.NeedDaemonReload == 'yes')
+- name:
+    "set_fact : need_systemd_daemon_reload"
+  set_fact:
+    need_systemd_daemon_reload:
+      "{{ need_systemd_daemon_reload
+        | ternary(need_systemd_daemon_reload,
+                  (item.stdout.split('=')[1] == 'yes')
+          )
+        }}"
+  loop:
+    "{{ systemd_service_needs_daemon_reload.results }}"
+  loop_control:
+    label: "{{ [ item.cmd[2], item.stdout ] | to_json }}"
+  vars:
+    need_systemd_daemon_reload: false
+
 # https://docs.ansible.com/ansible/latest/modules/systemd_module.html
 - name:
     "systemd : daemon-reload"
@@ -180,7 +237,8 @@
       custom_service_copy.changed or
       custom_dropin_dir.changed or
       custom_dropin_ini.changed or
-      custom_dropin_copy.changed)"
+      custom_dropin_copy.changed or
+      need_systemd_daemon_reload)"
   become:
     true
 
