@@ -30,6 +30,10 @@
     - import_tasks:
         "tasks/os/main.yml"
 
+    # https://docs.ansible.com/ansible/latest/import_tasks_module.html
+    - import_tasks:
+        "tasks/iaas/main.yml"
+
   tasks:
 
     # https://docs.ansible.com/ansible/latest/import_tasks_module.html

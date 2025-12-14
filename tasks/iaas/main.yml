@@ -1,4 +1,4 @@
-# Copyright (c) 2020-2023 eyeo GmbH
+# Copyright (c) 2025 Josip Rodin
 #
 # This module is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,27 +15,13 @@
 
 ---
 
-# https://docs.ansible.com/ansible/latest/user_guide/playbooks_intro.html
-- name:
-    "provision-custom-users-groups"
+# https://docs.ansible.com/ansible/latest/user_guide/playbooks_blocks.html
+- block:
 
-  hosts:
-    "all"
+    # https://docs.ansible.com/projects/ansible/latest/collections/amazon/aws/ec2_metadata_facts_module.html
+    - name:
+        "amazon.aws.ec2_metadata_facts"
+      amazon.aws.ec2_metadata_facts:
 
-  pre_tasks:
-
-    # https://docs.ansible.com/ansible/latest/import_tasks_module.html
-    - import_tasks:
-        "tasks/os/main.yml"
-
-    # https://docs.ansible.com/ansible/latest/import_tasks_module.html
-    - import_tasks:
-        "tasks/iaas/main.yml"
-
-  tasks:
-
-    # https://docs.ansible.com/ansible/latest/import_tasks_module.html
-    - import_tasks:
-        "tasks/groups.yml"
-    - import_tasks:
-        "tasks/users.yml"
+  when:
+    - "'aws-ec2-servers' in group_names"
