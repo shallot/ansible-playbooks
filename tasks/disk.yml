@@ -75,6 +75,7 @@
       # yamllint enable rule:line-length
     filesystem_create:
       "sudo mkfs.{{ item.value.filesystem | default('') }}
+      {{ item.value.filesystem_mkfs_options | default('') }}
        /dev/{{ item.value.vg }}/{{ item.value.name }}"
   when:
     "custom_disk_logical_volumes is defined"
