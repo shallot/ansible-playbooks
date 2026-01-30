@@ -189,7 +189,7 @@ test_testpages_apache2_sites__to_merge:
 
 # roles/gitlab/runner/tasks/main.yml
 # https://gitlab.com/eyeo/developer-experience/testpages.adblockplus.org/-/settings/ci_cd
-# gitlab_runners:
+# testpages_test_gitlab_runners__to_merge:
 #  - parameters:
 #      registration-token: "<value obtained from gitlab project instance>"
 #      name: "gitlab-runner@{{ ansible_fqdn }}"

@@ -17,7 +17,7 @@
 
 # roles/gitlab/runner/tasks/main.yml
 # https://gitlab.com/eyeo/devops/ansible-role-gitlab#synopsis
-gitlab_runners:
+gitlab_runner_test_gitlab_runners__to_merge:
   - parameters:
       # .gitlab-ci.yml
       registration-token: "{{ TEST_GITLAB_REGISTRATION_TOKEN }}"

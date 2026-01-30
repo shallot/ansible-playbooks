@@ -23,6 +23,15 @@
 
   tasks:
 
+    # roles/gitlab/runner/defaults/main.yml
+    # action_plugins/merge_variable.py
+    - name:
+        "merge_variable : gitlab_runners"
+      merge_variable:
+        default: []
+        name: "gitlab_runners"
+        suffix: "gitlab_runners__to_merge"
+
     # https://gitlab.com/eyeo/devops/ansible-role-gitlab
     - import_role:
         name: "gitlab/runner"

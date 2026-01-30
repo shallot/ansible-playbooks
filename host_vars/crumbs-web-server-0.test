@@ -17,7 +17,7 @@
 
 # roles/gitlab/runner/tasks/main.yml
 # https://gitlab.com/eyeo/devops/ansible-role-gitlab#synopsis
-# gitlab_runners:
+# crumbs_web_server_test_gitlab_runners__to_merge:
 #   - parameters:
 #       registration-token: "<value obtained from gitlab project instance>"
 #       name: "gitlab-runner@{{ ansible_fqdn }}"
