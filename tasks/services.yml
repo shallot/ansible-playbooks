@@ -208,6 +208,8 @@
     false
   register:
     "systemd_service_needs_daemon_reload"
+  check_mode:
+    "true"
 
 # https://docs.ansible.com/ansible/latest/modules/set_fact_module.html
 # in the future: (systemd_service_status.status.NeedDaemonReload == 'yes')
@@ -217,15 +219,17 @@
     need_systemd_daemon_reload:
       "{{ need_systemd_daemon_reload
         | ternary(need_systemd_daemon_reload,
-                  (item.stdout.split('=')[1] == 'yes')
+                  (systemctl_show_data == 'yes')
           )
         }}"
   loop:
     "{{ systemd_service_needs_daemon_reload.results }}"
   loop_control:
-    label: "{{ [ item.cmd[2], item.stdout ] | to_json }}"
+    label: "{{ [ systemctl_show_name, systemctl_show_data ] | to_json }}"
   vars:
     need_systemd_daemon_reload: false
+    systemctl_show_name: "{{ item.cmd[2] | default('none') }}"
+    systemctl_show_data: "{{ item.stdout | default('none=false') | split('=') | last }}"
 
 # https://docs.ansible.com/ansible/latest/modules/systemd_module.html
 - name:
