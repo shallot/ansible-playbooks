@@ -37,6 +37,8 @@
       "sudo vgcreate {{ item.value.name }} {{ item.value.pv | join(' ') }}"
     creates_string:
       "/etc/lvm/backup/{{ item.value.name }}"
+  when:
+    "custom_disk_volume_groups is defined"
 
 # https://docs.ansible.com/ansible/2.9/modules/set_fact_module.html
 # https://linux.die.net/man/8/lvcreate
@@ -46,21 +48,33 @@
   set_fact:
     custom_disk_custom_shells__to_merge:
       "{{ custom_disk_custom_shells__to_merge
+        | default({})
         | combine({
             item.key: {
               'cmd': cmd_string,
+            } | combine({
               'creates': creates_string
-            }
+              } if (creates_string is defined and creates_string)
+                else {}
+            )
           })
         }}"
   loop:
     "{{ custom_disk_logical_volumes | dict2items }}"
   vars:
-    cmd_string:
-      "{{ lv_create }}{{ (item.value.filesystem is defined)
-                       | ternary(' && ' + filesystem_create, none) }}"
+    cmd_string: >-
+      {{ (item.value.vg is defined)
+       | ternary(lv_create, '') }}
+      {{ (item.value.vg is defined and item.value.filesystem is defined)
+       | ternary('&&', '') }}
+      {{ (item.value.filesystem is defined)
+       | ternary(filesystem_create, '') }}
+    device_path: >-
+      /dev/{{ (item.value.vg ~ '/' ~ item.value.name)
+      if (item.value.vg is defined and item.value.vg)
+      else item.value.name }}
     creates_string:
-      "/dev/{{ item.value.vg }}/{{ item.value.name }}"
+      "{{ device_path if item.value.vg is defined }}"
     lv_create:
       # yamllint disable rule:line-length
       "sudo lvcreate -n {{ item.value.name }}
@@ -68,15 +82,16 @@
       -l {{ item.value.extents }}
       {% elif item.value.size is defined -%}
       -L {{ item.value.size }}
-      {% else -%}
+      {% elif item.value.vg is defined -%}
       {{ undefined | mandatory('custom_disk_logical_volumes needs either size or extents for ' + item.value.name) }}
       {% endif -%}
       {{ item.value.vg }}"
       # yamllint enable rule:line-length
     filesystem_create:
-      "sudo mkfs.{{ item.value.filesystem | default('') }}
+      "sudo blkid {{ device_path }} ||
+      sudo mkfs.{{ item.value.filesystem | default('') }}
       {{ item.value.filesystem_mkfs_options | default('') }}
-       /dev/{{ item.value.vg }}/{{ item.value.name }}"
+      {{ device_path }}"
   when:
     "custom_disk_logical_volumes is defined"
 
@@ -104,8 +119,12 @@
        {{ mount }}"
     mountpoint_mkdir:
       "sudo mkdir {{ item.value.mountpoint }}"
+    device_path: >-
+      /dev/{{ (item.value.vg ~ '/' ~ item.value.name)
+      if (item.value.vg is defined and item.value.vg)
+      else item.value.name }}
     record_mountpoint_fstab:
-      "echo /dev/{{ item.value.vg }}/{{ item.value.name }}
+      "echo {{ device_path }}
        {{ item.value.mountpoint }} {{ item.value.filesystem }}
        {{ fstab_options }} {{ item.value.fstab_dump | default('0') }}
        {{ item.value.fstab_pass | default('2') }} |
