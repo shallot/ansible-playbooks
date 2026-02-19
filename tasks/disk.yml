@@ -117,8 +117,8 @@
       "{{ mountpoint_mkdir }} &&
        {{ record_mountpoint_fstab }} &&
        {{ mount }}"
-    mountpoint_mkdir:
-      "sudo mkdir {{ item.value.mountpoint }}"
+    mountpoint_mkdir: >-
+      sudo mkdir -p {{ item.value.mountpoint }}
     device_path: >-
       /dev/{{ (item.value.vg ~ '/' ~ item.value.name)
       if (item.value.vg is defined and item.value.vg)
