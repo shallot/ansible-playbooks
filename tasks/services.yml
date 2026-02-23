@@ -209,7 +209,7 @@
   register:
     "systemd_service_needs_daemon_reload"
   check_mode:
-    "true"
+    "false"
 
 # https://docs.ansible.com/ansible/latest/modules/set_fact_module.html
 # in the future: (systemd_service_status.status.NeedDaemonReload == 'yes')
