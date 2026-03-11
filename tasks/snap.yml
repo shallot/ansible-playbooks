@@ -34,6 +34,14 @@
   become:
     true
 
+# https://docs.ansible.com/ansible/latest/collections/ansible/builtin/shell_module.html
+- name:
+    "shell : snap wait system seed.loaded"
+  shell:
+    cmd: "snap wait system seed.loaded"
+  become:
+    true
+
 # https://docs.ansible.com/projects/ansible/latest/collections/community/general/snap_module.html
 - name:
     "snap"
