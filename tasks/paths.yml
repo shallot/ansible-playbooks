@@ -203,5 +203,7 @@
         | list
         }}"
 
+  delegate_to:
+    "{{ item.value.delegate_to | default(inventory_hostname) }}"
   become:
     true
