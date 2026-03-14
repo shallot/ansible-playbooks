@@ -1,0 +1,79 @@
+# Copyright (c) 2026 Josip Rodin
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+# action_plugins/merge_variable.py
+- name:
+    "merge_variable : custom_k8s_definitions"
+  merge_variable:
+    default: {}
+    name: "custom_k8s_definitions"
+    suffix: "{{ custom_k8s_definitions_suffix
+              | default('custom_k8s_definitions__to_merge') }}"
+
+# https://docs.ansible.com/projects/ansible/latest/collections/kubernetes/core/k8s_module.html
+- name:
+    "k8s_definition"
+  k8s:
+    api_key: "{{ k8s_definition.value.api_key | default(omit) }}"
+    api_version: "{{ k8s_definition.value.api_version | default(omit) }}"
+    append_hash: "{{ k8s_definition.value.append_hash | default(omit) }}"
+    apply: "{{ k8s_definition.value.apply | default(omit) }}"
+    ca_cert: "{{ k8s_definition.value.ca_cert | default(omit) }}"
+    client_cert: "{{ k8s_definition.value.client_cert | default(omit) }}"
+    client_key: "{{ k8s_definition.value.client_key | default(omit) }}"
+    context: "{{ k8s_definition.value.context | default(omit) }}"
+    continue_on_error: "{{ k8s_definition.value.continue_on_error | default(omit) }}"
+    delete_all: "{{ k8s_definition.value.delete_all | default(omit) }}"
+    delete_options: "{{ k8s_definition.value.delete_options | default(omit) }}"
+    force: "{{ k8s_definition.value.force | default(omit) }}"
+    generate_name: "{{ k8s_definition.value.generate_name | default(omit) }}"
+    hidden_fields: "{{ k8s_definition.value.hidden_fields | default(omit) }}"
+    host: "{{ k8s_definition.value.host | default(omit) }}"
+    impersonate_groups: "{{ k8s_definition.value.impersonate_groups | default(omit) }}"
+    impersonate_user: "{{ k8s_definition.value.impersonate_user | default(omit) }}"
+    kind: "{{ k8s_definition.value.kind | default(omit) }}"
+    kubeconfig: "{{ k8s_definition.value.kubeconfig | default(omit) }}"
+    label_selectors: "{{ k8s_definition.value.label_selectors | default(omit) }}"
+    merge_type: "{{ k8s_definition.value.merge_type | default(omit) }}"
+    name: "{{ k8s_definition.value.name | default(omit) }}"
+    namespace: "{{ k8s_definition.value.namespace | default(omit) }}"
+    no_proxy: "{{ k8s_definition.value.no_proxy | default(omit) }}"
+    password: "{{ k8s_definition.value.password | default(omit) }}"
+    persist_config: "{{ k8s_definition.value.persist_config | default(omit) }}"
+    proxy: "{{ k8s_definition.value.proxy | default(omit) }}"
+    proxy_headers: "{{ k8s_definition.value.proxy_headers | default(omit) }}"
+    resource_definition: "{{ k8s_definition.value.resource_definition | default(omit) }}"
+    server_side_apply: "{{ k8s_definition.value.server_side_apply | default(omit) }}"
+    src: "{{ k8s_definition.value.src | default(omit) }}"
+    state: "{{ k8s_definition.value.state | default(omit) }}"
+    template: "{{ k8s_definition.value.template | default(omit) }}"
+    username: "{{ k8s_definition.value.username | default(omit) }}"
+    validate: "{{ k8s_definition.value.validate | default(omit) }}"
+    validate_certs: "{{ k8s_definition.value.validate_certs | default(omit) }}"
+    wait: "{{ k8s_definition.value.wait | default(omit) }}"
+    wait_condition: "{{ k8s_definition.value.wait_condition | default(omit) }}"
+    wait_sleep: "{{ k8s_definition.value.wait_sleep | default(omit) }}"
+    wait_timeout: "{{ k8s_definition.value.wait_timeout | default(omit) }}"
+  become:
+    true
+  become_user:
+    "{{ k8s_definition.value.become_user | default(omit) }}"
+  loop:
+    "{{ custom_k8s_definitions | dict2items | sort(attribute='key') }}"
+  loop_control:
+    loop_var:
+      "k8s_definition"

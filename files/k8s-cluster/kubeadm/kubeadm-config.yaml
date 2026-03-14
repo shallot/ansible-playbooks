@@ -1,0 +1,11 @@
+apiVersion: kubeadm.k8s.io/v1beta3
+kind: ClusterConfiguration
+kubernetesVersion: v{{ k8s_version_full }}
+controlPlaneEndpoint: "{{ k8s_cluster_control_plane_endpoint }}:6443"
+networking:
+  podSubnet: "{{ k8s_cluster_pod_subnet | default(k8s_cluster_pod_subnet_default) }}"
+  serviceSubnet: "{{ k8s_cluster_service_subnet| default(k8s_cluster_service_subnet_default) }}"
+---
+apiVersion: kubelet.config.k8s.io/v1beta1
+kind: KubeletConfiguration
+{{ kubelet_configuration | map(attribute='yaml') | join('\n') }}

@@ -1,0 +1,65 @@
+# Copyright (c) 2026 Josip Rodin
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+microk8s_channel_default:
+  "1.33-strict/stable"
+
+# tasks/snap.yml
+microk8s_snaps__to_merge:
+  microk8s:
+    channel: "{{ microk8s_channel }}"
+
+microk8s_cmd_prefix:
+  "k8s_10_microk8s"
+
+microk8s_addons_default:
+  - "rbac"
+  - "hostpath-storage"
+  - "dns"
+  - "metrics-server"
+
+# tasks/shells.yml
+microk8s_addons_custom_shells__to_merge: >-
+  {%- set microk8s_cmd_dict = {} -%}
+  {%- set _ = microk8s_cmd_dict.update({
+    microk8s_cmd_prefix ~ '_' ~ 1 ~ '_init': {
+      'cmd': '/snap/bin/microk8s status --wait-ready',
+      'become': true
+    }
+  }) -%}
+  {%- for addon in microk8s_addons -%}
+    {%- set _ = microk8s_cmd_dict.update({
+      microk8s_cmd_prefix ~ '_' ~ (loop.index + 1) ~ '_' ~ (addon | replace('-', '_')): {
+        'cmd': '/snap/bin/microk8s enable ' ~ addon,
+        'become': true
+      }
+    }) -%}
+  {%- endfor -%}
+  {{ (microk8s_cmd_dict | to_nice_yaml(indent=2)) | from_yaml }}
+
+kubectl_base_command:
+  "/snap/bin/microk8s kubectl"
+
+# group_vars/k8s-helm-hosts.yml
+helm_base_command:
+  "/snap/bin/microk8s helm3"
+
+k8s_cluster_config_server_dir:
+  "/var/snap/microk8s/common/etc"
+
+k8s_definitions_kubeconfig:
+  "/var/snap/microk8s/current/credentials/client.config"

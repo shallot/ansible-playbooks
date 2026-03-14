@@ -1,0 +1,49 @@
+# Copyright (c) 2025 Josip Rodin
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+k8s_cluster_init_kubeadm_custom_paths__to_merge:
+  "{{ k8s_cluster_config_server_dir }}/kubeadm":
+    dest: "{{ k8s_cluster_config_server_dir }}/kubeadm"
+    state: "directory"
+  "{{ k8s_cluster_config_server_dir }}/kubeadm/kubeadm-config.yaml":
+    dest: "{{ k8s_cluster_config_server_dir }}/kubeadm/kubeadm-config.yaml"
+    state: "template"
+    src: "{{ k8s_cluster_config_data_dir }}/kubeadm/kubeadm-config.yaml"
+
+k8s_cluster_init_custom_shells__to_merge:
+  k8s_01_cluster_01_init:
+    cmd: >-
+      kubeadm init
+      --config={{ k8s_cluster_config_server_dir }}/kubeadm/kubeadm-config.yaml
+    creates: "/etc/kubernetes/admin.conf"
+  k8s_01_cluster_02_get_join_token:
+    cmd: >-
+      {{ kubeadm_command }} token create
+      --print-join-command
+      > {{ k8s_cluster_config_server_dir }}/kubeadm/k8s_join_command.sh
+    creates: "{{ k8s_cluster_config_server_dir }}/kubeadm/k8s_join_command.sh"
+  k8s_01_cluster_03_get_join_certs:
+    cmd: >-
+      {{ kubeadm_command }} init phase upload-certs
+      --upload-certs
+      > {{ k8s_cluster_config_server_dir }}/kubeadm/k8s_join_certs.log
+      &&
+      grep -A1 ' Using certificate key:'
+      {{ k8s_cluster_config_server_dir }}/kubeadm/k8s_join_certs.sh
+      | tail -1
+      > {{ k8s_cluster_config_server_dir }}/kubeadm/k8s_join_certs_key
+    creates: "{{ k8s_cluster_config_server_dir }}/kubeadm/k8s_join_certs_key"

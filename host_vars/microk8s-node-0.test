@@ -1,0 +1,52 @@
+# Copyright (c) 2026 Josip Rodin
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+# group_vars/microk8s-nodes.yml
+microk8s_channel:
+  "{{ microk8s_channel_default }}"
+test_microk8s_addons__to_merge:
+  "{{ microk8s_addons_default }}"
+
+# group_vars/k8s-gateway-api.yml
+# tasks/k8s.yml
+k8s_gateway_api_version:
+  "{{ k8s_gateway_api_version_default }}"
+
+# tasks/k8s-helm-releases.yml
+test_k8s_helm_releases__to_merge:
+  - name: "traefik"
+    namespace: "traefik"
+    create_namespace: true
+    repo: "traefik"
+    repo_url: "https://traefik.github.io/charts"
+    chart: "traefik"
+
+# https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
+vagrant_groups:
+  - "k8s-nodes"
+  - "microk8s-nodes"
+  - "k8s-gateway-api"
+
+# https://www.vagrantup.com/intro/getting-started/networking.html
+vagrant_networks:
+  - private_network:
+      ip: "10.8.60.10"
+
+# https://www.vagrantup.com/docs/provisioning/ansible.html
+vagrant_playbooks:
+  - "provision-custom-systems.yml"
+  - "provision-k8s-nodes.yml"

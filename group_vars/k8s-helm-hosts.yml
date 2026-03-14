@@ -1,0 +1,76 @@
+# Copyright (c) 2026 Josip Rodin
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+# group_vars/microk8s-nodes.yml
+# group_vars/k8s-cluster-helm.yml
+helm_command:
+  "{{ helm_base_command | default('helm') }}"
+
+# needs to come after the k8s cluster provisioning base index
+helm_cmd_base_index:
+  "20"
+
+helm_cmd_prefix:
+  "k8s_{{ helm_cmd_base_index }}_helm"
+
+k8s_cluster_helm_custom_paths__to_merge:
+  "{{ k8s_cluster_config_server_dir }}/helm":
+    dest: "{{ k8s_cluster_config_server_dir }}/helm"
+    state: "directory"
+
+helm_custom_shells__to_merge: >-
+  {%- set helm_cmd_dict = {} -%}
+  {%- for release in k8s_helm_releases -%}
+    {%- set release_index = (helm_cmd_base_index | int) + loop.index -%}
+    {%- set release_name = release.name | replace('-', '_') -%}
+    {# helm repo add #}
+    {%- set helm_repo_add = helm_cmd_prefix ~ '_release_' ~ release_index ~ '_1_repo_' ~ release_name -%}
+    {%- set _ = helm_cmd_dict.update({
+      helm_repo_add: {
+        'cmd': helm_command ~ ' repo add ' ~ release.repo ~ ' ' ~ release.repo_url ~ ' && ' ~ helm_command ~ ' repo update',
+        'become': true
+      }
+    }) -%}
+    {# helm upgrade/install #}
+    {%- set helm_upgrade_install = helm_cmd_prefix ~ '_release_' ~ release_index ~ '_2_install_' ~ release_name -%}
+    {%- set helm_cmd = helm_command ~ ' upgrade --install ' ~ release.name ~ ' ' ~ release.repo ~ '/' ~ release.chart -%}
+    {%- if release.namespace is defined -%}
+      {%- set helm_cmd = helm_cmd ~ ' -n ' ~ release.namespace -%}
+      {%- if release.create_namespace | default(false) -%}
+        {%- set helm_cmd = helm_cmd ~ ' --create-namespace' -%}
+      {%- endif -%}
+    {%- endif -%}
+    {%- if release.values_file is defined -%}
+      {%- set helm_cmd = helm_cmd ~ ' -f ' ~ release.values_file -%}
+    {%- endif -%}
+    {%- if release.set_configs is defined -%}
+      {%- if release.set_configs is iterable and release.set_configs is not string -%}
+        {%- set set_str = release.set_configs | join(',') -%}
+      {%- else -%}
+        {%- set set_str = release.set_configs -%}
+      {%- endif -%}
+      {%- set helm_cmd = helm_cmd ~ ' --set ' ~ set_str -%}
+    {%- endif -%}
+    {%- set helm_cmd = helm_cmd ~ ' --wait' -%}
+    {%- set _ = helm_cmd_dict.update({
+      helm_upgrade_install: {
+        'cmd': helm_cmd,
+        'become': true
+      }
+    }) -%}
+  {%- endfor -%}
+  {{ (helm_cmd_dict | to_nice_yaml(indent=2)) | from_yaml }}

@@ -1,0 +1,84 @@
+# Copyright (c) 2025 Josip Rodin
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+k8s_cluster_config_data_dir_default:
+  "{{ playbook_dir }}/files/k8s-cluster"
+
+k8s_cluster_custom_paths__to_merge:
+  /etc/modules-load.d/containerd.conf:
+    state: "copy"
+    content: |
+      overlay
+      br_netfilter
+  /etc/sysctl.d/99-kubernetes-k8s.conf:
+    state: "copy"
+    content: |
+      net.bridge.bridge-nf-call-iptables = 1
+      net.ipv4.ip_forward = 1
+      net.bridge.bridge-nf-call-ip6tables = 1
+  /etc/containerd/config.toml:
+    state: "copy"
+    src: "{{ k8s_cluster_config_data_dir }}/containerd/config.toml"
+  # NB: if containernetworking-plugins is installed, the default path takes over
+  # and then the flannel cni plugin etc is missing from it. maybe this could be
+  # avoided better in kubelet config or something
+  /usr/lib/cni:
+    state: "link"
+    src: "/opt/cni/bin"
+
+k8s_cluster_custom_services__to_merge:
+  systemd-modules-load:
+    state: "restarted"
+  systemd-sysctl:
+    state: "restarted"
+  containerd:
+    state: "restarted"
+
+k8s_cluster_custom_packages__to_merge:
+  containerd: "present"
+  kubelet: "present"
+  kubeadm: "present"
+  kubectl: "present"
+  containernetworking-plugins: "absent"
+  rsyslog: "present"
+  logrotate: "present"
+
+k8s_apt_keys__to_merge:
+  k8s_debian:
+    keyring: "k8s_debian"
+    url: "https://pkgs.k8s.io/core:/stable:/v{{ k8s_version }}/deb/Release.key"
+
+k8s_apt_repositories__to_merge:
+  k8s:
+    repo: |
+      deb https://pkgs.k8s.io/core:/stable:/v{{ k8s_version }}/deb/ /
+
+k8s_cluster_munin_custom_paths__to_merge:
+  /etc/munin/plugins/irqstats:
+    state: "absent"
+
+k8s_cluster_pod_subnet_default:
+  "10.242.0.0/16"
+
+k8s_cluster_service_subnet_default:
+  "10.96.0.0/12"
+
+kubeadm_command:
+  "env KUBECONFIG=/etc/kubernetes/admin.conf kubeadm"
+
+kubectl_command:
+  "env KUBECONFIG=/etc/kubernetes/admin.conf kubectl"

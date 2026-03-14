@@ -1,0 +1,38 @@
+# Copyright (c) 2025 Josip Rodin
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+k8s_cluster_helm_apt_keys__to_merge:
+  helm_buildkite:
+    keyring: "helm_buildkite"
+    url: "https://packages.buildkite.com/helm-linux/helm-debian/gpgkey"
+
+k8s_cluster_helm_apt_repositories__to_merge:
+  helm:
+    repo: |
+      deb https://packages.buildkite.com/helm-linux/helm-debian/any/ any main
+
+k8s_cluster_helm_custom_packages__to_merge:
+  helm: "present"
+
+k8s_cluster_helm_custom_paths__to_merge:
+  "{{ k8s_cluster_config_server_dir }}/helm":
+    dest: "{{ k8s_cluster_config_server_dir }}/helm"
+    state: "directory"
+
+# group_vars/k8s-helm-hosts.yml
+helm_base_command:
+  "env KUBECONFIG=/etc/kubernetes/admin.conf helm"

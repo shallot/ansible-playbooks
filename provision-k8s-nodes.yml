@@ -1,0 +1,81 @@
+# Copyright (c) 2026 Josip Rodin
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+- name:
+    "provision-k8s-nodes"
+
+  hosts:
+    "k8s-nodes"
+
+  pre_tasks:
+
+    # https://docs.ansible.com/ansible/latest/import_tasks_module.html
+    - import_tasks:
+        "tasks/os/main.yml"
+
+    # https://docs.ansible.com/ansible/latest/import_tasks_module.html
+    - import_tasks:
+        "tasks/iaas/main.yml"
+
+  tasks:
+
+    - block:
+
+        # roles/gitlab/runner/defaults/main.yml
+        # action_plugins/merge_variable.py
+        - name:
+            "merge_variable : microk8s_addons"
+          merge_variable:
+            default: []
+            name: "microk8s_addons"
+            suffix: "microk8s_addons__to_merge"
+
+      when: "'microk8s-nodes' in group_names"
+
+    - block:
+
+        # roles/gitlab/runner/defaults/main.yml
+        # action_plugins/merge_variable.py
+        - name:
+            "merge_variable : kubelet_configuration"
+          merge_variable:
+            default: []
+            name: "kubelet_configuration"
+            suffix: "kubelet_configuration__to_merge"
+
+      when: "'k8s-cluster-init' in group_names"
+
+    # roles/gitlab/runner/defaults/main.yml
+    # action_plugins/merge_variable.py
+    - name:
+        "merge_variable : k8s_helm_releases"
+      merge_variable:
+        default: []
+        name: "k8s_helm_releases"
+        suffix: "k8s_helm_releases__to_merge"
+
+    # https://docs.ansible.com/ansible/latest/import_tasks_module.html
+    - import_tasks:
+        "tasks/paths.yml"
+
+    # https://docs.ansible.com/ansible/latest/import_tasks_module.html
+    - import_tasks:
+        "tasks/shells.yml"
+
+    # https://docs.ansible.com/ansible/latest/import_tasks_module.html
+    - import_tasks:
+        "tasks/k8s.yml"
