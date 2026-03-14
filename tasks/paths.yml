@@ -41,9 +41,9 @@
         msg: "custom path '{{ item.key }}' must define
           a 'state' and use a quoted 'mode'"
       loop:
-        "{{ custom_paths_for_fail_state
-          + custom_paths_for_fail_mode
-          + custom_paths_for_fail_directory_mode
+        "{{ custom_paths_for_fail_state | default([])
+          + custom_paths_for_fail_mode | default([])
+          + custom_paths_for_fail_directory_mode | default([])
           }}"
 
     # Covers paths that are using bad parameters.
@@ -54,9 +54,9 @@
         msg: "custom path '{{ item.key }}' uses unsupported parameters:
           'name', 'path, 'user'"
       loop:
-        "{{ custom_paths_for_fail_user
-          + custom_paths_for_fail_path
-          + custom_paths_for_fail_name
+        "{{ custom_paths_for_fail_user | default([])
+          + custom_paths_for_fail_path | default([])
+          + custom_paths_for_fail_name | default([])
           }}"
 
     # Covers any target state beside "copy" and "template".
