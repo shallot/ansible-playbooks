@@ -1,0 +1,48 @@
+# Copyright (c) 2026 Josip Rodin
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+k8s_gitlab_config_data_dir_default:
+  "{{ playbook_dir }}/files/k8s-gitlab"
+
+k8s_gitlab_agent_custom_paths__to_merge:
+  "{{ k8s_cluster_config_server_dir }}/helm/gitlab-agent.values.yaml":
+    dest: "{{ k8s_cluster_config_server_dir }}/helm/gitlab-agent.values.yaml"
+    state: "template"
+    src: "{{ k8s_gitlab_config_data_dir }}/agent/helm.values.yaml"
+
+gitlab_agent_k8s_helm_releases__to_merge:
+  - name: "gitlab-agent"
+    repo: "gitlab"
+    repo_url: "https://charts.gitlab.io"
+    chart: "gitlab-agent"
+    namespace: "gitlab-agent"
+    create_namespace: true
+    values_file: "{{ k8s_cluster_config_server_dir }}/helm/gitlab-agent.values.yaml"
+
+gitlab_agent_custom_k8s_definitions__to_merge:
+  20_01_jobs_namespace:
+    kubeconfig: "{{ k8s_definitions_kubeconfig | default(omit) }}"
+    resource_definition: |
+      {{ lookup('file', k8s_gitlab_config_data_dir + '/agent/' + '01-jobs-namespace.yaml' ) | from_yaml }}
+  20_02_agent_role:
+    kubeconfig: "{{ k8s_definitions_kubeconfig | default(omit) }}"
+    resource_definition: |
+      {{ lookup('file', k8s_gitlab_config_data_dir + '/agent/' + '02-agent-role.yaml' ) | from_yaml }}
+  20_03_agent_rolebinding:
+    kubeconfig: "{{ k8s_definitions_kubeconfig | default(omit) }}"
+    resource_definition: |
+      {{ lookup('file', k8s_gitlab_config_data_dir + '/agent/' + '03-agent-rolebinding.yaml' ) | from_yaml }}

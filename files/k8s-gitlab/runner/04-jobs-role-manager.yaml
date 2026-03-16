@@ -1,0 +1,15 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: gitlab-runner-manager
+  namespace: gitlab-ci-jobs
+rules:
+# https://docs.gitlab.com/runner/executors/kubernetes/#configure-runner-api-permissions
+# would be the fancy granular version of this, but rbac.create=true just makes this bulldozer
+# in the gitlab-runner namespace, so might as well pass it onto the jobs namespace
+- apiGroups:
+  - '*'
+  resources:
+  - '*'
+  verbs:
+  - '*'

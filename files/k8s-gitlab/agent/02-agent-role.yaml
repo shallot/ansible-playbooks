@@ -1,0 +1,9 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: gitlab-agent-job-executor
+  namespace: gitlab-ci-jobs
+rules:
+  - apiGroups: ["apps", ""]
+    resources: ["deployments", "services", "configmaps", "pods"]
+    verbs: ["get", "list", "watch", "create", "update", "patch"]

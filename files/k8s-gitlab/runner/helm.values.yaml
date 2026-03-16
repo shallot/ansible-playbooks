@@ -1,0 +1,35 @@
+gitlabUrl: "{{ k8s_gitlab_runner_url }}"
+runnerToken: "{{ k8s_gitlab_runner_token }}"
+
+replicaCount: "{{ k8s_gitlab_runner_replica_count }}"
+
+serviceAccount:
+  create: true
+  name: "gitlab-runner"
+
+rbac:
+  create: true
+
+runners:
+  config: |
+    [[runners]]
+      environment = ["HOME=/tmp", "GIT_CONFIG_NOSYSTEM=1"]
+      [runners.kubernetes]
+        namespace = "gitlab-ci-jobs"
+        service_account = "default"
+        cpu_request = "{{ k8s_gitlab_runner_cpu_request }}"
+        cpu_limit = "{{ k8s_gitlab_runner_cpu_limit }}"
+        memory_request = "{{ k8s_gitlab_runner_memory_request }}"
+        memory_limit = "{{ k8s_gitlab_runner_memory_limit }}"
+        privileged = false
+        [runners.kubernetes.feature_flags]
+          FF_USE_LEGACY_KUBERNETES_EXECUTION_STRATEGY = true
+        [runners.kubernetes.pod_security_context]
+          seccomp_profile_type = "RuntimeDefault"
+        [runners.kubernetes.container_security_context]
+          allow_privilege_escalation = false
+          capabilities = { drop = ["ALL"], add = ["SETFCAP", "CHOWN", "DAC_OVERRIDE", "FOWNER", "SETGID", "SETUID"] }
+        [[runners.kubernetes.volumes.empty_dir]]
+          name = "build-storage"
+          mount_path = "/home/build/.local/share/containers"
+          medium = "Memory"

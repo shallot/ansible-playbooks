@@ -1,0 +1,11 @@
+image:
+  tag: "{{ k8s_gitlab_agent_image }}"
+
+replicas: "{{ k8s_gitlab_agent_replica_count }}"
+
+config:
+  token: "{{ k8s_gitlab_agent_token }}"
+  kasAddress: "{{ k8s_gitlab_agent_server }}"
+
+rbac:
+  create: false

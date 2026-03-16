@@ -1,0 +1,79 @@
+# Copyright (c) 2026 Josip Rodin
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+k8s_gitlab_config_data_dir:
+  "{{ k8s_gitlab_config_data_dir_default }}"
+
+# group_vars/k8s-gitlab-runner.yml
+k8s_gitlab_agent_server:
+  "wss://gitlab.example.com/-/kubernetes-agent/"
+
+k8s_gitlab_agent_token:
+  "glagent-testdata"
+
+k8s_gitlab_agent_image:
+  "v18.8.0"
+
+k8s_gitlab_runner_url:
+  "https://gitlab.example.com/"
+
+k8s_gitlab_runner_token:
+  "glrt-testdata"
+
+k8s_gitlab_runner_cpu_request:
+  "100m"
+
+k8s_gitlab_runner_cpu_limit:
+  "1"
+
+k8s_gitlab_runner_memory_request:
+  "256Mi"
+
+k8s_gitlab_runner_memory_limit:
+  "2Gi"
+
+k8s_gitlab_runner_replica_count:
+  1
+
+k8s_gitlab_agent_replica_count:
+  1
+
+k8s_gitlab_runner_registry_url:
+  "gitlab-container-registry.example.com:5050"
+
+# identifier-deploy-token @ https://gitlab.example.com/groups/mygroup/-/settings/repository#js-deploy-tokens
+k8s_gitlab_runner_registry_username:
+  "gitlab+deploy-token-1"
+k8s_gitlab_runner_registry_password:
+  "gldt-testdata"
+
+# https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
+vagrant_groups:
+  - "k8s-nodes"
+  - "microk8s-nodes"
+  - "k8s-gitlab-runners"
+  - "k8s-gitlab-agents"
+
+# https://www.vagrantup.com/intro/getting-started/networking.html
+vagrant_networks:
+  - private_network:
+      ip: "10.8.60.11"
+
+# https://www.vagrantup.com/docs/provisioning/ansible.html
+vagrant_playbooks:
+  - "provision-custom-systems.yml"
+  - "provision-k8s-nodes.yml"
