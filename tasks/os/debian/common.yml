@@ -38,7 +38,7 @@
       keyword in apt sources.list files. Replace this with the distribution
       codename and try again.
   when:
-    "apt_sources_list_stable.found"
+    "apt_sources_list_stable.found > 0"
 
 # https://docs.ansible.com/ansible/latest/modules/set_fact_module.html
 # custom_os_distribution: tasks/os/main.yml
@@ -100,7 +100,7 @@
       Couldn't find {{ security_apt_regexp }} in the apt sources.list file.
       Please add it and try again.
   when:
-    - "not apt_sources_list_security.found"
+    - "not apt_sources_list_security.found > 0"
 
 # action_plugins/merge_variable.py
 # https://docs.ansible.com/ansible/latest/modules/apt_key_module.html
