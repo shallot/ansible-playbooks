@@ -17,7 +17,7 @@
 
 # tasks/os/debian/common.yml
 custom_nodejs_apt_keys__to_merge:
-  68576280:
+  nodesource:
     keyring: "nodesource"
     data: "{{ lookup('file', playbook_dir + '/files/nodesource.gpg.key') }}"
 

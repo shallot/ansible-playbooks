@@ -58,7 +58,7 @@ k8s_cluster_custom_packages__to_merge:
   logrotate: "present"
 
 k8s_apt_keys__to_merge:
-  k8s_debian:
+  k8s:
     keyring: "k8s_debian"
     url: "https://pkgs.k8s.io/core:/stable:/v{{ k8s_version }}/deb/Release.key"
 

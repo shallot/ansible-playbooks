@@ -16,7 +16,7 @@
 ---
 
 k8s_cluster_helm_apt_keys__to_merge:
-  helm_buildkite:
+  helm:
     keyring: "helm_buildkite"
     url: "https://packages.buildkite.com/helm-linux/helm-debian/gpgkey"
 
