@@ -28,6 +28,5 @@
     packages:
       - "git"
       - "vagrant"
-      - "virtualenv"
   become:
     true

@@ -23,23 +23,6 @@
   loop_control:
     loop_var: "bootstrap_tasks"
 
-# https://docs.ansible.com/ansible/latest/modules/command_module.html
-# https://docs.python.org/library/venv.html
-- name:
-    "command : virtualenv"
-  command: >
-    virtualenv
-    --prompt '({{ playbook_dir | basename }}) '
-    --python {{ ansible_python.executable | quote }}
-    -- {{ custom_ansible_pip_virtualenv | quote }}
-  args:
-    creates: "{{ custom_ansible_pip_virtualenv }}"
-  vars:
-
-    # The location of the Python virtual environment used to install Ansible
-    # and its dependencies in the officially supported versions.
-    custom_ansible_pip_virtualenv: "{{ playbook_dir }}/builds/virtualenv"
-
 # https://docs.ansible.com/ansible/latest/modules/import_tasks_module.html
 - import_tasks:
     "ansible.yml"

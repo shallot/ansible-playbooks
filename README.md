@@ -52,8 +52,6 @@ playbooks within this repository:
   - Software that provides Vagrant with virtual machines, such as:
     - [libvirt][libvirt]
     - [VirtualBox][virtualbox]
-- The [virtualenv][virtualenv] software, for isolating *Python* packages
-  in development or in other specific use cases
 
 The lists above do not include the dependencies of the listed items themselves.
 
