@@ -30,7 +30,7 @@
     name: "libvirt/manager"
   tags:
     - "never"
-    - "libvirt"
+    - "libvirt-manager"
 - import_role:
     name: "virtualbox/host"
   tags:
