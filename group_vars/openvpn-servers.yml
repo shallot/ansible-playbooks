@@ -48,6 +48,11 @@ openvpn_non_easyrsa_data_files_custom_shells__to_merge:
     creates:
       "{{ openvpn_data_dir }}/dh.pem"
 
+openvpn_easyrsa_command: >-
+      {{ openvpn_easyrsa_ca_dir }}/easyrsa
+      --pki-dir={{ openvpn_easyrsa_ca_dir }}/pki
+      --vars={{ openvpn_easyrsa_ca_dir }}/vars
+
 # tasks/shells.yml
 openvpn_vpn_easyrsa_custom_shells__to_merge:
   openvpn_easyrsa_1_make_cadir:
@@ -67,26 +72,20 @@ openvpn_vpn_easyrsa_custom_shells__to_merge:
       "{{ openvpn_easyrsa_ca_dir }}/pki"
   openvpn_easyrsa_4_build_ca:
     cmd: >-
-      {{ openvpn_easyrsa_ca_dir }}/easyrsa
-      --pki-dir={{ openvpn_easyrsa_ca_dir }}/pki
-      --vars={{ openvpn_easyrsa_ca_dir }}/vars
+      {{ openvpn_easyrsa_command }}
       --req-cn="{{ openvpn_ca_name }}" build-ca "{{ openvpn_ca_cert_pass }}"
     creates:
       "{{ openvpn_easyrsa_ca_dir }}/pki/ca.crt"
   openvpn_easyrsa_5_gen_req:
     cmd: >-
-      {{ openvpn_easyrsa_ca_dir }}/easyrsa
-      --pki-dir={{ openvpn_easyrsa_ca_dir }}/pki
-      --vars={{ openvpn_easyrsa_ca_dir }}/vars
+      {{ openvpn_easyrsa_command }}
       --req-cn={{ openvpn_server_name }}
       gen-req {{ openvpn_server_name }} "{{ openvpn_server_cert_pass }}"
     creates:
       "{{ openvpn_easyrsa_ca_dir }}/pki/reqs/{{ openvpn_server_name }}.req"
   openvpn_easyrsa_6_sign_req:
     cmd: >-
-      {{ openvpn_easyrsa_ca_dir }}/easyrsa
-      --pki-dir={{ openvpn_easyrsa_ca_dir }}/pki
-      --vars={{ openvpn_easyrsa_ca_dir }}/vars
+      {{ openvpn_easyrsa_command }}
       sign-req server {{ openvpn_server_name }}
     creates:
       "{{ openvpn_easyrsa_ca_dir }}/pki/issued/{{ openvpn_server_name }}.crt"

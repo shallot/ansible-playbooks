@@ -42,6 +42,20 @@ openvpn_ca_cert_pass:
 openvpn_server_cert_pass:
   "nopass"
 
+test_openvpn_clients_custom_shells__to_merge:
+  openvpn_easyrsa_clients_N_gen_req:
+    cmd: >-
+      {{ openvpn_easyrsa_command }}
+      --req-cn=example-client-name-2026 gen-req example-client-name-2026 nopass
+    creates:
+      "{{ openvpn_easyrsa_ca_dir }}/pki/private/example-client-name-2026.key"
+  openvpn_easyrsa_clients_N_sign_req:
+    cmd: >-
+      {{ openvpn_easyrsa_command }}
+      sign-req client example-client-name-2026
+    creates:
+      "{{ openvpn_easyrsa_ca_dir }}/pki/issued/example-client-name-2026.crt"
+
 # https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
 vagrant_groups:
   - "openvpn-servers"
