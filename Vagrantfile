@@ -74,7 +74,7 @@ Vagrant.configure('2') do |vagrant|
     next if hostname == 'vagrant-runner-0.test'
 
     # https://docs.ruby-lang.org/en/trunk/YAML.html
-    hostvars = YAML.load_file(file)
+    hostvars = YAML.load_file(file, aliases: true)
 
     # https://docs.ruby-lang.org/en/trunk/Hash.html#method-i-fetch
     hostvars.fetch('vagrant_groups', []).each do |name|
