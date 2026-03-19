@@ -195,9 +195,9 @@
 # https://docs.ansible.com/ansible/latest/collections/ansible/builtin/command_module.html
 - name:
     "systemd : systemctl show"
-#  systemd:
-#    name: "{{ systemd_unit_name }}"
-#    get_status: true
+  # systemd:
+  #   name: "{{ systemd_unit_name }}"
+  #   get_status: true
   command:
     "systemctl show {{ item }} --property=NeedDaemonReload"
   loop:
