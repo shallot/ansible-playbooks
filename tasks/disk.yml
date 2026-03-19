@@ -141,9 +141,11 @@
       sudo mount {{ item.value.mountpoint }}
       && sudo install -d
       {{ '-o ' ~ item.value.mountpoint_owner
-      if item.value.mountpoint_owner is defined and item.value.mountpoint_owner }}
+      if item.value.mountpoint_owner is defined
+      and item.value.mountpoint_owner }}
       {{ '-g ' ~ item.value.mountpoint_group
-      if item.value.mountpoint_group is defined and item.value.mountpoint_group }}
+      if item.value.mountpoint_group is defined
+      and item.value.mountpoint_group }}
       {{ item.value.mountpoint }}
   when:
     "item.value.mountpoint is defined and item.value.filesystem is defined"

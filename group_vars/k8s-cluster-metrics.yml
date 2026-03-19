@@ -25,11 +25,15 @@ k8s_cluster_init_kubelet_csr_sign_custom_paths__to_merge:
   "{{ k8s_cluster_config_server_dir }}/kubeadm/approve-kubelet-serving-csr.sh":
     dest: "{{ k8s_cluster_config_server_dir }}/kubeadm/approve-kubelet-serving-csr.sh"
     state: "copy"
-    content: |
-      {{ kubectl_command }} get csr -o json | \
-        jq -r '.items[] | select(.spec.signerName == "kubernetes.io/kubelet-serving") | .metadata.name' | \
-        xargs -r \
-          {{ kubectl_command }} certificate approve
+    content: >-
+      {{ kubectl_command }} get csr -o json
+      |
+      jq -r '.items[]
+      | select(.spec.signerName == "kubernetes.io/kubelet-serving")
+      | .metadata.name'
+      |
+      xargs -r
+      {{ kubectl_command }} certificate approve
 
 # TODO: verify first if there is a join group?
 k8s_cluster_init_kubelet_csr_sign_custom_shells__to_merge:

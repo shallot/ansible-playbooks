@@ -20,11 +20,11 @@
 # TODO: combine /root/k8s_join_command and /root/k8s_join_certs instead
 k8s_cluster_join_custom_shells__to_merge:
   k8s_01_cluster_05_join:
-    cmd: |
-      kubeadm join \
-              {{ k8s_cluster_control_plane_endpoint }}:6443 \
-              --token "{{ secrets.k8s_cluster[k8s_cluster_name].token }}" \
-              --discovery-token-ca-cert-hash "{{ secrets.k8s_cluster[k8s_cluster_name].discovery_token_ca_cert_hash }}" \
-              {{ ('k8s-cluster-mixed-nodes' in group_names) | ternary('--control-plane', '') }} \
-              --certificate-key "{{ secrets.k8s_cluster[k8s_cluster_name].certificate_key }}"
+    cmd: >-
+      kubeadm join
+      {{ k8s_cluster_control_plane_endpoint }}:6443
+      --token "{{ secrets.k8s_cluster[k8s_cluster_name].token }}"
+      --discovery-token-ca-cert-hash "{{ secrets.k8s_cluster[k8s_cluster_name].discovery_token_ca_cert_hash }}"
+      {{ ('k8s-cluster-mixed-nodes' in group_names) | ternary('--control-plane', '') }}
+      --certificate-key "{{ secrets.k8s_cluster[k8s_cluster_name].certificate_key }}"
     creates: "/etc/kubernetes/kubelet.conf"
