@@ -36,65 +36,75 @@ openvpn_vpn_config_custom_paths__to_merge:
 # tasks/shells.yml
 openvpn_non_easyrsa_data_files_custom_shells__to_merge:
   openvpn_server_10_make_ta_key:
-    cmd: |
+    cmd: >-
       openvpn --genkey --secret {{ openvpn_data_dir }}/ta.key
     creates:
       "{{ openvpn_data_dir }}/ta.key"
   openvpn_server_11_make_dh:
-    # yamllint disable rule:line-length
-    cmd: |
-      openssl dhparam -out {{ openvpn_data_dir }}/dh.pem {{ openvpn_easyrsa_key_size }}
-    # yamllint enable rule:line-length
+    cmd: >-
+      openssl dhparam
+      -out {{ openvpn_data_dir }}/dh.pem
+      {{ openvpn_easyrsa_key_size }}
     creates:
       "{{ openvpn_data_dir }}/dh.pem"
 
 # tasks/shells.yml
-# yamllint disable rule:line-length
 openvpn_vpn_easyrsa_custom_shells__to_merge:
   openvpn_easyrsa_1_make_cadir:
-    cmd: |
+    cmd: >-
       make-cadir {{ openvpn_easyrsa_ca_dir }}
     creates:
       "{{ openvpn_easyrsa_ca_dir }}/easyrsa"
   openvpn_easyrsa_2_our_vars:
-    cmd: |
+    cmd: >-
       cp {{ openvpn_data_dir }}/vars {{ openvpn_easyrsa_ca_dir }}/vars
   openvpn_easyrsa_3_init_pki:
-    cmd: |
-      {{ openvpn_easyrsa_ca_dir }}/easyrsa --pki-dir={{ openvpn_easyrsa_ca_dir }}/pki init-pki
+    cmd: >-
+      {{ openvpn_easyrsa_ca_dir }}/easyrsa
+      --pki-dir={{ openvpn_easyrsa_ca_dir }}/pki
+      init-pki
     creates:
       "{{ openvpn_easyrsa_ca_dir }}/pki"
   openvpn_easyrsa_4_build_ca:
-    cmd: |
-      {{ openvpn_easyrsa_ca_dir }}/easyrsa --pki-dir={{ openvpn_easyrsa_ca_dir }}/pki --vars={{ openvpn_easyrsa_ca_dir }}/vars --req-cn="{{ openvpn_ca_name }}" build-ca "{{ openvpn_ca_cert_pass }}"
+    cmd: >-
+      {{ openvpn_easyrsa_ca_dir }}/easyrsa
+      --pki-dir={{ openvpn_easyrsa_ca_dir }}/pki
+      --vars={{ openvpn_easyrsa_ca_dir }}/vars
+      --req-cn="{{ openvpn_ca_name }}" build-ca "{{ openvpn_ca_cert_pass }}"
     creates:
       "{{ openvpn_easyrsa_ca_dir }}/pki/ca.crt"
   openvpn_easyrsa_5_gen_req:
-    cmd: |
-      {{ openvpn_easyrsa_ca_dir }}/easyrsa --vars={{ openvpn_easyrsa_ca_dir }}/vars --req-cn={{ openvpn_server_name }} gen-req {{ openvpn_server_name }} "{{ openvpn_server_cert_pass }}"
+    cmd: >-
+      {{ openvpn_easyrsa_ca_dir }}/easyrsa
+      --pki-dir={{ openvpn_easyrsa_ca_dir }}/pki
+      --vars={{ openvpn_easyrsa_ca_dir }}/vars
+      --req-cn={{ openvpn_server_name }}
+      gen-req {{ openvpn_server_name }} "{{ openvpn_server_cert_pass }}"
     creates:
       "{{ openvpn_easyrsa_ca_dir }}/pki/reqs/{{ openvpn_server_name }}.req"
   openvpn_easyrsa_6_sign_req:
-    cmd: |
-      {{ openvpn_easyrsa_ca_dir }}/easyrsa --vars={{ openvpn_easyrsa_ca_dir }}/vars sign-req server {{ openvpn_server_name }}
+    cmd: >-
+      {{ openvpn_easyrsa_ca_dir }}/easyrsa
+      --pki-dir={{ openvpn_easyrsa_ca_dir }}/pki
+      --vars={{ openvpn_easyrsa_ca_dir }}/vars
+      sign-req server {{ openvpn_server_name }}
     creates:
       "{{ openvpn_easyrsa_ca_dir }}/pki/issued/{{ openvpn_server_name }}.crt"
   openvpn_easyrsa_7_copy_ca_cert:
-    cmd: |
-      cp {{ openvpn_easyrsa_ca_dir }}/pki/ca.crt \
+    cmd: >-
+      cp {{ openvpn_easyrsa_ca_dir }}/pki/ca.crt
       {{ openvpn_data_dir }}/ca.crt
     creates:
       "{{ openvpn_data_dir }}/ca.crt"
   openvpn_easyrsa_8_copy_server_cert:
-    cmd: |
-      cp {{ openvpn_easyrsa_ca_dir }}/pki/issued/{{ openvpn_server_name }}.crt \
+    cmd: >-
+      cp {{ openvpn_easyrsa_ca_dir }}/pki/issued/{{ openvpn_server_name }}.crt
       {{ openvpn_data_dir }}/{{ openvpn_server_name }}.crt
     creates:
       "{{ openvpn_data_dir }}/{{ openvpn_server_name }}.crt"
   openvpn_easyrsa_9_copy_server_key:
-    cmd: |
-      cp {{ openvpn_easyrsa_ca_dir }}/pki/private/{{ openvpn_server_name }}.key \
+    cmd: >-
+      cp {{ openvpn_easyrsa_ca_dir }}/pki/private/{{ openvpn_server_name }}.key
       {{ openvpn_data_dir }}/{{ openvpn_server_name }}.key
     creates:
       "{{ openvpn_data_dir }}/{{ openvpn_server_name }}.key"
-# yamllint enable rule:line-length
