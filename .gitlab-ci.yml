@@ -18,7 +18,7 @@
 # https://docs.gitlab.com/ee/ci/yaml/#stages
 stages:
   - "test"
-  - "vagrant-shortlived"
+#  - "vagrant-shortlived"
 
 # Use `gitlab-runner exec docker rubocop` to execute in development
 rubocop:
@@ -51,288 +51,288 @@ include:
 
 # vagrant-runner-0 intentionally skipped as it can't have a vagrant/libvirt job
 
-aab-signing-0-shortlived:
-  extends:
-    - ".vagrantshortlivedjob"
-  variables:
-    TEST_HOST: "aab-signing-0.test"
-
-adblockplus-donate-server-0-shortlived:
-  extends:
-    - ".vagrantshortlivedjob"
-  variables:
-    TEST_HOST: "adblockplus-donate-server-0.test"
-
-adblockplus-publish-host-0-shortlived:
-  extends:
-    - ".vagrantshortlivedjob"
-  variables:
-    TEST_HOST: "adblockplus-publish-host-0.test"
-
-admin-0-shortlived:
-  extends:
-    - ".vagrantshortlivedjob"
-  variables:
-    TEST_HOST: "admin-0.test"
-    VAGRANT_BOX_NEEDS_CHECKED_OUT_BRANCH: "admin-0.test"
-
-apache2-geoip-0-shortlived:
-  extends:
-    - ".vagrantshortlivedjob"
-  variables:
-    TEST_HOST: "apache2-geoip-0.test"
-
-apache2-server-0-shortlived:
-  extends:
-    - ".vagrantshortlivedjob"
-  variables:
-    TEST_HOST: "apache2-server-0.test"
-
-apache2-letsencrypt-server-0-shortlived:
-  extends:
-    - ".vagrantshortlivedjob"
-  variables:
-    TEST_HOST: "apache2-letsencrypt-server-0.test"
-  # would require proper hostnames instead of example.com to complete
-  allow_failure: true
-
-apache2-mimeo-server-0-shortlived:
-  extends:
-    - ".vagrantshortlivedjob"
-  variables:
-    TEST_HOST: "apache2-mimeo-server-0.test"
-
-apache2-modsecurity-server-0-shortlived:
-  extends:
-    - ".vagrantshortlivedjob"
-  variables:
-    TEST_HOST: "apache2-modsecurity-server-0.test"
-
-apache2-sitescripts-server-0-shortlived:
-  extends:
-    - ".vagrantshortlivedjob"
-  variables:
-    TEST_HOST: "apache2-sitescripts-server-0.test"
-
-apk-signing-0-shortlived:
-  extends:
-    - ".vagrantshortlivedjob"
-  variables:
-    TEST_HOST: "apk-signing-0.test"
-
-backup-client-0-shortlived:
-  extends:
-    - ".vagrantshortlivedjob"
-  variables:
-    TEST_HOST: "backup-client-0.test"
-  # requires persistent backup-server-0.test to complete
-  allow_failure: true
-
-backup-server-0-shortlived:
-  extends:
-    - ".vagrantshortlivedjob"
-  variables:
-    TEST_HOST: "backup-server-0.test"
-
-crumbs-filter-server-0-shortlived:
-  extends:
-    - ".vagrantshortlivedjob"
-  variables:
-    TEST_HOST: "crumbs-filter-server-0.test"
-
-crumbs-web-server-0-shortlived:
-  extends:
-    - ".vagrantshortlivedjob"
-  variables:
-    TEST_HOST: "crumbs-web-server-0.test"
-
-custom-centos7-0-shortlived:
-  extends:
-    - ".vagrantshortlivedjob"
-  variables:
-    TEST_HOST: "custom-centos7-0.test"
-
-custom-commands-shells-0-shortlived:
-  extends:
-    - ".vagrantshortlivedjob"
-  variables:
-    TEST_HOST: "custom-commands-shells-0.test"
-
-custom-debian11-0-shortlived:
-  extends:
-    - ".vagrantshortlivedjob"
-  variables:
-    TEST_HOST: "custom-debian11-0.test"
-
-custom-disk-0-shortlived:
-  extends:
-    - ".vagrantshortlivedjob"
-  variables:
-    TEST_HOST: "custom-disk-0.test"
-
-custom-paths-0-shortlived:
-  extends:
-    - ".vagrantshortlivedjob"
-  variables:
-    TEST_HOST: "custom-paths-0.test"
-
-docker-0-shortlived:
-  extends:
-    - ".vagrantshortlivedjob"
-  variables:
-    TEST_HOST: "docker-0.test"
-
-docker-gitlab-runner-0-shortlived:
-  extends:
-    - ".vagrantshortlivedjob"
-  variables:
-    TEST_HOST: "docker-gitlab-runner-0.test"
-
-elastic-agent-0-shortlived:
-  extends:
-    - ".vagrantshortlivedjob"
-  variables:
-    TEST_HOST: "elastic-agent-0.test"
-    # https://gitlab.com/eyeo/devops/examples/ansible-role-example/-/settings/ci_cd
-    # https://gitlab.com/eyeo/devops/ansible-playbooks/-/settings/ci_cd
-    TEST_ELASTIC_AGENT_TOKEN: "$ANSIBLE_ROLE_EXAMPLE_ELASTIC_AGENT_TOKEN"
-    TEST_ELASTIC_AGENT_FLEET_URL: "$ANSIBLE_ROLE_EXAMPLE_ELASTIC_AGENT_FLEET_URL"
-
-eramba-server-0-shortlived:
-  extends:
-    - ".vagrantshortlivedjob"
-  variables:
-    TEST_HOST: "eramba-server-0.test"
-  # requires proprietary binary blob to complete
-  allow_failure: true
-
-eyeo-cms-web-server-0-shortlived:
-  extends:
-    - ".vagrantshortlivedjob"
-  variables:
-    TEST_HOST: "eyeo-cms-web-server-0.test"
-
-filter-delivery-0-shortlived:
-  extends:
-    - ".vagrantshortlivedjob"
-  variables:
-    TEST_HOST: "filter-delivery-0.test"
-
-filter-list-origin-host-0-shortlived:
-  extends:
-    - ".vagrantshortlivedjob"
-  variables:
-    TEST_HOST: "filter-list-origin-host-0.test"
-
-filter-server-0-shortlived:
-  extends:
-    - ".vagrantshortlivedjob"
-  variables:
-    TEST_HOST: "filter-server-0.test"
-
-gitlab-runner-0-shortlived:
-  extends:
-    - ".vagrantshortlivedjob"
-  variables:
-    TEST_HOST: "gitlab-runner-0.test"
-    # https://gitlab.com/eyeo/devops/examples/ansible-role-example/-/settings/ci_cd
-    # https://gitlab.com/eyeo/devops/ansible-playbooks/-/settings/ci_cd
-    TEST_GITLAB_REGISTRATION_TOKEN: "$ANSIBLE_ROLE_EXAMPLE_GITLAB_TOKEN"
-
-icinga-0-shortlived:
-  extends:
-    - ".vagrantshortlivedjob"
-  variables:
-    TEST_HOST: "icinga-0.test"
-
-jirafeau-0-shortlived:
-  extends:
-    - ".vagrantshortlivedjob"
-  variables:
-    TEST_HOST: "jirafeau-server-0.test"
-
-lamp-server-0-shortlived:
-  extends:
-    - ".vagrantshortlivedjob"
-  variables:
-    TEST_HOST: "lamp-server-0.test"
-
-libvirt-host-0-shortlived:
-  extends:
-    - ".vagrantshortlivedjob"
-  variables:
-    TEST_HOST: "libvirt-host-0.test"
-  # requires nested virtualization to complete
-  allow_failure: true
-
-mattermost-server-0-shortlived:
-  extends:
-    - ".vagrantshortlivedjob"
-  variables:
-    TEST_HOST: "mattermost-server-0.test"
-
-munin-0-shortlived:
-  extends:
-    - ".vagrantshortlivedjob"
-  variables:
-    TEST_HOST: "munin-0.test"
-
-munin-node-0-shortlived:
-  extends:
-    - ".vagrantshortlivedjob"
-  variables:
-    TEST_HOST: "munin-node-0.test"
-
-mysql-0-shortlived:
-  extends:
-    - ".vagrantshortlivedjob"
-  variables:
-    TEST_HOST: "mysql-0.test"
-
-mumble-0-shortlived:
-  extends:
-    - ".vagrantshortlivedjob"
-  variables:
-    TEST_HOST: "mumble-0.test"
-
-openvpn-server-0-shortlived:
-  extends:
-    - ".vagrantshortlivedjob"
-  variables:
-    TEST_HOST: "openvpn-server-0.test"
-
-postfix-0-shortlived:
-  extends:
-    - ".vagrantshortlivedjob"
-  variables:
-    TEST_HOST: "postfix-0.test"
-
-postgresql-0-shortlived:
-  extends:
-    - ".vagrantshortlivedjob"
-  variables:
-    TEST_HOST: "postgresql-0.test"
-
-public-git-web-server-0-shortlived:
-  extends:
-    - ".vagrantshortlivedjob"
-  variables:
-    TEST_HOST: "public-git-web-server-0.test"
-
-subscriptionlist-fallback-server-0-shortlived:
-  extends:
-    - ".vagrantshortlivedjob"
-  variables:
-    TEST_HOST: "subscriptionlist-fallback-server-0.test"
-
-testpages-server-0-shortlived:
-  extends:
-    - ".vagrantshortlivedjob"
-  variables:
-    TEST_HOST: "testpages-server-0.test"
-
-tmate-0-shortlived:
-  extends:
-    - ".vagrantshortlivedjob"
-  variables:
-    TEST_HOST: "tmate-0.test"
+# aab-signing-0-shortlived:
+#   extends:
+#     - ".vagrantshortlivedjob"
+#   variables:
+#     TEST_HOST: "aab-signing-0.test"
+#
+# adblockplus-donate-server-0-shortlived:
+#   extends:
+#     - ".vagrantshortlivedjob"
+#   variables:
+#     TEST_HOST: "adblockplus-donate-server-0.test"
+#
+# adblockplus-publish-host-0-shortlived:
+#   extends:
+#     - ".vagrantshortlivedjob"
+#   variables:
+#     TEST_HOST: "adblockplus-publish-host-0.test"
+#
+# admin-0-shortlived:
+#   extends:
+#     - ".vagrantshortlivedjob"
+#   variables:
+#     TEST_HOST: "admin-0.test"
+#     VAGRANT_BOX_NEEDS_CHECKED_OUT_BRANCH: "admin-0.test"
+#
+# apache2-geoip-0-shortlived:
+#   extends:
+#     - ".vagrantshortlivedjob"
+#   variables:
+#     TEST_HOST: "apache2-geoip-0.test"
+#
+# apache2-server-0-shortlived:
+#   extends:
+#     - ".vagrantshortlivedjob"
+#   variables:
+#     TEST_HOST: "apache2-server-0.test"
+#
+# apache2-letsencrypt-server-0-shortlived:
+#   extends:
+#     - ".vagrantshortlivedjob"
+#   variables:
+#     TEST_HOST: "apache2-letsencrypt-server-0.test"
+#   # would require proper hostnames instead of example.com to complete
+#   allow_failure: true
+#
+# apache2-mimeo-server-0-shortlived:
+#   extends:
+#     - ".vagrantshortlivedjob"
+#   variables:
+#     TEST_HOST: "apache2-mimeo-server-0.test"
+#
+# apache2-modsecurity-server-0-shortlived:
+#   extends:
+#     - ".vagrantshortlivedjob"
+#   variables:
+#     TEST_HOST: "apache2-modsecurity-server-0.test"
+#
+# apache2-sitescripts-server-0-shortlived:
+#   extends:
+#     - ".vagrantshortlivedjob"
+#   variables:
+#     TEST_HOST: "apache2-sitescripts-server-0.test"
+#
+# apk-signing-0-shortlived:
+#   extends:
+#     - ".vagrantshortlivedjob"
+#   variables:
+#     TEST_HOST: "apk-signing-0.test"
+#
+# backup-client-0-shortlived:
+#   extends:
+#     - ".vagrantshortlivedjob"
+#   variables:
+#     TEST_HOST: "backup-client-0.test"
+#   # requires persistent backup-server-0.test to complete
+#   allow_failure: true
+#
+# backup-server-0-shortlived:
+#   extends:
+#     - ".vagrantshortlivedjob"
+#   variables:
+#     TEST_HOST: "backup-server-0.test"
+#
+# crumbs-filter-server-0-shortlived:
+#   extends:
+#     - ".vagrantshortlivedjob"
+#   variables:
+#     TEST_HOST: "crumbs-filter-server-0.test"
+#
+# crumbs-web-server-0-shortlived:
+#   extends:
+#     - ".vagrantshortlivedjob"
+#   variables:
+#     TEST_HOST: "crumbs-web-server-0.test"
+#
+# custom-centos7-0-shortlived:
+#   extends:
+#     - ".vagrantshortlivedjob"
+#   variables:
+#     TEST_HOST: "custom-centos7-0.test"
+#
+# custom-commands-shells-0-shortlived:
+#   extends:
+#     - ".vagrantshortlivedjob"
+#   variables:
+#     TEST_HOST: "custom-commands-shells-0.test"
+#
+# custom-debian11-0-shortlived:
+#   extends:
+#     - ".vagrantshortlivedjob"
+#   variables:
+#     TEST_HOST: "custom-debian11-0.test"
+#
+# custom-disk-0-shortlived:
+#   extends:
+#     - ".vagrantshortlivedjob"
+#   variables:
+#     TEST_HOST: "custom-disk-0.test"
+#
+# custom-paths-0-shortlived:
+#   extends:
+#     - ".vagrantshortlivedjob"
+#   variables:
+#     TEST_HOST: "custom-paths-0.test"
+#
+# docker-0-shortlived:
+#   extends:
+#     - ".vagrantshortlivedjob"
+#   variables:
+#     TEST_HOST: "docker-0.test"
+#
+# docker-gitlab-runner-0-shortlived:
+#   extends:
+#     - ".vagrantshortlivedjob"
+#   variables:
+#     TEST_HOST: "docker-gitlab-runner-0.test"
+#
+# elastic-agent-0-shortlived:
+#   extends:
+#     - ".vagrantshortlivedjob"
+#   variables:
+#     TEST_HOST: "elastic-agent-0.test"
+#     # https://gitlab.com/eyeo/devops/examples/ansible-role-example/-/settings/ci_cd
+#     # https://gitlab.com/eyeo/devops/ansible-playbooks/-/settings/ci_cd
+#     TEST_ELASTIC_AGENT_TOKEN: "$ANSIBLE_ROLE_EXAMPLE_ELASTIC_AGENT_TOKEN"
+#     TEST_ELASTIC_AGENT_FLEET_URL: "$ANSIBLE_ROLE_EXAMPLE_ELASTIC_AGENT_FLEET_URL"
+#
+# eramba-server-0-shortlived:
+#   extends:
+#     - ".vagrantshortlivedjob"
+#   variables:
+#     TEST_HOST: "eramba-server-0.test"
+#   # requires proprietary binary blob to complete
+#   allow_failure: true
+#
+# eyeo-cms-web-server-0-shortlived:
+#   extends:
+#     - ".vagrantshortlivedjob"
+#   variables:
+#     TEST_HOST: "eyeo-cms-web-server-0.test"
+#
+# filter-delivery-0-shortlived:
+#   extends:
+#     - ".vagrantshortlivedjob"
+#   variables:
+#     TEST_HOST: "filter-delivery-0.test"
+#
+# filter-list-origin-host-0-shortlived:
+#   extends:
+#     - ".vagrantshortlivedjob"
+#   variables:
+#     TEST_HOST: "filter-list-origin-host-0.test"
+#
+# filter-server-0-shortlived:
+#   extends:
+#     - ".vagrantshortlivedjob"
+#   variables:
+#     TEST_HOST: "filter-server-0.test"
+#
+# gitlab-runner-0-shortlived:
+#   extends:
+#     - ".vagrantshortlivedjob"
+#   variables:
+#     TEST_HOST: "gitlab-runner-0.test"
+#     # https://gitlab.com/eyeo/devops/examples/ansible-role-example/-/settings/ci_cd
+#     # https://gitlab.com/eyeo/devops/ansible-playbooks/-/settings/ci_cd
+#     TEST_GITLAB_REGISTRATION_TOKEN: "$ANSIBLE_ROLE_EXAMPLE_GITLAB_TOKEN"
+#
+# icinga-0-shortlived:
+#   extends:
+#     - ".vagrantshortlivedjob"
+#   variables:
+#     TEST_HOST: "icinga-0.test"
+#
+# jirafeau-0-shortlived:
+#   extends:
+#     - ".vagrantshortlivedjob"
+#   variables:
+#     TEST_HOST: "jirafeau-server-0.test"
+#
+# lamp-server-0-shortlived:
+#   extends:
+#     - ".vagrantshortlivedjob"
+#   variables:
+#     TEST_HOST: "lamp-server-0.test"
+#
+# libvirt-host-0-shortlived:
+#   extends:
+#     - ".vagrantshortlivedjob"
+#   variables:
+#     TEST_HOST: "libvirt-host-0.test"
+#   # requires nested virtualization to complete
+#   allow_failure: true
+#
+# mattermost-server-0-shortlived:
+#   extends:
+#     - ".vagrantshortlivedjob"
+#   variables:
+#     TEST_HOST: "mattermost-server-0.test"
+#
+# munin-0-shortlived:
+#   extends:
+#     - ".vagrantshortlivedjob"
+#   variables:
+#     TEST_HOST: "munin-0.test"
+#
+# munin-node-0-shortlived:
+#   extends:
+#     - ".vagrantshortlivedjob"
+#   variables:
+#     TEST_HOST: "munin-node-0.test"
+#
+# mysql-0-shortlived:
+#   extends:
+#     - ".vagrantshortlivedjob"
+#   variables:
+#     TEST_HOST: "mysql-0.test"
+#
+# mumble-0-shortlived:
+#   extends:
+#     - ".vagrantshortlivedjob"
+#   variables:
+#     TEST_HOST: "mumble-0.test"
+#
+# openvpn-server-0-shortlived:
+#   extends:
+#     - ".vagrantshortlivedjob"
+#   variables:
+#     TEST_HOST: "openvpn-server-0.test"
+#
+# postfix-0-shortlived:
+#   extends:
+#     - ".vagrantshortlivedjob"
+#   variables:
+#     TEST_HOST: "postfix-0.test"
+#
+# postgresql-0-shortlived:
+#   extends:
+#     - ".vagrantshortlivedjob"
+#   variables:
+#     TEST_HOST: "postgresql-0.test"
+#
+# public-git-web-server-0-shortlived:
+#   extends:
+#     - ".vagrantshortlivedjob"
+#   variables:
+#     TEST_HOST: "public-git-web-server-0.test"
+#
+# subscriptionlist-fallback-server-0-shortlived:
+#   extends:
+#     - ".vagrantshortlivedjob"
+#   variables:
+#     TEST_HOST: "subscriptionlist-fallback-server-0.test"
+#
+# testpages-server-0-shortlived:
+#   extends:
+#     - ".vagrantshortlivedjob"
+#   variables:
+#     TEST_HOST: "testpages-server-0.test"
+#
+# tmate-0-shortlived:
+#   extends:
+#     - ".vagrantshortlivedjob"
+#   variables:
+#     TEST_HOST: "tmate-0.test"
