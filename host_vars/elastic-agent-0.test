@@ -18,10 +18,6 @@
 elastic_agent_install_type:
   "fleet"
 
-# https://www.vagrantup.com/docs/vagrantfile/machine_settings.html
-vagrant_box:
-  "debian/bullseye64"
-
 # https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
 vagrant_groups:
   - "elastic-agents"

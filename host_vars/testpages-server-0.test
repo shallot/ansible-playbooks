@@ -198,10 +198,6 @@ test_testpages_apache2_sites__to_merge:
 #      extra:
 #        tag-list: "eyeo_cms_web_server_{{ inventory_hostname }}"
 
-# https://www.vagrantup.com/docs/vagrantfile/machine_settings.html
-vagrant_box:
-  "debian/bullseye64"
-
 # https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
 vagrant_groups:
   - "testpages-servers"

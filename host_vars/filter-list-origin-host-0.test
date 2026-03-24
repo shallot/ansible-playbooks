@@ -92,10 +92,6 @@ filter_list_origin_final_output_retention:
 vagrant_groups:
   - "filter-list-origin-hosts"
 
-# https://www.vagrantup.com/docs/vagrantfile/machine_settings.html
-vagrant_box:
-  "debian/bullseye64"
-
 # https://www.vagrantup.com/docs/providers/configuration
 vagrant_memory:
   2048
