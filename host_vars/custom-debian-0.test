@@ -228,7 +228,6 @@ vagrant_groups:
   - "examples.test"
   - "unattended-upgrades"
   - "git-hosts"
-  - "elastic-agents"
 
 # https://www.vagrantup.com/intro/getting-started/networking.html
 vagrant_networks:
