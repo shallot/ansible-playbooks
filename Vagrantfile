@@ -114,10 +114,12 @@ Vagrant.configure('2') do |vagrant|
 
       # https://www.vagrantup.com/intro/getting-started/networking.html
       networks_groups = hostvars.fetch('vagrant_networks', [])
+      static_ssh_ip = nil
       networks_groups.each do |networks|
         networks.each do |type, settings|
           settings.symbolize_keys!
           config.vm.network(type, **settings)
+          static_ssh_ip = settings[:ip] if type.to_s == 'private_network' && settings.key?(:ip)
         end
       end
 
@@ -130,6 +132,7 @@ Vagrant.configure('2') do |vagrant|
       # https://docs.ansible.com/ansible/latest/user_guide/playbooks_variables.html
       ansible_extra_vars = {}
       ansible_extra_vars = fill_extra_vars(hostvars, ansible_extra_vars)
+      # ansible_extra_vars[:ansible_ssh_host] = ansible_ssh_ip if ansible_ssh_ip
 
       # https://docs.ansible.com/ansible/latest/user_guide/playbooks.html
       playbooks = hostvars.fetch('vagrant_playbooks', [])
@@ -137,17 +140,57 @@ Vagrant.configure('2') do |vagrant|
         provisioned?(ICINGA_SERVER_VM) || hostname == ICINGA_SERVER_VM
       playbooks.each do |playbook|
 
+        playbook_file = File.join(__dir__, playbook)
+
+        # FIXME: restore:
         # https://www.vagrantup.com/docs/provisioning/ansible.html
-        config.vm.provision('ansible') do |ansible|
-          ansible.compatibility_mode = '2.0'
-          ansible.extra_vars = ansible_extra_vars
-          ansible.tags = ansible_tags
-          ansible.groups = ansible_host_groups
-          ansible.playbook = File.join(__dir__, playbook)
-          ansible.raw_arguments = [
-            '--diff'
-          ]
-          ansible.verbose = 'v'
+        # config.vm.provision('ansible') do |ansible|
+        #   ansible.compatibility_mode = '2.0'
+        #   ansible.extra_vars = ansible_extra_vars
+        #   ansible.tags = ansible_tags
+        #   ansible.groups = ansible_host_groups
+        #   ansible.playbook = playbook_file
+        #   ansible.raw_arguments = [
+        #     '--diff'
+        #   ]
+        #   ansible.verbose = 'v'
+        # end
+
+        config.trigger.after :provision do |trigger|
+          trigger.name = 'Running Ansible from host'
+          trigger.ruby do |_env, machine|
+            provider = machine.provider_name.to_s
+            machine_dir = ".vagrant/machines/#{hostname}/#{provider}"
+            ansible_inventory_file = "#{machine_dir}/ansible_inventory.yaml"
+            host_vars = {
+              'ansible_host' => static_ssh_ip,
+              'ansible_ssh_private_key_file' => "#{machine_dir}/private_key",
+              'ansible_user' => 'vagrant'
+            }
+            host_vars.merge!(ansible_extra_vars)
+            ansible_inventory = {
+              'all' => {
+                'hosts' => { hostname => host_vars },
+                'children' => {}
+              }
+            }
+            hostvars.fetch('vagrant_groups', []).each do |group_name|
+              ansible_inventory['all']['children'][group_name] = { 'hosts' => { hostname => {} } }
+            end
+            File.write(ansible_inventory_file, ansible_inventory.to_yaml)
+            ansible_tags_str = ansible_tags.is_a?(Array) ? ansible_tags.join(',') : ansible_tags
+            cmd = [
+              'env ANSIBLE_HOST_KEY_CHECKING=False',
+              '/usr/bin/ansible-playbook',
+              "-i '#{ansible_inventory_file}'",
+              "-t '#{ansible_tags_str}'",
+              '--diff',
+              '-v',
+              playbook_file
+            ].join(' ')
+            puts "==> #{trigger.name} for #{hostname}/#{static_ssh_ip} (groups: #{ansible_inventory['all']['children'].keys.join(', ')})..."
+            system(cmd)
+          end
         end
 
       end
