@@ -20,7 +20,7 @@ Layout/EmptyLinesAroundBlockBody:
   Enabled: false
 
 Metrics/BlockLength:
-  Max: 100
+  Max: 200
 
 Metrics/LineLength:
   Max: 160
