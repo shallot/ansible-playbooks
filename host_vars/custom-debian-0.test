@@ -213,7 +213,7 @@ host_specific_custom_cron_jobs__to_merge:
 # tasks/git.yml
 host_specific_git_checkouts__to_merge:
   ansible-playbook:
-    repo: "https://gitlab.com/eyeo/devops/ansible-playbooks.git"
+    repo: "https://gitlab.com/shallot/ansible-playbooks.git"
     dest: "/tmp/ansible-playbooks"
     user: "example2"
     to_update: "true"
