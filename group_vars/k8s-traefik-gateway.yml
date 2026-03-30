@@ -1,0 +1,41 @@
+# Copyright (c) 2026 Josip Rodin
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+k8s_traefik_config_data_dir_default:
+  "{{ playbook_dir }}/files/k8s-traefik"
+
+traefik_default_additional_args:
+  - "--global.checknewversion=false"
+  - "--global.sendanonymoususage=false"
+  - "--providers.kubernetesgateway.statusaddress.service.name=traefik"
+
+traefik_custom_paths__to_merge:
+  "{{ k8s_cluster_config_server_dir }}/helm/traefik.values.yaml":
+    dest: "{{ k8s_cluster_config_server_dir }}/helm/traefik.values.yaml"
+    state: "template"
+    src: "{{ k8s_traefik_config_data_dir
+           | default(k8s_traefik_config_data_dir_default)
+           }}/helm.values.yaml"
+
+traefik_k8s_helm_releases__to_merge:
+  - name: "traefik"
+    namespace: "traefik"
+    create_namespace: true
+    repo: "traefik"
+    repo_url: "https://traefik.github.io/charts"
+    chart: "traefik"
+    values_file: "{{ k8s_cluster_config_server_dir }}/helm/traefik.values.yaml"

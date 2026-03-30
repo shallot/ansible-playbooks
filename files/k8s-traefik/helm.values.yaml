@@ -1,0 +1,48 @@
+---
+
+providers:
+  kubernetesGateway:
+    enabled: true
+
+ports:
+  web:
+    port: {{ traefik_web_port | default(8000) }}
+    protocol: TCP
+    hostPort: {{ traefik_web_hostport | default(80) }}
+    expose:
+      default: true
+    exposedPort: {{ traefik_web_hostport | default(80) }}
+  websecure:
+    port: {{ traefik_secure_port | default(8443) }}
+    protocol: TCP
+    hostPort: {{ traefik_secure_hostport | default(443) }}
+    expose:
+      default: true
+    exposedPort: {{ traefik_web_hostport | default(443) }}
+
+deployment:
+  kind: {{ traefik_deployment_kind | default('DaemonSet') }}
+  updateStrategy:
+    type: {{ traefik_deployment_updatestrategy_type | default('RollingUpdate') }}
+    rollingUpdate:
+      maxUnavailable: {{ traefik_deployment_rollingupdate_maxunavailable | default('1') }}
+
+resources:
+  requests:
+    cpu: {{ traefik_cpu_request | default('100m') }}
+    memory: {{ traefik_memory_request | default('128Mi') }}
+  limits:
+    cpu: {{ traefik_cpu_limit | default('500m') }}
+    memory: {{ traefik_memory_limit | default('512Mi') }}
+
+rbac:
+  enabled: {{ traefik_rbac_enabled | default('true') }}
+
+service:
+  enabled: {{ traefik_service_enabled | default('true') }}
+  type: {{ traefik_service_type | default('ClusterIP') }}
+
+additionalArguments:
+{% for arg in traefik_additional_args | default(traefik_default_additional_args) %}
+  - "{{ arg }}"
+{% endfor %}
