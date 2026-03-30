@@ -22,7 +22,9 @@ k8s_gitlab_agent_custom_paths__to_merge:
   "{{ k8s_cluster_config_server_dir }}/helm/gitlab-agent.values.yaml":
     dest: "{{ k8s_cluster_config_server_dir }}/helm/gitlab-agent.values.yaml"
     state: "template"
-    src: "{{ k8s_gitlab_config_data_dir }}/agent/helm.values.yaml"
+    src: "{{ k8s_gitlab_config_data_dir
+           | default(k8s_gitlab_config_data_dir_default)
+          }}/agent/helm.values.yaml"
 
 gitlab_agent_k8s_helm_releases__to_merge:
   - name: "gitlab-agent"
@@ -37,12 +39,21 @@ gitlab_agent_custom_k8s_definitions__to_merge:
   20_01_jobs_namespace:
     kubeconfig: "{{ k8s_definitions_kubeconfig | default(omit) }}"
     resource_definition: |
-      {{ lookup('file', k8s_gitlab_config_data_dir + '/agent/' + '01-jobs-namespace.yaml' ) | from_yaml }}
+      {{ lookup('file', k8s_gitlab_config_data_dir
+                        | default(k8s_gitlab_config_data_dir_default)
+                        + '/agent/' + '01-jobs-namespace.yaml' )
+       | from_yaml }}
   20_02_agent_role:
     kubeconfig: "{{ k8s_definitions_kubeconfig | default(omit) }}"
     resource_definition: |
-      {{ lookup('file', k8s_gitlab_config_data_dir + '/agent/' + '02-agent-role.yaml' ) | from_yaml }}
+      {{ lookup('file', k8s_gitlab_config_data_dir
+                        | default(k8s_gitlab_config_data_dir_default)
+                        + '/agent/' + '02-agent-role.yaml' )
+       | from_yaml }}
   20_03_agent_rolebinding:
     kubeconfig: "{{ k8s_definitions_kubeconfig | default(omit) }}"
     resource_definition: |
-      {{ lookup('file', k8s_gitlab_config_data_dir + '/agent/' + '03-agent-rolebinding.yaml' ) | from_yaml }}
+      {{ lookup('file', k8s_gitlab_config_data_dir
+                        | default(k8s_gitlab_config_data_dir_default)
+                        + '/agent/' + '03-agent-rolebinding.yaml' )
+       | from_yaml }}

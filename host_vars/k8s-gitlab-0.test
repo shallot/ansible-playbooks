@@ -15,9 +15,6 @@
 
 ---
 
-k8s_gitlab_config_data_dir:
-  "{{ k8s_gitlab_config_data_dir_default }}"
-
 # group_vars/k8s-gitlab-runner.yml
 k8s_gitlab_agent_server:
   "wss://gitlab.example.com/-/kubernetes-agent/"
