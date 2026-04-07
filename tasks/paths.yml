@@ -59,10 +59,11 @@
           + custom_paths_for_fail_name | default([])
           }}"
 
-    # Covers any target state beside "copy" and "template".
-    # https://docs.ansible.com/ansible/latest/modules/file_module.html
+    # Covers any (virtual) target state beside "copy", "template" and "link",
+    # which in turn means: "absent", "directory", "file", "touch".
+    # https://docs.ansible.com/projects/ansible/latest/collections/ansible/builtin/file_module.html
     - name:
-        "paths : file"
+        "paths : file : non-links"
       file:
         follow: "{{ item.value.follow | default(omit) }}"
         dest: "{{ item.value.dest | default(item.key) }}"
@@ -134,6 +135,27 @@
       when:
         "item.value.dest is not defined or item.value.dest != omit"
 
+    # Covers (virtual) target states "link" and "hard".
+    # https://docs.ansible.com/projects/ansible/latest/collections/ansible/builtin/file_module.html
+    - name:
+        "paths : file : links"
+      file:
+        follow: "{{ item.value.follow | default(omit) }}"
+        dest: "{{ item.value.dest | default(item.key) }}"
+        recurse: "{{ item.value.recurse | default(omit) }}"
+        state: "{{ item.value.state | default(omit) }}"
+      args:
+        *shared_parameters
+      loop:
+        "{{ custom_paths_for_link | sort(attribute='key') }}"
+      loop_control:
+        label: "{{ item.key }}"
+      notify:
+        "{{ item.value.notify | default(custom_paths_notify)
+          | default(none) or omit }}"
+      when:
+        "item.value.path is not defined or item.value.path != omit"
+
   vars:
     _itemized_custom_paths:
       "{{ custom_paths | dict2items }}"
@@ -180,12 +202,14 @@
         | list
         }}"
 
-    # Identifies all custom_paths with a target state that is not "copy"
-    # or "template".
+    # Identifies all custom_paths with a target state that is not
+    # one of the known handled states.
     custom_paths_for_file:
       "{{ _itemized_custom_paths
         | rejectattr('value.state', 'equalto', 'copy')
         | rejectattr('value.state', 'equalto', 'template')
+        | rejectattr('value.state', 'equalto', 'link')
+        | rejectattr('value.state', 'equalto', 'hard')
         | list
         }}"
 
@@ -200,6 +224,14 @@
     custom_paths_for_template:
       "{{ _itemized_custom_paths
         | selectattr('value.state', 'equalto', 'template')
+        | list
+        }}"
+
+    # Identifies all custom_paths with target state "link".
+    custom_paths_for_link:
+      "{{ _itemized_custom_paths
+        | selectattr('value.state', 'defined')
+        | selectattr('value.state', 'in', ['link', 'hard'])
         | list
         }}"
 
