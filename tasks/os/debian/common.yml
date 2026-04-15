@@ -15,42 +15,6 @@
 
 ---
 
-# https://docs.ansible.com/ansible/latest/collections/ansible/builtin/lineinfile_module.html
-- name:
-    "apt : stable keyword check"
-  lineinfile:
-    path: "/etc/apt/sources.list"
-    regexp: "^deb(-src)?.* stable.*$"
-    state: "absent"
-  check_mode:
-    true
-  changed_when:
-    false
-  register:
-    "apt_sources_list_stable"
-
-# https://docs.ansible.com/ansible/latest/modules/fail_module.html
-- name:
-    "apt : /etc/apt/sources.list : stable"
-  fail:
-    msg: >-
-      Found {{ apt_sources_list_stable.found }} occurences of the 'stable'
-      keyword in apt sources.list files. Replace this with the distribution
-      codename and try again.
-  when:
-    "apt_sources_list_stable.found > 0"
-
-# https://docs.ansible.com/ansible/latest/modules/set_fact_module.html
-# custom_os_distribution: tasks/os/main.yml
-- name:
-    "set_fact : security_apt_regexp"
-  set_fact:
-    security_apt_regexp: "{{ security_apt_sites[custom_os_distribution] }}"
-  vars:
-    security_apt_sites:
-      debian: "/debian-security"
-      ubuntu: "security\\.ubuntu\\.com"
-
 # https://docs.ansible.com/ansible/latest/collections/ansible/builtin/stat_module.html
 - name:
     "apt : /etc/apt/sources.list.d/debian.sources"
@@ -66,25 +30,41 @@
   register: "ubuntu_sources_stat_result"
 
 # https://docs.ansible.com/ansible/latest/modules/set_fact_module.html
+# custom_os_distribution: tasks/os/main.yml
 - name:
-    "set_fact : security_apt_file"
+    "apt : set_fact"
   set_fact:
-    security_apt_file: "{{ debian_sources_stat_result.stat.exists
-                         | ternary(
-                             '/etc/apt/sources.list.d/debian.sources',
-                             ubuntu_sources_stat_result.stat.exists
-                             | ternary(
-                                 '/etc/apt/sources.list.d/ubuntu.sources',
-                                 '/etc/apt/sources.list'
-                               )
-                           )
-                         }}"
+    main_apt_sources_file:
+      "{{ debian_sources_stat_result.stat.exists
+        | ternary(
+          '/etc/apt/sources.list.d/debian.sources',
+          ubuntu_sources_stat_result.stat.exists
+          | ternary(
+            '/etc/apt/sources.list.d/ubuntu.sources',
+            '/etc/apt/sources.list'
+          )
+        )
+       }}"
+    main_apt_sources_stable_regexp:
+      "{{ (debian_sources_stat_result.stat.exists or
+           ubuntu_sources_stat_result.stat.exists)
+        | ternary(
+          '^Suites: stable.*$',
+          '^deb(-src)?.* stable.*$'
+        )
+       }}"
+    security_apt_regexp:
+      "{{ security_apt_sites[custom_os_distribution] }}"
+  vars:
+    security_apt_sites:
+      debian: "/debian-security"
+      ubuntu: "security\\.ubuntu\\.com"
 
 # https://docs.ansible.com/ansible/latest/collections/ansible/builtin/lineinfile_module.html
 - name:
-    "apt : {{ security_apt_file }} : {{ security_apt_regexp }}"
+    "apt : {{ main_apt_sources_file }} : {{ security_apt_regexp }}"
   lineinfile:
-    path: "{{ security_apt_file }}"
+    path: "{{ main_apt_sources_file }}"
     regexp: "{{ security_apt_regexp }}"
     state: "absent"
   check_mode:
@@ -101,6 +81,31 @@
       Please add it and try again.
   when:
     - "not apt_sources_list_security.found > 0"
+
+# https://docs.ansible.com/ansible/latest/collections/ansible/builtin/lineinfile_module.html
+- name:
+    "apt : {{ main_apt_sources_file }} : {{ main_apt_sources_stable_regexp }}"
+  lineinfile:
+    path: "{{ main_apt_sources_file }}"
+    regexp: "{{ main_apt_sources_stable_regexp }}"
+    state: "absent"
+  check_mode:
+    true
+  changed_when:
+    false
+  register:
+    "apt_sources_list_stable"
+
+# https://docs.ansible.com/ansible/latest/modules/fail_module.html
+- name:
+    "apt : {{ main_apt_sources_file }} : stable"
+  fail:
+    msg: >-
+      Found {{ apt_sources_list_stable.found }} occurences of the 'stable'
+      keyword in apt sources.list files. Replace this with the distribution
+      codename and try again.
+  when:
+    "apt_sources_list_stable.found > 0"
 
 # action_plugins/merge_variable.py
 # https://docs.ansible.com/ansible/latest/modules/apt_key_module.html
