@@ -1,24 +1,30 @@
-#import sys
-#from pprint import pformat
+from pprint import pformat
+from ansible.utils.display import Display
+
+display = Display()
 
 class FilterModule(object):
     def filters(self):
         return { 'ini_input_from_dict': self.ini_input_from_dict }
 
     def ini_input_from_dict(self, arg):
+        display.v(f"Processing input for INI conversion: {list(arg)}")
         ret = []
         for ini_file, configurations in arg.items():
-            if type(configurations) is not dict:
-#                sys.stderr.write("configurations: " + str(configurations) + "\n")
+            if not isinstance(configurations, dict):
+                display.v(f"For {ini_file}, parsed non-dict configurations: {str(configurations)}")
                 continue
             config = {}
             for configuration, sections in configurations.items():
-                if type(sections) is not dict:
+                if not isinstance(sections, dict):
                     config[configuration] = sections
+                    display.v(f"For {ini_file}, parsed non-dict sections, passing it on as {configuration} config")
                     continue
-#                sys.stderr.write("found dict sections, will now use config: " + pformat(config) + "\n")
+                display.v(f"For {ini_file}, parsed dict sections, generating {configuration} with config: {pformat(config)}")
                 for section, optionvaluepairs in sections.items():
+                    display.v(f"For {ini_file}, adding INI entries in [{section}]...")
                     for option, value in optionvaluepairs.items():
+                        display.vv(f"For {ini_file}, adding to [{section}]: {option}={value}")
                         ret.append(dict(
                                     ini_file=ini_file,
                                     config=config,
