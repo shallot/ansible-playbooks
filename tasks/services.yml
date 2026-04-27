@@ -176,7 +176,9 @@
   set_fact:
     systemd_units_affected:
       "{{ (systemd_units_affected + [ service_file_name ])
-        | unique }}"
+        | unique
+        | reject('search', '@\\.')
+        | list }}"
   loop: "{{ (custom_services | dict2items) + (custom_service_dropins | dict2items) }}"
   loop_control:
     label: "{{ service_file_name }}"
@@ -270,5 +272,8 @@
                     | default(item.key) }}.{{ item.value.type
                                             | default('service') }}"
     service_state: "{{ item.value.state | default('started') }}"
+    is_template: "{{ service_name is regex('@\\.') }}"
+  when:
+    "not is_template"
   become:
     true
