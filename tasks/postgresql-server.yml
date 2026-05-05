@@ -51,6 +51,15 @@
     name: "postgresql_hba_entries"
     suffix: "postgresql_hba_entries__to_merge"
 
+# roles/postgresql/server/defaults/main.yml
+# action_plugins/merge_variable.py
+- name:
+    "merge_variable : postgresql_privs"
+  merge_variable:
+    default: {}
+    name: "postgresql_privs"
+    suffix: "postgresql_privs__to_merge"
+
 # https://docs.ansible.com/ansible/latest/import_role_module.html
 # https://gitlab.com/eyeo/devops/ansible-role-postgresql
 # roles/postgresql/server/tasks/main.yml

@@ -57,6 +57,16 @@ host_specific_postgresql_users__to_merge:
     password: "changeme"
 
 # roles/postgresql/server/defaults/main.yml
+host_specific_postgresql_privs__to_merge:
+  example_1:
+    login_db: "example_1"
+    role: "example_1"
+    privs: "SELECT"
+    type: "table"
+    objs: "ALL_IN_SCHEMA"
+    schema: "public"
+
+# roles/postgresql/server/defaults/main.yml
 host_specific_postgresql_hba_entries__to_merge:
   - type: "host"
     database: "example_1"
