@@ -67,7 +67,7 @@ k8s_apt_repositories__to_merge:
     repo: |
       deb https://pkgs.k8s.io/core:/stable:/v{{ k8s_version }}/deb/ /
 
-k8s_cluster_munin_custom_paths__to_merge:
+k8s_cluster_munin_node_paths__to_merge:
   /etc/munin/plugins/irqstats:
     state: "absent"
 

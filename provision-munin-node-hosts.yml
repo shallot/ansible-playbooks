@@ -39,6 +39,9 @@
       vars:
         custom_paths_suffix:
           "munin_node_paths__to_merge"
+        custom_paths_notify:
+          - "service : munin-node"
+          - "service : munin-async"
 
     # https://docs.ansible.com/ansible/latest/import_tasks_module.html
     - import_tasks:
