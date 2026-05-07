@@ -212,6 +212,8 @@
     "systemd_service_needs_daemon_reload"
   check_mode:
     "false"
+  when:
+    "systemd_units_affected is defined"
 
 # https://docs.ansible.com/ansible/latest/modules/set_fact_module.html
 # in the future: (systemd_service_status.status.NeedDaemonReload == 'yes')
@@ -232,6 +234,8 @@
     need_systemd_daemon_reload: false
     systemctl_show_name: "{{ item.cmd[2] | default('none') }}"
     systemctl_show_data: "{{ item.stdout | default('none=false') | split('=') | last }}"
+  when:
+    "systemd_units_affected is defined"
 
 # https://docs.ansible.com/ansible/latest/modules/systemd_module.html
 - name:
@@ -244,14 +248,18 @@
       custom_dropin_dir.changed or
       custom_dropin_ini.changed or
       custom_dropin_copy.changed or
-      need_systemd_daemon_reload)"
+      (systemd_units_affected is defined and
+      need_systemd_daemon_reload)
+     )"
   changed_when:
     "(custom_service_ini.changed or
       custom_service_copy.changed or
       custom_dropin_dir.changed or
       custom_dropin_ini.changed or
       custom_dropin_copy.changed or
-      need_systemd_daemon_reload)"
+      (systemd_units_affected is defined and
+      need_systemd_daemon_reload)
+     )"
   become:
     true
 
