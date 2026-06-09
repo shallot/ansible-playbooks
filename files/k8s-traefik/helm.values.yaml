@@ -40,7 +40,8 @@ rbac:
 
 service:
   enabled: {{ traefik_service_enabled | default('true') }}
-  type: {{ traefik_service_type | default('ClusterIP') }}
+  spec:
+    type: {{ traefik_service_type | default('ClusterIP') }}
 
 additionalArguments:
 {% for arg in traefik_additional_args | default(traefik_default_additional_args) %}
