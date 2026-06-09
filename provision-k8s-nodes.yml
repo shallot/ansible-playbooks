@@ -59,6 +59,13 @@
 
       when: "'k8s-cluster-init' in group_names"
 
+    # https://docs.ansible.com/ansible/latest/import_tasks_module.html
+    - import_tasks:
+        "tasks/k8s.yml"
+      vars:
+        custom_k8s_definitions_suffix:
+          "helm_prerequisite_k8s_definitions__to_merge"
+
     # roles/gitlab/runner/defaults/main.yml
     # action_plugins/merge_variable.py
     - name:

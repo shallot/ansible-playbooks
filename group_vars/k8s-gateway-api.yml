@@ -18,8 +18,12 @@
 k8s_gateway_api_version_default:
   "v1.1.0"
 
+k8s_gateway_api_releases_url_base:
+  "https://github.com/kubernetes-sigs/gateway-api/releases/download"
+
+# provision-k8s-nodes.yml
 # tasks/k8s.yml
-gateway_api_crds_custom_k8s_definitions__to_merge:
+gateway_api_crds_helm_prerequisite_k8s_definitions__to_merge:
   15_gateway_api_crds:
     kubeconfig: "{{ k8s_definitions_kubeconfig | default(omit) }}"
-    src: "https://github.com/kubernetes-sigs/gateway-api/releases/download/{{ k8s_gateway_api_version }}/standard-install.yaml"
+    src: "{{ k8s_gateway_api_releases_url_base }}/{{ k8s_gateway_api_version }}/standard-install.yaml"
