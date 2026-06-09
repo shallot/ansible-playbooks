@@ -18,7 +18,7 @@ ports:
     hostPort: {{ traefik_secure_hostport | default(443) }}
     expose:
       default: true
-    exposedPort: {{ traefik_web_hostport | default(443) }}
+    exposedPort: {{ traefik_secure_hostport | default(443) }}
 
 deployment:
   kind: {{ traefik_deployment_kind | default('DaemonSet') }}
