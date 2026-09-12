@@ -5,5 +5,5 @@ metadata:
   namespace: gitlab-ci-jobs
 rules:
   - apiGroups: ["apps", ""]
-    resources: ["deployments", "services", "configmaps", "pods"]
+    resources: ["deployments", "replicasets", "services", "configmaps", "pods"]
     verbs: ["get", "list", "watch", "create", "update", "patch"]

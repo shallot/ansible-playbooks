@@ -43,17 +43,31 @@ gitlab_agent_custom_k8s_definitions__to_merge:
                         | default(k8s_gitlab_config_data_dir_default)
                         + '/agent/' + '01-jobs-namespace.yaml' )
        | from_yaml }}
-  20_02_agent_role:
+  20_02_agent_jobs_role:
     kubeconfig: "{{ k8s_definitions_kubeconfig | default(omit) }}"
     resource_definition: |
       {{ lookup('file', k8s_gitlab_config_data_dir
                         | default(k8s_gitlab_config_data_dir_default)
-                        + '/agent/' + '02-agent-role.yaml' )
+                        + '/agent/' + '02-agent-jobs-role.yaml' )
        | from_yaml }}
-  20_03_agent_rolebinding:
+  20_03_agent_jobs_rolebinding:
     kubeconfig: "{{ k8s_definitions_kubeconfig | default(omit) }}"
     resource_definition: |
       {{ lookup('file', k8s_gitlab_config_data_dir
                         | default(k8s_gitlab_config_data_dir_default)
-                        + '/agent/' + '03-agent-rolebinding.yaml' )
+                        + '/agent/' + '03-agent-jobs-rolebinding.yaml' )
+       | from_yaml }}
+  20_04_agent_lock_role:
+    kubeconfig: "{{ k8s_definitions_kubeconfig | default(omit) }}"
+    resource_definition: |
+      {{ lookup('file', k8s_gitlab_config_data_dir
+                        | default(k8s_gitlab_config_data_dir_default)
+                        + '/agent/' + '04-agent-lock-role.yaml' )
+       | from_yaml }}
+  20_05_agent_lock_rolebinding:
+    kubeconfig: "{{ k8s_definitions_kubeconfig | default(omit) }}"
+    resource_definition: |
+      {{ lookup('file', k8s_gitlab_config_data_dir
+                        | default(k8s_gitlab_config_data_dir_default)
+                        + '/agent/' + '05-agent-lock-rolebinding.yaml' )
        | from_yaml }}
