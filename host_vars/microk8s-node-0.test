@@ -26,7 +26,7 @@ test_microk8s_addons__to_merge:
 k8s_gateway_api_version:
   "{{ k8s_gateway_api_version_default }}"
 
-# tasks/k8s-helm-releases.yml
+# tasks/helm.yml
 test_k8s_helm_releases__to_merge:
   - name: "traefik"
     namespace: "traefik"

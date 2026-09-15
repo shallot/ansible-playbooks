@@ -1,0 +1,145 @@
+# Copyright (c) 2026 Josip Rodin
+#
+# This module is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+
+# https://docs.ansible.com/ansible/latest/import_tasks_module.html
+- import_tasks:
+    "tasks/k8s.yml"
+  vars:
+    custom_k8s_definitions_suffix:
+      "helm_prerequisite_k8s_definitions__to_merge"
+
+# action_plugins/merge_variable.py
+- name:
+    "merge_variable : k8s_helm_releases"
+  merge_variable:
+    default: []
+    name: "k8s_helm_releases"
+    suffix: "{{ k8s_helm_releases_suffix
+              | default('k8s_helm_releases__to_merge') }}"
+
+# https://docs.ansible.com/ansible/latest/modules/set_fact_module.html
+- name:
+    "set_fact : helm_values_files_custom_paths"
+  set_fact:
+    helm_values_files_custom_paths__to_merge: >-
+      {%- set helm_base_dir = helm_config_server_dir
+                            | default(k8s_cluster_config_server_dir
+                                      ~ '/helm') -%}
+
+      {%- set helm_paths_dict = {
+        helm_base_dir: {
+          'dest': helm_base_dir,
+          'state': 'directory'
+        }
+      } -%}
+
+      {%- for release in k8s_helm_releases -%}
+        {%- set rel_name = release.name
+                         | mandatory -%}
+        {%- set raw_files = release.values_files
+                         | default(release.values_file
+                         | default([])) -%}
+        {%- set files = [raw_files]
+           if raw_files is string
+           else raw_files -%}
+
+        {%- for file_path in files -%}
+          {%- set file_suffix = ('.' ~ loop.index)
+              if files | length > 1
+              else '' -%}
+          {%- set dest_path = helm_base_dir ~ '/'
+                            ~ rel_name ~ file_suffix ~ '.values.yaml' -%}
+          {%- set _ = helm_paths_dict.update({
+            dest_path: {
+              'dest': dest_path,
+              'state': 'template',
+              'src': file_path
+            }
+          }) -%}
+        {%- endfor -%}
+      {%- endfor -%}
+      {{ (helm_paths_dict | to_nice_yaml(indent=2)) | from_yaml }}
+
+# https://docs.ansible.com/ansible/latest/import_tasks_module.html
+- import_tasks:
+    "tasks/paths.yml"
+  vars:
+    custom_paths_suffix:
+      "helm_values_files_custom_paths__to_merge"
+
+# https://docs.ansible.com/projects/ansible/latest/collections/kubernetes/core/helm_module.html
+- name:
+    "helm"
+  kubernetes.core.helm:
+    binary_path: "{{ helm_release.binary_path
+                   | default(helm_binary_path
+                   | default(omit)) }}"
+    kubeconfig_path: "{{ helm_release.kubeconfig
+                       | default(helm_kubeconfig_path
+                       | default(omit)) }}"
+    context: "{{ helm_release.context | default(omit) }}"
+    name: "{{ helm_release.name | mandatory }}"
+    chart_ref: "{{ helm_release.chart }}"
+    release_namespace: "{{ helm_release.namespace | default(omit) }}"
+    chart_repo_url: "{{ helm_release.repo_url | default(omit) }}"
+    chart_version: "{{ helm_release.chart_version | default(omit) }}"
+    values: "{{ helm_release.get('values') | default({}, true) }}"
+    values_files: "{{ helm_release.values_files }}"
+    set_values: "{{ helm_release.set_values | default(omit) }}"
+    state: "{{ helm_release.state | default('present') }}"
+    update_repo_cache: "{{ helm_release.update_repo_cache | default(omit) }}"
+    create_namespace: "{{ helm_release.create_namespace | default(omit) }}"
+    replace: "{{ helm_release.replace | default(omit) }}"
+    force: "{{ helm_release.force | default(omit) }}"
+    force_conflicts: "{{ helm_release.force_conflicts | default(omit) }}"
+    server_side: "{{ helm_release.server_side | default(omit) }}"
+    wait: "{{ helm_release.wait | default(true) }}"
+    wait_timeout: "{{ helm_release.wait_timeout | default(omit) }}"
+    atomic: "{{ helm_release.atomic | default(omit) }}"
+    cleanup_on_fail: "{{ helm_release.cleanup_on_fail | default(omit) }}"
+    history_max: "{{ helm_release.history_max | default(omit) }}"
+    skip_crds: "{{ helm_release.skip_crds | default(omit) }}"
+    disable_hook: "{{ helm_release.disable_hook | default(omit) }}"
+    post_renderer: "{{ helm_release.post_renderer | default(omit) }}"
+  become:
+    true
+  become_user:
+    "{{ helm_release.become_user | default(omit) }}"
+  vars:
+    helm_default_order: 50
+  loop: >-
+    {%- set processed_releases = [] -%}
+    {%- for rel in k8s_helm_releases -%}
+      {%- set matched_files = helm_values_files_custom_paths__to_merge
+                              | select('search',
+                                       '/' ~ rel.name ~ '\.values\.yaml$')
+                              | list -%}
+      {%- set order_val = rel.order
+                        | default(helm_default_order) -%}
+      {%- set rel_with_files = rel
+                             | combine({
+                                'values_files': matched_files,
+                                'order': order_val
+                               }, recursive=True) -%}
+      {%- set _ = processed_releases.append(rel_with_files) -%}
+    {%- endfor -%}
+    {{ processed_releases
+     | sort(attribute='order')
+     }}
+  loop_control:
+    loop_var:
+      "helm_release"

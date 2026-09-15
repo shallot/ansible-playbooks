@@ -23,14 +23,7 @@ traefik_default_additional_args:
   - "--global.sendanonymoususage=false"
   - "--providers.kubernetesgateway.statusaddress.service.name=traefik"
 
-traefik_custom_paths__to_merge:
-  "{{ k8s_cluster_config_server_dir }}/helm/traefik.values.yaml":
-    dest: "{{ k8s_cluster_config_server_dir }}/helm/traefik.values.yaml"
-    state: "template"
-    src: "{{ k8s_traefik_config_data_dir
-           | default(k8s_traefik_config_data_dir_default)
-           }}/helm.values.yaml"
-
+# tasks/helm.yml
 traefik_k8s_helm_releases__to_merge:
   - name: "traefik"
     namespace: "traefik"
@@ -38,4 +31,6 @@ traefik_k8s_helm_releases__to_merge:
     repo: "traefik"
     repo_url: "https://traefik.github.io/charts"
     chart: "traefik"
-    values_file: "{{ k8s_cluster_config_server_dir }}/helm/traefik.values.yaml"
+    values_file: "{{ k8s_traefik_config_data_dir
+                   | default(k8s_traefik_config_data_dir_default)
+                   }}/helm.values.yaml"

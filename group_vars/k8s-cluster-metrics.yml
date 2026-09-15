@@ -41,9 +41,10 @@ k8s_cluster_init_kubelet_csr_sign_custom_shells__to_merge:
     cmd: |
       sh /var/local/kubeadm/approve-kubelet-serving-csr.sh
 
-# group_vars/k8s-helm-releases.yml
+# tasks/helm.yml
 k8s_cluster_init_metrics_k8s_helm_releases__to_merge:
   - name: "metrics-server"
+    order: "{{ k8s_helm_metrics_server_order | default(omit) }}"
     repo: "metrics-server"
     chart: "metrics-server"
     repo_url: "https://kubernetes-sigs.github.io/metrics-server/"

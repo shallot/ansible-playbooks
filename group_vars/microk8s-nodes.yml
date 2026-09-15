@@ -54,9 +54,11 @@ microk8s_addons_custom_shells__to_merge: >-
 kubectl_base_command:
   "/snap/bin/microk8s kubectl"
 
-# group_vars/k8s-helm-hosts.yml
-helm_base_command:
-  "/snap/bin/microk8s helm3"
+# tasks/helm.yml
+helm_binary_path:
+  "/snap/microk8s/current/bin/helm"
+helm_kubeconfig_path:
+  "{{ k8s_definitions_kubeconfig }}"
 
 k8s_cluster_config_server_dir:
   "/var/snap/microk8s/common/etc"

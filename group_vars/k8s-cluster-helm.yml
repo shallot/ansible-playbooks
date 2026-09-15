@@ -33,6 +33,8 @@ k8s_cluster_helm_custom_paths__to_merge:
     dest: "{{ k8s_cluster_config_server_dir }}/helm"
     state: "directory"
 
-# group_vars/k8s-helm-hosts.yml
-helm_base_command:
-  "env KUBECONFIG=/etc/kubernetes/admin.conf helm"
+# tasks/helm.yml
+helm_kubeconfig_path:
+  "{{ k8s_definitions_kubeconfig }}"
+helm_binary_path:
+  "/usr/bin/helm"

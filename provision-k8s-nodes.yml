@@ -61,27 +61,7 @@
 
     # https://docs.ansible.com/ansible/latest/import_tasks_module.html
     - import_tasks:
-        "tasks/k8s.yml"
-      vars:
-        custom_k8s_definitions_suffix:
-          "helm_prerequisite_k8s_definitions__to_merge"
-
-    # roles/gitlab/runner/defaults/main.yml
-    # action_plugins/merge_variable.py
-    - name:
-        "merge_variable : k8s_helm_releases"
-      merge_variable:
-        default: []
-        name: "k8s_helm_releases"
-        suffix: "k8s_helm_releases__to_merge"
-
-    # https://docs.ansible.com/ansible/latest/import_tasks_module.html
-    - import_tasks:
-        "tasks/paths.yml"
-
-    # https://docs.ansible.com/ansible/latest/import_tasks_module.html
-    - import_tasks:
-        "tasks/shells.yml"
+        "tasks/helm.yml"
 
     # https://docs.ansible.com/ansible/latest/import_tasks_module.html
     - import_tasks:

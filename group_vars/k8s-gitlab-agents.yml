@@ -18,14 +18,7 @@
 k8s_gitlab_config_data_dir_default:
   "{{ playbook_dir }}/files/k8s-gitlab"
 
-k8s_gitlab_agent_custom_paths__to_merge:
-  "{{ k8s_cluster_config_server_dir }}/helm/gitlab-agent.values.yaml":
-    dest: "{{ k8s_cluster_config_server_dir }}/helm/gitlab-agent.values.yaml"
-    state: "template"
-    src: "{{ k8s_gitlab_config_data_dir
-           | default(k8s_gitlab_config_data_dir_default)
-          }}/agent/helm.values.yaml"
-
+# tasks/helm.yml
 gitlab_agent_k8s_helm_releases__to_merge:
   - name: "gitlab-agent"
     repo: "gitlab"
@@ -33,7 +26,9 @@ gitlab_agent_k8s_helm_releases__to_merge:
     chart: "gitlab-agent"
     namespace: "gitlab-agent"
     create_namespace: true
-    values_file: "{{ k8s_cluster_config_server_dir }}/helm/gitlab-agent.values.yaml"
+    values_file: "{{ k8s_gitlab_config_data_dir
+                   | default(k8s_gitlab_config_data_dir_default)
+                   }}/agent/helm.values.yaml"
 
 gitlab_agent_custom_k8s_definitions__to_merge:
   20_01_jobs_namespace:
