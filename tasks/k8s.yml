@@ -15,6 +15,16 @@
 
 ---
 
+# https://docs.ansible.com/ansible/latest/modules/include_tasks_module.html
+- include_tasks:
+    "{{ k8s_tasks }}"
+  with_first_found:
+    - files:
+        - "os/{{ ansible_os_family | lower }}/k8s.yml"
+        - "os/generic/k8s.yml"
+  loop_control:
+    loop_var: "k8s_tasks"
+
 # action_plugins/merge_variable.py
 - name:
     "merge_variable : custom_k8s_definitions"
