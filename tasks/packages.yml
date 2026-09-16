@@ -32,15 +32,18 @@
     - "os/generic/packages.yml"
   vars:
     custom_packages_absent:
-      "{{ lookup('dict', custom_packages)
+      "{{ custom_packages
+        | dict2items
         | selectattr('value', 'equalto', 'absent')
         | map(attribute='key') | list }}"
     custom_packages_latest:
-      "{{ lookup('dict', custom_packages)
+      "{{ custom_packages
+        | dict2items
         | selectattr('value', 'equalto', 'latest')
         | map(attribute='key') | list }}"
     custom_packages_present:
-      "{{ lookup('dict', custom_packages)
+      "{{ custom_packages
+        | dict2items
         | selectattr('value', 'equalto', 'present')
         | map(attribute='key') | list }}"
   loop_control:
