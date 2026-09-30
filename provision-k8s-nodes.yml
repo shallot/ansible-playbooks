@@ -33,31 +33,18 @@
 
   tasks:
 
-    - block:
+    # https://docs.ansible.com/ansible/latest/include_tasks_module.html
+    - include_tasks:
+        "tasks/k8s-nodes-microk8s.yml"
+      when: >
+        'microk8s-nodes' in group_names
 
-        # roles/gitlab/runner/defaults/main.yml
-        # action_plugins/merge_variable.py
-        - name:
-            "merge_variable : microk8s_addons"
-          merge_variable:
-            default: []
-            name: "microk8s_addons"
-            suffix: "microk8s_addons__to_merge"
-
-      when: "'microk8s-nodes' in group_names"
-
-    - block:
-
-        # roles/gitlab/runner/defaults/main.yml
-        # action_plugins/merge_variable.py
-        - name:
-            "merge_variable : kubelet_configuration"
-          merge_variable:
-            default: []
-            name: "kubelet_configuration"
-            suffix: "kubelet_configuration__to_merge"
-
-      when: "'k8s-cluster-init' in group_names"
+    # https://docs.ansible.com/ansible/latest/include_tasks_module.html
+    - include_tasks:
+        "tasks/k8s-nodes-kubeadm.yml"
+      when: >
+        'kubeadm-nodes' in group_names or
+        'k8s-cluster-init' in group_names
 
     # https://docs.ansible.com/ansible/latest/import_tasks_module.html
     - import_tasks:

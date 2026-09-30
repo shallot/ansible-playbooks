@@ -16,10 +16,8 @@
 ---
 
 # group_vars/k8s-cluster-init.yml
-kubelet_configuration__to_merge:
-  - name: "metrics"
-    yaml: |
-      serverTLSBootstrap: true
+metrics_kubelet_configuration__to_merge:
+  serverTLSBootstrap: true
 
 k8s_cluster_init_kubelet_csr_sign_custom_paths__to_merge:
   "{{ k8s_cluster_config_server_dir }}/kubeadm/approve-kubelet-serving-csr.sh":

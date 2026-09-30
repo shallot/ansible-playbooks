@@ -19,6 +19,8 @@ k8s_cluster_init_kubeadm_custom_paths__to_merge:
   "{{ k8s_cluster_config_server_dir }}/kubeadm":
     dest: "{{ k8s_cluster_config_server_dir }}/kubeadm"
     state: "directory"
+
+k8s_cluster_init_kubeadm_k8s_nodes_prerequisite_paths__to_merge:
   "{{ k8s_cluster_config_server_dir }}/kubeadm/kubeadm-config.yaml":
     dest: "{{ k8s_cluster_config_server_dir }}/kubeadm/kubeadm-config.yaml"
     state: "template"

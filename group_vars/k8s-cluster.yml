@@ -77,6 +77,15 @@ k8s_cluster_pod_subnet_default:
 k8s_cluster_service_subnet_default:
   "10.96.0.0/12"
 
+k8s_cluster_kubeadm_cluster_configuration__to_merge:
+  kubernetesVersion: "v{{ k8s_version_full }}"
+  controlPlaneEndpoint: "{{ k8s_cluster_control_plane_endpoint }}:6443"
+  networking:
+    podSubnet: "{{ k8s_cluster_pod_subnet
+                 | default(k8s_cluster_pod_subnet_default) }}"
+    serviceSubnet: "{{ k8s_cluster_service_subnet
+                     | default(k8s_cluster_service_subnet_default) }}"
+
 k8s_definitions_kubeconfig:
   "/etc/kubernetes/admin.conf"
 
