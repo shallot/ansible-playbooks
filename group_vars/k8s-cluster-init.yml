@@ -49,3 +49,7 @@ k8s_cluster_init_custom_shells__to_merge:
       | tail -1
       > {{ k8s_cluster_config_server_dir }}/kubeadm/k8s_join_certs_key
     creates: "{{ k8s_cluster_config_server_dir }}/kubeadm/k8s_join_certs_key"
+
+# TODO: maybe support updates with
+#      kubeadm init phase upload-config kubeadm \
+#              --config={{ k8s_cluster_config_server_dir }}/kubeadm/kubeadm-config.yaml
