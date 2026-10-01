@@ -50,6 +50,7 @@ k8s_cluster_custom_services__to_merge:
 
 k8s_cluster_custom_packages__to_merge:
   containerd: "present"
+  cri-tools: "present"
   kubelet: "present"
   kubeadm: "present"
   kubectl: "present"
