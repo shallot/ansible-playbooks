@@ -24,7 +24,7 @@
     custom_disk_custom_shells__to_merge:
       "{{ custom_disk_custom_shells__to_merge | default({})
         | combine({
-            item.key: {
+            'custom_disk_1_volume_group_' ~ item.key: {
               'cmd': cmd_string,
               'creates': creates_string
             }
@@ -50,7 +50,7 @@
       "{{ custom_disk_custom_shells__to_merge
         | default({})
         | combine({
-            item.key: {
+            'custom_disk_2_logical_volume_' ~ item.key: {
               'cmd': cmd_string,
             } | combine({
               'creates': creates_string
@@ -104,7 +104,7 @@
     custom_disk_custom_shells__to_merge:
       "{{ custom_disk_custom_shells__to_merge
         | combine({
-            item.value.name: {
+            'custom_disk_3_mount_' ~ item.value.name: {
               'cmd': cmd_string,
               'creates': item.value.mountpoint
             }
