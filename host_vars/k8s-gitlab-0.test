@@ -49,6 +49,10 @@ k8s_gitlab_runner_replica_count:
 k8s_gitlab_agent_replica_count:
   1
 
+k8s_gitlab_runner_config:
+  - toml: |
+      {{ k8s_gitlab_runner_default_config_toml }}
+
 k8s_gitlab_runner_registry_url:
   "gitlab-container-registry.example.com:5050"
 

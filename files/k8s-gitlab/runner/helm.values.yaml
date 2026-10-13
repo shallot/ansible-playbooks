@@ -1,5 +1,5 @@
-gitlabUrl: "{{ k8s_gitlab_runner_url }}"
-runnerToken: "{{ k8s_gitlab_runner_token }}"
+gitlabUrl: "{{ k8s_gitlab_runner_url | default('') }}"
+runnerToken: "{{ k8s_gitlab_runner_token | default('') }}"
 
 replicaCount: "{{ k8s_gitlab_runner_replica_count }}"
 
@@ -11,25 +11,21 @@ rbac:
   create: true
 
 runners:
+{% if k8s_gitlab_runner_token is not defined %}
+  configOverride: |
+    shutdown_timeout = {{ k8s_gitlab_runner_shutdown_timeout | default('0') }}
+    concurrent = {{ k8s_gitlab_runner_concurrent | default('10') }}
+    check_interval = {{ k8s_gitlab_runner_check_interval | default('3') }}
+    log_level = "{{ k8s_gitlab_runner_log_level | default('info') }}"
+{% else %}
   config: |
+{% endif %}
+    {% for runner in k8s_gitlab_runner_config -%}
     [[runners]]
-      environment = ["HOME=/tmp", "GIT_CONFIG_NOSYSTEM=1"]
-      [runners.kubernetes]
-        namespace = "gitlab-ci-jobs"
-        service_account = "default"
-        cpu_request = "{{ k8s_gitlab_runner_cpu_request }}"
-        cpu_limit = "{{ k8s_gitlab_runner_cpu_limit }}"
-        memory_request = "{{ k8s_gitlab_runner_memory_request }}"
-        memory_limit = "{{ k8s_gitlab_runner_memory_limit }}"
-        privileged = false
-        [runners.kubernetes.feature_flags]
-          FF_USE_LEGACY_KUBERNETES_EXECUTION_STRATEGY = true
-        [runners.kubernetes.pod_security_context]
-          seccomp_profile_type = "RuntimeDefault"
-        [runners.kubernetes.container_security_context]
-          allow_privilege_escalation = false
-          capabilities = { drop = ["ALL"], add = ["SETFCAP", "CHOWN", "DAC_OVERRIDE", "FOWNER", "SETGID", "SETUID"] }
-        [[runners.kubernetes.volumes.empty_dir]]
-          name = "build-storage"
-          mount_path = "/home/build/.local/share/containers"
-          medium = "Memory"
+{% if k8s_gitlab_runner_token is not defined %}
+      url = "{{ k8s_gitlab_runner_url | default('') }}"
+      executor = "{{ k8s_gitlab_runner_executor | default('kubernetes') }}"
+      request_concurrency = {{ k8s_gitlab_runner_request_concurrency | default('3') }}
+{% endif %}
+      {{ runner.toml | indent(6) }}
+    {%- endfor %}
