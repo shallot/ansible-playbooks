@@ -20,7 +20,7 @@ runners:
 {% else %}
   config: |
 {% endif %}
-    {% for runner in k8s_gitlab_runner_config -%}
+{% for runner in k8s_gitlab_runner_config %}
     [[runners]]
 {% if k8s_gitlab_runner_token is not defined %}
       url = "{{ k8s_gitlab_runner_url | default('') }}"
@@ -28,4 +28,4 @@ runners:
       request_concurrency = {{ k8s_gitlab_runner_request_concurrency | default('3') }}
 {% endif %}
       {{ runner.toml | indent(6) }}
-    {%- endfor %}
+{% endfor %}
