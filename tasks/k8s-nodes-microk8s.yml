@@ -23,3 +23,13 @@
     default: []
     name: "microk8s_addons"
     suffix: "microk8s_addons__to_merge"
+
+# https://docs.ansible.com/ansible/latest/import_tasks_module.html
+- import_tasks:
+    "tasks/snap.yml"
+  vars:
+    custom_snaps_suffix: "microk8s_snaps__to_merge"
+- import_tasks:
+    "tasks/shells.yml"
+  vars:
+    custom_shells_suffix: "microk8s_addons_custom_shells__to_merge"

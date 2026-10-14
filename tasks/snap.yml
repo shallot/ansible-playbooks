@@ -21,7 +21,7 @@
   merge_variable:
     default: {}
     name: "snaps"
-    suffix: "{{ snaps
+    suffix: "{{ custom_snaps_suffix
               | default('snaps__to_merge') }}"
 
 # https://docs.ansible.com/ansible/latest/modules/package_module.html
