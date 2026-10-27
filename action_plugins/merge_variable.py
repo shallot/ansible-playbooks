@@ -70,6 +70,7 @@ class ActionModule(ansible.plugins.action.ActionBase):
             'changed': False,
         }
 
+        display.v(f"merge_variable output:")
         display.v(json.dumps(result, indent=2))
 
         return result
@@ -119,6 +120,8 @@ def merge_dicts(dictionaries, recursive):
     """Merge the given dictionaries into a single one."""
     result = {}
 
+    display.v(f"Processing merge_dicts input (recursive={str(recursive)}):")
+    display.v(json.dumps(dictionaries, indent=2))
     if recursive is True:
       for to_merge in dictionaries:
         for key, value in to_merge.items():
@@ -140,6 +143,8 @@ def merge_lists(lists):
     """Merge the given lists into a single one without duplicate items."""
     result = []
 
+    display.v(f"Processing merge_lists input:")
+    display.v(json.dumps(lists, indent=2))
     for item in lists:
         result.extend(value for value in item if value not in result)
 
