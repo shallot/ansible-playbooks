@@ -1,4 +1,5 @@
 # Copyright (c) 2021-2023 eyeo GmbH
+# Copyright (c) 2026 Josip Rodin
 #
 # This module is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,7 +16,7 @@
 
 ---
 
-# provision-custom-systems.yml
+# provision-custom-disk-hosts.yml
 # tasks/disk.yml
-custom_disk_custom_packages__to_merge:
+default_custom_disk_lvm_packages__to_merge:
   lvm2: "present"
