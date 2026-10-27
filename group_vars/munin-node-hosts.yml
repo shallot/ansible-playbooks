@@ -88,11 +88,25 @@ munin_async_custom_service_dropins__to_merge:
       [Service]
       ExecStart=
       ExecStart=/usr/share/munin/munin-asyncd {{ munin_asyncd_parameters }}
+  "systemd-journald@munin":
+    dropin_name: "munin"
+    content: |
+      [Journal]
+      SystemMaxUse=512M
+      MaxRetentionSec=7day
+  munin-async-log-namespace:
+    name: "munin-async"
+    dropin_name: "log-namespace"
+    content: |
+      [Service]
+      LogNamespace=munin
 
 munin_node_custom_services__to_merge:
   munin-node:
     enabled: "{{ munin_node_service_enabled }}"
   munin-async:
+    enabled: "{{ munin_async_service_enabled }}"
+  "systemd-journald@munin":
     enabled: "{{ munin_async_service_enabled }}"
 
 # provision-munin-node-hosts.yml
